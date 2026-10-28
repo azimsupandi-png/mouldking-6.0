@@ -55,6 +55,9 @@ button,input,select{font:inherit;color:inherit}
 .estop{min-height:44px;padding:0 20px;border:0;border-radius:6px;background:var(--danger);color:#fff;
   font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .estop:active{transform:scale(.97)}
+.estop[aria-pressed="true"]{background:var(--panel);color:var(--danger);outline:2px solid var(--danger);outline-offset:-2px}
+.bar-banner{background:var(--danger);color:#fff;font-size:13px;font-weight:600;text-align:center;padding:6px 16px}
+.cols.locked #chCard,.cols.locked #joyCard{opacity:.5}
 
 main{max-width:1100px;margin:0 auto;padding-block:16px 40px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -161,8 +164,9 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
     </div>
     <div class="spacer"></div>
     <button class="pill" id="link" type="button" aria-pressed="true" title="Hidupkan atau matikan hab"><span class="dot"></span><span id="linkText">Simulasi aktif</span></button>
-    <button class="estop" id="estop" type="button">E-Stop</button>
+    <button class="estop" id="estop" type="button" aria-pressed="false">E-Stop</button>
   </div>
+  <div class="bar-banner" id="esBanner" role="alert" hidden>E-Stop aktif. Semua saluran dikunci pada 0. Tekan Lepas E-Stop untuk sambung semula.</div>
 </header>
 <div class="live" id="live" role="status" aria-live="polite"></div>
 
@@ -312,8 +316,9 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
   /* ---------- Channels ---------- */
   var refs=[], wrap=$('#channels'), cols=$('#cols');
   function setT(i,v,fromUI){
+    if(S.estop) v=0;
     rt.t[i]=clamp(Math.round(v),-100,100);
-    if(!fromUI) refs[i].rng.value=rt.t[i];
+    if(!fromUI||S.estop) refs[i].rng.value=rt.t[i];
     refs[i].val.textContent=fmt(rt.t[i]);
   }
   for(var ci=0;ci<N;ci++){(function(i){
@@ -337,7 +342,7 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
     var rel=function(){ if(C.spring){r.rng.value=0;setT(i,0,true)} };
     r.rng.addEventListener('pointerup',rel);
     r.rng.addEventListener('pointercancel',rel);
-    $('.stop',el).addEventListener('click',function(){r.rng.value=0;setT(i,0,true)});
+    $('.stop',el).addEventListener('click',function(){r.rng.value=0;setT(i,0,true);rt.o[i]=0;last=null});
 
     [r.hRev,r.hFwd].forEach(function(btn,k){
       var dir=k?1:-1, down=false;
@@ -501,7 +506,7 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
   });
 
   /* ---------- Link, E-STOP, frames ---------- */
-  var S={connected:!NB};
+  var S={connected:!NB,estop:false};
   var link=$('#link'), live=$('#live'), last=null, lastSend=0, sent=0, t0=performance.now(), lines=[];
   var hubMsg='';
   var HUB_TEXT={off:'Bluetooth mati',denied:'Kebenaran ditolak',unsupported:'Peranti tak sokong siaran BLE',error:'Ralat Bluetooth'};
@@ -528,10 +533,18 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
     else{S.connected=false;hubMsg=HUB_TEXT[s]||'Ralat';live.textContent=hubMsg}
     paintLink();
   };
-  $('#estop').addEventListener('click',function(){
+  var es=$('#estop'), banner=$('#esBanner');
+  function paintEstop(){
+    es.setAttribute('aria-pressed',String(S.estop));
+    es.textContent=S.estop?'Lepas E-Stop':'E-Stop';
+    banner.hidden=!S.estop;
+    cols.classList.toggle('locked',S.estop);
+  }
+  es.addEventListener('click',function(){
+    S.estop=!S.estop;
     for(var i=0;i<N;i++){rt.t[i]=0;rt.o[i]=0;refs[i].rng.value=0;refs[i].val.textContent='0'}
-    last=null;tick();
-    live.textContent='E-Stop: semua saluran ditetapkan ke 0';
+    last=null;tick();paintEstop();
+    live.textContent=S.estop?'E-Stop aktif: semua saluran dikunci pada 0':'E-Stop dilepaskan';
   });
 
   function logFrame(f){
@@ -551,7 +564,9 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
   function tick(){
     var step=Math.max(2,200*Math.pow(1-C.ramp/100,2)), frame=[];
     for(var i=0;i<N;i++){
-      var goal=goalOf(i), d=goal-rt.o[i];
+      var goal=S.estop?0:goalOf(i);
+      if(S.estop) rt.o[i]=0;
+      var d=goal-rt.o[i];
       rt.o[i]=Math.abs(d)<=step?goal:rt.o[i]+(d<0?-1:1)*step;
       var o=Math.round(rt.o[i]), v=(C.ch[i].inv?-o:o)||0;
       frame.push(v);

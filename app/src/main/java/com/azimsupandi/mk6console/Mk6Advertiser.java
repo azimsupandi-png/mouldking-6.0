@@ -51,6 +51,7 @@ final class Mk6Advertiser {
     private boolean pushScheduled;
     private boolean stopping;
     private long lastPushAt;
+    private int failCount;
     private int module;
     private final int[] latest = new int[CHANNELS];
 
@@ -72,6 +73,24 @@ final class Mk6Advertiser {
                 } else {
                     running = false;
                     listener.onState("error");
+                }
+            });
+        }
+
+        @Override
+        public void onAdvertisingDataSet(AdvertisingSet advertisingSet, int status) {
+            handler.post(() -> {
+                if (status == AdvertisingSetCallback.ADVERTISE_SUCCESS) {
+                    failCount = 0;
+                    return;
+                }
+                if (!running || connecting || stopping) return;
+                failCount++;
+                if (failCount > 20) {
+                    stopNow();
+                    listener.onState("error");
+                } else {
+                    schedulePush();
                 }
             });
         }
@@ -137,6 +156,7 @@ final class Mk6Advertiser {
         }
         module = Math.max(0, Math.min(2, moduleNo));
         for (int i = 0; i < CHANNELS; i++) latest[i] = 0;
+        failCount = 0;
         stopping = false;
         starting = true;
         try {
@@ -218,6 +238,8 @@ final class Mk6Advertiser {
             set.setAdvertisingData(dataFor(telegram(module, latest)));
             lastPushAt = SystemClock.uptimeMillis();
         } catch (RuntimeException e) {
+            // Never keep broadcasting a stale command if the update could not be applied.
+            stopNow();
             listener.onState("error");
         }
     }
