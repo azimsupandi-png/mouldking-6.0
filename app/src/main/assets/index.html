@@ -36,7 +36,9 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{overflow-x:hidden}
+html{overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+input[type=range],.track,.pad,.hold{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input[type=range]:focus,input[type=range]:focus-visible{outline:none}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.4}
 [hidden]{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
