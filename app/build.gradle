@@ -11,7 +11,7 @@ android {
         minSdk 26
         targetSdk 34
         // Each CI run gets a higher versionCode so a new APK installs over the old one.
-        versionCode (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
+        versionCode Integer.parseInt(System.getenv('GITHUB_RUN_NUMBER') ?: '1')
         versionName '1.0'
     }
 
