@@ -450,7 +450,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider'});
-    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,theme:'std',pad:{on:true,dead:12,trig:-1},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -544,7 +544,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.s2={mode:s2.mode==='tank'?'tank':'axis',a:idxOf(s2.a,2,true),b:idxOf(s2.b,3,true)};
     d.hubs=cleanHubs(Array.isArray(c.hubs)?c.hubs:[num(c.mod,0,2,0),-1,-1]);
     d.layout=(c.layout==='joy'||c.layout==='dual')?c.layout:'std';
+    // Colour choices are now orange(0), red(1), yellow(2). Older saves used six: pink maps to red, yellow to yellow, the rest to orange.
     d.accent=Math.round(num(c.accent,0,5,0));
+    if(c.accentV!==2) d.accent=({4:1,5:2})[d.accent]||0; else d.accent=Math.min(2,d.accent);
+    d.accentV=2;
     d.theme=c.theme==='build'?'build':'std';
     var pd=(c.pad&&typeof c.pad==='object')?c.pad:{};
     d.pad={on:pd.on!==false,dead:Math.round(num(pd.dead,5,40,12)),trig:Math.round(num(pd.trig,-1,NMAX-1,-1))};
@@ -556,7 +559,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var car=baseCfg(['Left wheel','Right wheel','Headlights','Channel D','Channel E','Channel F']);
     car.s1.mode='tank';car.layout='joy';car.ch[2].kind='hold';
     var exc=baseCfg(['Left track','Right track','Arm','Bucket','Swing','Lights']);
-    exc.s1.mode='tank';exc.layout='dual';exc.ch[4].kind='hold';exc.ch[4].max=60;exc.ch[5].kind='hold';exc.theme='build';exc.accent=5;
+    exc.s1.mode='tank';exc.layout='dual';exc.ch[4].kind='hold';exc.ch[4].max=60;exc.ch[5].kind='hold';exc.theme='build';exc.accent=2;
     car.seq=[{id:uid(),name:'Spin',loop:false,steps:[{ch:0,pwr:60,dur:1.5,par:false},{ch:1,pwr:-60,dur:1.5,par:true},{ch:-1,pwr:0,dur:0.5,par:false}]}];
     exc.seq=[{id:uid(),name:'Dig cycle',loop:false,steps:[{ch:2,pwr:-60,dur:2,par:false},{ch:3,pwr:60,dur:1.5,par:false},{ch:2,pwr:60,dur:2,par:false},{ch:4,pwr:40,dur:3,par:false}]}];
     return [
@@ -862,7 +865,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     refs.forEach(function(r,i){syncChannel(i)});
     syncSticks();syncSettings();syncLayout();syncProfiles();syncRec();paintAccent();paintSkin();paintLamps();syncSeq();
   }
-  var ACC=['#FF7A2F','#1FB5A8','#5CB85C','#9B6BFF','#FF5C93','#F2B705'];
+  var ACC=['#FF7A2F','#FF4B3E','#F5B800'];
   var swBox=$('#swatches'),swBtns=ACC.map(function(c,n){
     var b=document.createElement('button');b.type='button';b.className='sw';b.style.setProperty('--c',c);b.setAttribute('aria-label','Colour '+(n+1));
     b.addEventListener('click',function(){C.accent=n;paintAccent();save()});
@@ -881,7 +884,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   function setTheme(t){
     C.theme=t;
-    if(t==='build'&&C.accent===0) C.accent=5;
+    if(t==='build'&&C.accent===0) C.accent=2;
     paintAccent();paintSkin();save();
   }
   $('#thStd').addEventListener('click',function(){setTheme('std')});

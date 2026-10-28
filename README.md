@@ -24,7 +24,7 @@ The app stops broadcasting when it leaves the screen, so motors do not keep runn
 ## Features
 
 - **Models:** every model stores channel names, reverse, limits, stick mapping, layout and recordings. Two examples are included.
-- **Look:** pick a colour per model, power rings on every channel and stick, glowing sliders and a pulsing link light.
+- **Look:** pick one of three colours (orange, red, yellow) per model, power rings on every channel and stick, glowing sliders and a pulsing link light.
 - **Themes:** per model, "Classic" or "Construction" (dark steel, hazard stripes, riveted panels, segmented power bars, yellow accent and status lamps). The look is generic machinery styling, not any brand's.
 - **Layouts:** Standard, Joystick (stick 1 first, its channels hidden from the list) and Dual stick (two sticks side by side, works well in landscape).
 - **Per channel:** maximum power, start power, fine control (expo curve with preview) and slider or hold-to-move control.
