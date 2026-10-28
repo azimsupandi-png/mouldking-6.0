@@ -1,6 +1,6 @@
 # MK6 Console
 
-Android app that controls up to three **Mould King Module 6.0** (6 channels) or **Module 4.0** (4 channels) hubs from your phone, mixed if you like.
+Android app that controls one to three **Mould King Module 6.0** hubs (6 channels each) from your phone.
 The hubs are driven by encrypted Bluetooth LE advertisements, so no pairing is needed.
 
 ## Get the APK
@@ -20,12 +20,6 @@ You can also start a build by hand from the **Actions** tab (Run workflow).
 4. Move the sliders, hold buttons or sticks. **E-Stop** locks every channel at 0 until you tap **Release E-Stop**.
 
 The app stops broadcasting when it leaves the screen, so motors do not keep running in the background.
-
-## Hub type and number
-
-Pick the type of each hub (MK 6.0 or MK 4.0) under **Limits & hubs**. MK 4.0 hubs have four channels (A to D) and all share one broadcast, so even three of them update as fast as a single hub. Mixing both kinds works, but each MK 6.0 hub adds one more turn to the rotation.
-
-The MK 4.0 packet format is taken from J0EK3R's and pink0D's open-source projects and its encoding is checked against their reference code. It has not been tried on a real MK 4.0 hub by the author of this app, so if a channel runs backwards use that channel's **Reverse** button.
 
 ## Setting the hub number
 
