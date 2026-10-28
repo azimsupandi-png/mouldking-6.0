@@ -203,6 +203,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   background:var(--fg);color:var(--bg);font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.45);animation:slide .2s ease-out}
 .pm{display:grid;grid-template-columns:minmax(0,5.5em) minmax(0,1fr);align-items:center;gap:8px;font-size:13px}
 .pm span{color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.hcell{display:grid;gap:4px;min-width:0;font-size:12px;color:var(--muted)}
 .quick{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .qbtn{min-height:56px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--well);color:var(--fg);cursor:pointer;
   font-family:var(--f-display);font-weight:600;font-size:18px;letter-spacing:.06em;text-transform:uppercase;border-left:4px solid var(--acc);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -431,10 +432,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <label>Warn after long full power<select id="sfWarn"><option value="0">Off</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <div class="set-row"><span class="set-top"><span>Hubs (module number of each)</span></span>
             <div class="hubrow">
-              <label>Hub 1<select id="hub0"><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
-              <label>Hub 2<select id="hub1"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
-              <label>Hub 3<select id="hub2"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
+              <div class="hcell"><span>Hub 1</span><select id="hubK0" aria-label="Hub 1 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option></select><select id="hub0" aria-label="Hub 1 number"><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
+              <div class="hcell"><span>Hub 2</span><select id="hubK1" aria-label="Hub 2 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option></select><select id="hub1" aria-label="Hub 2 number"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
+              <div class="hcell"><span>Hub 3</span><select id="hubK2" aria-label="Hub 3 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option></select><select id="hub2" aria-label="Hub 3 number"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
             </div>
+            <p class="note" style="margin:6px 0 0">MK 4.0 hubs have four channels (A to D) and share one broadcast, so several MK 4.0 hubs update as fast as one.</p>
           </div>
         </div>
       </section>
@@ -493,15 +495,22 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider'});
-    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],hubKinds:[6,6,6],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30},seq:[],rec:[]};
   }
-  function cleanHubs(h){
+  // Hub module numbers (0..2 = M1..M3, -1 = off). A number may only be used once per hub kind (MK 6.0 / MK 4.0).
+  function cleanHubs(h,k){
     var out=[-1,-1,-1],s,t;
+    k=k||[6,6,6];
     for(s=0;s<3;s++){var v=Math.round(+(h&&h[s]));out[s]=(v>=0&&v<=2)?v:-1}
-    for(s=1;s<3;s++) for(t=0;t<s;t++) if(out[s]>=0&&out[s]===out[t]) out[s]=-1;
-    if(out[0]<0){var m=0;while(out.indexOf(m)>=0) m++;out[0]=m}
+    for(s=1;s<3;s++) for(t=0;t<s;t++) if(out[s]>=0&&out[s]===out[t]&&k[s]===k[t]) out[s]=-1;
+    if(out[0]<0){
+      var m=0;
+      while(out.some(function(v,i){return i>0&&v===m&&k[i]===k[0]})) m++;
+      out[0]=m;
+    }
     return out;
   }
+  function cleanKinds(k){return [0,1,2].map(function(i){return pickOf(k&&k[i],[4,6],6)})}
   var PAD_BTNS=[0,1,2,3,4,5,10,11,12,13,14,15];
   function pickOf(v,list,def){v=+v;return list.indexOf(v)>=0?v:def}
   var MAX_SEQ=10, MAX_STEPS=30;
@@ -587,7 +596,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
     d.s1={mode:s1.mode==='tank'?'tank':'axis',a:idxOf(s1.a,0,false),b:idxOf(s1.b,1,false)};
     d.s2={mode:s2.mode==='tank'?'tank':'axis',a:idxOf(s2.a,2,true),b:idxOf(s2.b,3,true)};
-    d.hubs=cleanHubs(Array.isArray(c.hubs)?c.hubs:[num(c.mod,0,2,0),-1,-1]);
+    d.hubKinds=cleanKinds(c.hubKinds);
+    d.hubs=cleanHubs(Array.isArray(c.hubs)?c.hubs:[num(c.mod,0,2,0),-1,-1],d.hubKinds);
     d.layout=(c.layout==='joy'||c.layout==='dual')?c.layout:'std';
     // Colour choices are now orange(0), red(1), yellow(2). Older saves used six: pink maps to red, yellow to yellow, the rest to orange.
     d.accent=Math.round(num(c.accent,0,5,0));
@@ -663,10 +673,15 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   for(var q=0;q<NMAX;q++){rt.t.push(0);rt.o.push(0)}
 
   function slotOn(s){return C.hubs[s]>=0}
-  function isActive(i){return slotOn((i/PER)|0)}
+  // An MK 4.0 hub only has four channels (A to D).
+  function isActive(i){var s=(i/PER)|0;return slotOn(s)&&(C.hubKinds[s]===6||(i%PER)<4)}
   function activeSlots(){var o=[];for(var s=0;s<3;s++) if(slotOn(s)) o.push(s);return o}
   function activeIdx(){var o=[];for(var i=0;i<NMAX;i++) if(isActive(i)) o.push(i);return o}
-  function tagOf(i){var s=(i/PER)|0;return activeSlots().length>1?'M'+(C.hubs[s]+1)+L[i%PER]:L[i%PER]}
+  function kindsMixed(){var k=activeSlots().map(function(s){return C.hubKinds[s]});return k.indexOf(4)>=0&&k.indexOf(6)>=0}
+  // Hub list for the native side: "1" = MK 6.0 hub with module number 1, "4:2" = MK 4.0 hub with module number 2.
+  function hubCsv(){return activeSlots().map(function(s){return (C.hubKinds[s]===4?'4:':'')+C.hubs[s]}).join(',')}
+  function slotName(s){return (kindsMixed()&&C.hubKinds[s]===4?'4.':'')+'M'+(C.hubs[s]+1)}
+  function tagOf(i){var s=(i/PER)|0;return activeSlots().length>1?slotName(s)+L[i%PER]:L[i%PER]}
 
   /* Transport: broadcasts through the native bridge when running inside the Android app. */
   var transport={send:function(frame,changed){
@@ -872,7 +887,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     groups.forEach(function(g,s){
       g.hidden=!(multi&&slotOn(s)&&visible[s]>0);
-      g.textContent='Hub M'+(C.hubs[s]+1);
+      g.textContent='Hub M'+(C.hubs[s]+1)+(C.hubKinds[s]===4?' (MK 4.0)':'');
     });
   }
 
@@ -888,7 +903,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     activeIdx().forEach(function(i){var o=document.createElement('option');o.value=String(i);o.textContent=tagOf(i)+' · '+C.ch[i].name;gpTrig.appendChild(o)});
     if(C.pad.trig>=0&&!isActive(C.pad.trig)) C.pad.trig=-1;
     gpTrig.value=String(C.pad.trig);
-    for(var s=0;s<3;s++) $('#hub'+s).value=String(C.hubs[s]);
+    for(var s=0;s<3;s++){$('#hub'+s).value=String(C.hubs[s]);$('#hubK'+s).value=String(C.hubKinds[s]);$('#hubK'+s).disabled=C.hubs[s]<0}
   }
   limit.addEventListener('input',function(){C.limit=+limit.value;$('#limitOut').textContent=C.limit+'%'});
   ramp.addEventListener('input',function(){C.ramp=+ramp.value;$('#rampOut').textContent=C.ramp});
@@ -901,15 +916,28 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   loopBox.addEventListener('change',function(){S.loop=loopBox.checked});
   function onHubChange(s,v){
     var h=C.hubs.slice();h[s]=v;
-    for(var t=0;t<3;t++) if(t!==s&&v>=0&&h[t]===v) h[t]=-1;
-    C.hubs=cleanHubs(h);
+    for(var t=0;t<3;t++) if(t!==s&&v>=0&&h[t]===v&&C.hubKinds[t]===C.hubKinds[s]) h[t]=-1;
+    C.hubs=cleanHubs(h,C.hubKinds);
+    applyHubSetup();
+  }
+  function onKindChange(s,k){
+    C.hubKinds[s]=pickOf(k,[4,6],6);
+    var h=C.hubs.slice();
+    for(var t=0;t<3;t++) if(t!==s&&h[s]>=0&&h[t]===h[s]&&C.hubKinds[t]===C.hubKinds[s]) h[t]=-1;
+    C.hubs=cleanHubs(h,C.hubKinds);
+    applyHubSetup();
+  }
+  function applyHubSetup(){
     stopPlay(true);
     for(var i=0;i<NMAX;i++) if(!isActive(i)){rt.t[i]=0;rt.o[i]=0;refs[i].rng.value=0;refs[i].val.textContent='0'}
     if(NB&&S.connected){NB.stop();S.connected=false;hubMsg='';live.textContent='Hub setup changed. Tap Connect hub to reconnect.'}
     last=null;
     syncAll();paintLink();save();
   }
-  [0,1,2].forEach(function(s){var sel=$('#hub'+s);sel.addEventListener('change',function(){onHubChange(s,+sel.value)})});
+  [0,1,2].forEach(function(s){
+    var sel=$('#hub'+s);sel.addEventListener('change',function(){onHubChange(s,+sel.value)});
+    var ks=$('#hubK'+s);ks.addEventListener('change',function(){onKindChange(s,+ks.value)});
+  });
   if(NB){
     $('#note').textContent='Frames are broadcast over Bluetooth straight to the Mould King hubs. Put each hub in Bluetooth mode, tap Connect hub and wait until it says Hub active. With several hubs each one is updated in turn, so expect slightly slower response.';
   }
@@ -1176,7 +1204,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       if(S.connected){NB.stop();S.connected=false;hubMsg='';stopPlay(true)}
       else{
         hubMsg='Pairing…';S.connected=true;
-        NB.start(activeSlots().map(function(s){return C.hubs[s]}).join(','));
+        NB.start(hubCsv());
       }
       paintLink();return;
     }
@@ -1214,7 +1242,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var slots=activeSlots(), multi=slots.length>1;
     slots.forEach(function(sl,n){
       var part=f.slice(n*PER,n*PER+PER).map(function(v,j){return L[j]+fmt(v).padStart(4,' ')}).join(' ');
-      lines.push(s+'s  '+(multi?'M'+(C.hubs[sl]+1)+' ':'')+part);
+      lines.push(s+'s  '+(multi?slotName(sl)+' ':'')+part);
     });
     while(lines.length>60) lines.shift();
     var el=$('#log');el.textContent=lines.join('\n');el.scrollTop=el.scrollHeight;
@@ -1606,6 +1634,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Limits & hubs':'Had & hab','Power limit (all channels)':'Had kuasa (semua saluran)','Acceleration smoothing':'Pelicinan pecutan',
     'Sliders return to 0 when released':'Gelangsar kembali ke 0 bila dilepas','Auto-stop when idle':'Henti automatik bila tiada input','Warn after long full power':'Amaran selepas kuasa penuh lama',
     'Off':'Mati','Hubs (module number of each)':'Hab (nombor modul setiap satu)',
+    'MK 4.0 hubs have four channels (A to D) and share one broadcast, so several MK 4.0 hubs update as fast as one.':'Hab MK 4.0 ada empat saluran (A hingga D) dan berkongsi satu siaran, jadi beberapa hab MK 4.0 dikemas kini sepantas satu hab.',
     'Frames sent':'Bingkai dihantar','Frame log':'Log bingkai',
     'Each frame is six values from -100 to +100, one per channel, for every active hub. This page is running in simulation: no Bluetooth is used, frames are only logged.':'Setiap bingkai ialah enam nilai dari -100 hingga +100, satu setiap saluran, untuk setiap hab aktif. Halaman ini berjalan dalam simulasi: Bluetooth tidak digunakan, bingkai hanya dicatat.',
     'Frames are broadcast over Bluetooth straight to the Mould King hubs. Put each hub in Bluetooth mode, tap Connect hub and wait until it says Hub active. With several hubs each one is updated in turn, so expect slightly slower response.':'Bingkai disiarkan melalui Bluetooth terus ke hab Mould King. Letakkan setiap hab dalam mod Bluetooth, tekan Sambung hab dan tunggu sehingga tertulis Hab aktif. Dengan beberapa hab, setiap satu dikemas kini bergilir, jadi tindak balas sedikit lebih perlahan.',
@@ -1622,7 +1651,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Welcome to MK6 Console':'Selamat datang ke MK6 Console',
     'Control up to three Mould King 6.0 hubs from your phone over Bluetooth. This short guide covers the setup.':'Kawal sehingga tiga hab Mould King 6.0 dari telefon anda melalui Bluetooth. Panduan ringkas ini merangkumi persediaan.',
     'Set each hub number':'Tetapkan nombor setiap hab',
-    'Press the power button on the hub briefly. The LED flashes 1, 2 or 3 times: that is its number (M1, M2, M3). Give every hub a different number, then pick the same numbers under Limits & hubs.':'Tekan butang power pada hab sekejap. LED berkelip 1, 2 atau 3 kali: itulah nombornya (M1, M2, M3). Beri setiap hab nombor berbeza, kemudian pilih nombor yang sama di bawah Had & hab.',
+    'Press the power button on the hub briefly. The LED flashes 1, 2 or 3 times: that is its number (M1, M2, M3). Give every hub a different number, then pick the same numbers under Limits & hubs. Choose the hub type there too (MK 6.0 or MK 4.0).':'Tekan butang power pada hab sekejap. LED berkelip 1, 2 atau 3 kali: itulah nombornya (M1, M2, M3). Beri setiap hab nombor berbeza, kemudian pilih nombor yang sama di bawah Had & hab. Pilih jenis hab di situ juga (MK 6.0 atau MK 4.0).',
     'Connect':'Sambung',
     'Switch the hub into Bluetooth mode and power it on. Tap Connect hub, allow the Bluetooth permission, and wait about 3 seconds until it says Hub active.':'Tukar hab ke mod Bluetooth dan hidupkannya. Tekan Sambung hab, benarkan kebenaran Bluetooth, dan tunggu kira-kira 3 saat sehingga tertulis Hab aktif.',
     'Drive safely':'Pandu dengan selamat',
@@ -1634,7 +1663,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     [/^Colour (\d)$/,function(m){return 'Warna '+m[1]}],
     [/^Name of channel (\S+)$/,function(m){return 'Nama saluran '+m[1]}],
     [/^Power of channel (\S+)$/,function(m){return 'Kuasa saluran '+m[1]}],
-    [/^Hub (M?\d)$/,function(m){return 'Hab '+m[1]}],
+    [/^Hub (M?\d)( \(MK 4\.0\))?$/,function(m){return 'Hab '+m[1]+(m[2]||'')}],
+    [/^Hub (\d) type$/,function(m){return 'Jenis hab '+m[1]}],
+    [/^Hub (\d) number$/,function(m){return 'Nombor hab '+m[1]}],
     [/^(\d+) frames$/,function(m){return m[1]+' bingkai'}],
     [/^Recording (\d+:\d\d \/ \d+:\d\d)$/,function(m){return 'Merakam '+m[1]}],
     [/^Playing (\d+:\d\d \/ \d+:\d\d)( \(loop\))?$/,function(m){return 'Memainkan '+m[1]+(m[2]?' (ulang)':'')}],
@@ -1712,7 +1743,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
   var GUIDE=[
     ['Welcome to MK6 Console','Control up to three Mould King 6.0 hubs from your phone over Bluetooth. This short guide covers the setup.'],
-    ['Set each hub number','Press the power button on the hub briefly. The LED flashes 1, 2 or 3 times: that is its number (M1, M2, M3). Give every hub a different number, then pick the same numbers under Limits & hubs.'],
+    ['Set each hub number','Press the power button on the hub briefly. The LED flashes 1, 2 or 3 times: that is its number (M1, M2, M3). Give every hub a different number, then pick the same numbers under Limits & hubs. Choose the hub type there too (MK 6.0 or MK 4.0).'],
     ['Connect','Switch the hub into Bluetooth mode and power it on. Tap Connect hub, allow the Bluetooth permission, and wait about 3 seconds until it says Hub active.'],
     ['Drive safely','E-Stop locks every channel at 0 until you release it. On a gamepad, Back is E-Stop and Start releases it. Motors also stop when the app leaves the screen or after the idle time you set.'],
     ['Make it yours','Pick a colour and a theme per model, build sequences and quick action buttons, and map gamepad buttons. You can reopen this guide from the App card.']
