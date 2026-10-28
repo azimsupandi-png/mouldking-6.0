@@ -266,6 +266,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         <div class="pads" id="pads"></div>
       </section>
 
+      <section class="card" id="padCard">
+        <h2>Gamepad</h2>
+        <p class="rec-stat" id="gpStat">No gamepad found. Pair it in Android Bluetooth settings, then press any button.</p>
+        <label class="check" for="gpOn"><input id="gpOn" type="checkbox" checked>Use gamepad</label>
+        <div class="set" style="margin-top:12px">
+          <div class="set-row"><label for="gpDead"><span class="set-top"><span>Stick dead zone</span><output id="gpDeadOut">12%</output></span></label>
+            <input id="gpDead" type="range" min="5" max="40" step="1" value="12"></div>
+          <label>Trigger channel (RT forward, LT reverse)<select id="gpTrig"></select></label>
+        </div>
+        <p class="note">Left stick = stick 1, right stick = stick 2 (Dual stick layout). Back = E-Stop, Start = release. The sticks use the channels chosen in the stick cards.</p>
+      </section>
+
       <section class="card" id="recCard">
         <h2>Record &amp; replay</h2>
         <div class="rec-row">
@@ -342,7 +354,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider'});
-    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,rec:[]};
+    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,pad:{on:true,dead:12,trig:-1},rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -393,6 +405,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.hubs=cleanHubs(Array.isArray(c.hubs)?c.hubs:[num(c.mod,0,2,0),-1,-1]);
     d.layout=(c.layout==='joy'||c.layout==='dual')?c.layout:'std';
     d.accent=Math.round(num(c.accent,0,5,0));
+    var pd=(c.pad&&typeof c.pad==='object')?c.pad:{};
+    d.pad={on:pd.on!==false,dead:Math.round(num(pd.dead,5,40,12)),trig:Math.round(num(pd.trig,-1,NMAX-1,-1))};
     d.rec=cleanRecs(c.rec);
     return d;
   }
@@ -462,7 +476,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var refs=[], groups=[], wrap=$('#channels'), cols=$('#cols');
   function setT(i,v,fromUI,force){
     if(S.estop) v=0; else if(S.play&&!force) return;
-    rt.t[i]=clamp(Math.round(v),-100,100);
+    rt.t[i]=clamp(Math.round(v),-100,100)||0;
     if(!fromUI||S.estop) refs[i].rng.value=rt.t[i];
     refs[i].val.textContent=fmt(rt.t[i]);
   }
@@ -650,15 +664,26 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
   /* ---------- Settings & hubs ---------- */
   var limit=$('#limit'), ramp=$('#ramp'), spring=$('#spring'), loopBox=$('#loop');
+  var gpOn=$('#gpOn'), gpDead=$('#gpDead'), gpTrig=$('#gpTrig'), gpStat=$('#gpStat');
   function syncSettings(){
     limit.value=C.limit;ramp.value=C.ramp;spring.checked=C.spring;loopBox.checked=S.loop;
     $('#limitOut').textContent=C.limit+'%';$('#rampOut').textContent=C.ramp;
+    gpOn.checked=C.pad.on;gpDead.value=C.pad.dead;$('#gpDeadOut').textContent=C.pad.dead+'%';
+    gpTrig.innerHTML='';
+    var no=document.createElement('option');no.value='-1';no.textContent='None';gpTrig.appendChild(no);
+    activeIdx().forEach(function(i){var o=document.createElement('option');o.value=String(i);o.textContent=tagOf(i)+' · '+C.ch[i].name;gpTrig.appendChild(o)});
+    if(C.pad.trig>=0&&!isActive(C.pad.trig)) C.pad.trig=-1;
+    gpTrig.value=String(C.pad.trig);
     for(var s=0;s<3;s++) $('#hub'+s).value=String(C.hubs[s]);
   }
   limit.addEventListener('input',function(){C.limit=+limit.value;$('#limitOut').textContent=C.limit+'%'});
   ramp.addEventListener('input',function(){C.ramp=+ramp.value;$('#rampOut').textContent=C.ramp});
   limit.addEventListener('change',save);ramp.addEventListener('change',save);
   spring.addEventListener('change',function(){C.spring=spring.checked;save()});
+  gpOn.addEventListener('change',function(){C.pad.on=gpOn.checked;if(!C.pad.on) releasePad();save()});
+  gpDead.addEventListener('input',function(){C.pad.dead=+gpDead.value;$('#gpDeadOut').textContent=C.pad.dead+'%'});
+  gpDead.addEventListener('change',save);
+  gpTrig.addEventListener('change',function(){releasePad();C.pad.trig=+gpTrig.value;save()});
   loopBox.addEventListener('change',function(){S.loop=loopBox.checked});
   function onHubChange(s,v){
     var h=C.hubs.slice();h[s]=v;
@@ -938,13 +963,15 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     banner.hidden=!S.estop;
     syncLock();paintRec();
   }
-  es.addEventListener('click',function(){
-    S.estop=!S.estop;
+  function setEstop(on){
+    if(S.estop===on) return;
+    S.estop=on;
     stopRecord();stopPlay(false);
     zeroAll();
     last=null;tick();paintEstop();
     live.textContent=S.estop?'E-Stop is on: every channel is locked at 0':'E-Stop released';
-  });
+  }
+  es.addEventListener('click',function(){setEstop(!S.estop)});
 
   function logFrame(f){
     var s=((performance.now()-t0)/1000).toFixed(1).padStart(6,' ');
@@ -958,6 +985,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
 
   function tick(){
+    padPoll();
     var now=performance.now();
     stepRecord(now);stepPlay(now);
     var step=Math.max(2,200*Math.pow(1-C.ramp/100,2)), vals=new Array(NMAX);
@@ -993,6 +1021,60 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   syncAll();
   paintLink();
   paintEstop();
+
+  // ---- Gamepad (browser Gamepad API; standard mapping) ----
+  var GP={on:[false,false],trig:false,btn:{},stat:''};
+  function padInfo(){
+    try{
+      var l=navigator.getGamepads?navigator.getGamepads():[];
+      for(var i=0;i<l.length;i++) if(l[i]&&l[i].connected) return l[i];
+    }catch(e){}
+    return null;
+  }
+  function padDz(v,d){var a=Math.abs(+v||0);return a<d?0:(v<0?-1:1)*Math.min(1,(a-d)/(1-d))}
+  function showKnob(k,x,y){
+    var st=sticks[k];if(!st) return;
+    var R=st.pad.getBoundingClientRect().width*0.4;
+    st.knob.classList.toggle('rest',x===0&&y===0);
+    st.knob.style.transform='translate('+(x*R)+'px,'+(-y*R)+'px)';
+    st.pad.style.setProperty('--m',Math.min(1,Math.hypot(x,y)).toFixed(2));
+  }
+  function releasePad(){
+    for(var k=0;k<2;k++) if(GP.on[k]){GP.on[k]=false;showKnob(k,0,0);applyStick(k,0,0)}
+    if(GP.trig){GP.trig=false;if(C.pad.trig>=0) setT(C.pad.trig,0,false)}
+  }
+  function padEdge(g,n){
+    var b=g.buttons[n],down=!!(b&&(b.pressed||b.value>0.5)),was=!!GP.btn[n];
+    GP.btn[n]=down;return down&&!was;
+  }
+  function padStatus(g){
+    var t=!g?'No gamepad found. Pair it in Android Bluetooth settings, then press any button.'
+      :(C.pad.on?'Connected: '+String(g.id).slice(0,40):'Connected but switched off');
+    if(t!==GP.stat){GP.stat=t;gpStat.textContent=t}
+  }
+  function padPoll(){
+    var g=padInfo();
+    padStatus(g);
+    if(!g||!C.pad.on){releasePad();return}
+    if(padEdge(g,8)) setEstop(true);
+    if(padEdge(g,9)) setEstop(false);
+    if(S.estop||S.play){releasePad();return}
+    var d=C.pad.dead/100, ax=g.axes||[];
+    var xs=[[padDz(ax[0],d),padDz(ax[1],d)],[padDz(ax[2],d),padDz(ax[3],d)]];
+    var n=C.layout==='dual'?2:1;
+    for(var k=0;k<n;k++){
+      var x=xs[k][0],y=-xs[k][1],act=x!==0||y!==0;
+      if(act||GP.on[k]){applyStick(k,x,y);showKnob(k,x,y)}
+      GP.on[k]=act;
+    }
+    if(C.pad.trig>=0&&isActive(C.pad.trig)){
+      var rt_=g.buttons[7]?g.buttons[7].value:0, lt_=g.buttons[6]?g.buttons[6].value:0;
+      var tv=rt_-lt_; if(Math.abs(tv)<0.05) tv=0;
+      if(tv!==0||GP.trig) setT(C.pad.trig,tv*100,false);
+      GP.trig=tv!==0;
+    }
+  }
+  if(typeof window.addEventListener==='function') window.addEventListener('gamepaddisconnected',function(){releasePad()});
   setInterval(tick,50);
 })();
 </script>
