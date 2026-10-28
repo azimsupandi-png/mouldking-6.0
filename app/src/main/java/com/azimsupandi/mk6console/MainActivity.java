@@ -7,6 +7,11 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
+import android.graphics.drawable.Icon;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,7 +22,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -36,6 +45,9 @@ public class MainActivity extends Activity {
     private Mk6Advertiser mk6;
     private int[] pendingMods;
     private String pendingExport;
+    private String pendingModel;
+    private boolean pageReady;
+    private Vibrator vibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +63,72 @@ public class MainActivity extends Activity {
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        readModelExtra(getIntent());
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return !request.getUrl().toString().startsWith("file:///android_asset/");
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                pageReady = true;
+                deliverModel();
+            }
         });
         web.addJavascriptInterface(new Bridge(), "MK6Bridge");
         web.loadUrl(PAGE);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        readModelExtra(intent);
+        deliverModel();
+    }
+
+    private void readModelExtra(Intent intent) {
+        if (intent == null) return;
+        String id = intent.getStringExtra("model");
+        if (id != null && id.matches("[A-Za-z0-9_-]{1,40}")) pendingModel = id;
+        intent.removeExtra("model");
+    }
+
+    private void deliverModel() {
+        if (!pageReady || pendingModel == null || web == null) return;
+        final String js = "window.openModel&&window.openModel(" + JSONObject.quote(pendingModel) + ")";
+        pendingModel = null;
+        web.post(() -> web.evaluateJavascript(js, null));
+    }
+
+    private void buzz(long[] pattern) {
+        if (vibrator == null || !vibrator.hasVibrator()) return;
+        try {
+            vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
+        } catch (RuntimeException ignored) {
+            // Vibration is a nicety; never let it break control.
+        }
+    }
+
+    private Intent modelIntent(String id) {
+        Intent i = new Intent(this, MainActivity.class);
+        i.setAction(Intent.ACTION_VIEW);
+        i.putExtra("model", id);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return i;
+    }
+
+    private ShortcutInfo shortcutFor(String prefix, String id, String name) {
+        String label = name == null || name.trim().isEmpty() ? "Model" : name.trim();
+        return new ShortcutInfo.Builder(this, prefix + id)
+            .setShortLabel(label.length() > 10 ? label.substring(0, 10) : label)
+            .setLongLabel(label)
+            .setIcon(Icon.createWithResource(this, R.mipmap.ic_launcher))
+            .setIntent(modelIntent(id))
+            .build();
     }
 
     @Override
@@ -159,6 +229,12 @@ public class MainActivity extends Activity {
             "window.onHubState&&window.onHubState('" + state + "')", null));
     }
 
+    private void notifyApp(final String event) {
+        if (web == null) return;
+        web.post(() -> web.evaluateJavascript(
+            "window.onAppEvent&&window.onAppEvent('" + event + "')", null));
+    }
+
     private void notifyFile(final String kind, final String result) {
         if (web == null) return;
         web.post(() -> web.evaluateJavascript(
@@ -217,6 +293,57 @@ public class MainActivity extends Activity {
             final int[] frame = parseFrame(csv);
             if (frame == null) return;
             runOnUiThread(() -> mk6.setFrame(frame));
+        }
+
+        @JavascriptInterface
+        public void haptic(final String kind) {
+            long[] p;
+            if ("estop".equals(kind)) p = new long[] {0, 90, 70, 90};
+            else if ("warn".equals(kind)) p = new long[] {0, 200, 100, 200, 100, 200};
+            else if ("lost".equals(kind)) p = new long[] {0, 300};
+            else if ("ok".equals(kind)) p = new long[] {0, 40};
+            else p = new long[] {0, 15};
+            final long[] pattern = p;
+            runOnUiThread(() -> buzz(pattern));
+        }
+
+        @JavascriptInterface
+        public void pinModel(final String id, final String name) {
+            runOnUiThread(() -> {
+                try {
+                    ShortcutManager sm = getSystemService(ShortcutManager.class);
+                    if (sm != null && sm.isRequestPinShortcutSupported()
+                            && id != null && id.matches("[A-Za-z0-9_-]{1,40}")) {
+                        sm.requestPinShortcut(shortcutFor("pin_", id, name), null);
+                    } else {
+                        notifyApp("nopin");
+                    }
+                } catch (RuntimeException e) {
+                    notifyApp("nopin");
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void shortcuts(final String json) {
+            runOnUiThread(() -> {
+                try {
+                    ShortcutManager sm = getSystemService(ShortcutManager.class);
+                    if (sm == null) return;
+                    JSONArray arr = new JSONArray(json);
+                    List<ShortcutInfo> list = new ArrayList<>();
+                    int max = Math.min(arr.length(), Math.min(4, sm.getMaxShortcutCountPerActivity()));
+                    for (int i = 0; i < max; i++) {
+                        JSONObject o = arr.getJSONObject(i);
+                        String id = o.optString("id", "");
+                        if (!id.matches("[A-Za-z0-9_-]{1,40}")) continue;
+                        list.add(shortcutFor("dyn_", id, o.optString("name", "")));
+                    }
+                    sm.setDynamicShortcuts(list);
+                } catch (Exception ignored) {
+                    // Shortcuts are optional.
+                }
+            });
         }
 
         @JavascriptInterface
