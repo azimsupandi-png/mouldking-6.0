@@ -24,6 +24,7 @@ The app stops broadcasting when it leaves the screen, so motors do not keep runn
 ## Features
 
 - **Models:** every model stores channel names, reverse, limits, stick mapping, layout and recordings. Two examples are included.
+- **Look:** pick a colour per model, power rings on every channel and stick, glowing sliders and a pulsing link light.
 - **Layouts:** Standard, Joystick (stick 1 first, its channels hidden from the list) and Dual stick (two sticks side by side, works well in landscape).
 - **Per channel:** maximum power, start power, fine control (expo curve with preview) and slider or hold-to-move control.
 - **Record & replay:** record up to 90 seconds of control movements, then replay once or in a loop. Manual input is locked during replay and E-Stop cancels it.
