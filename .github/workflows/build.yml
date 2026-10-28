@@ -24,7 +24,19 @@ jobs:
           gradle-version: '8.10.2'
 
       - name: Build signed release APK
-        run: gradle --no-daemon assembleRelease
+        run: |
+          set +e
+          gradle --no-daemon assembleRelease > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            # Show the useful lines as annotations so the failure can be read without the full log.
+            grep -nE "error|FAILED|What went wrong|Could not|AAPT|Execution failed|not found|cannot find" build.log | head -30 \
+              | sed 's/%/%25/g' | awk '{printf "%s%%0A",$0}' > key.txt
+            echo "::error title=Gradle errors::$(head -c 3500 key.txt)"
+            tail -n 25 build.log | sed 's/%/%25/g' | awk '{printf "%s%%0A",$0}' > tail.txt
+            echo "::error title=Gradle tail::$(head -c 3500 tail.txt)"
+          fi
+          exit $code
 
       - name: Name the APK
         run: cp app/build/outputs/apk/release/app-release.apk MK6-Console.apk
