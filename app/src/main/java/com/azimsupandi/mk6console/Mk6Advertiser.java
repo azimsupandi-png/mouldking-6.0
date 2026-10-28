@@ -11,11 +11,13 @@ import android.os.Looper;
 import android.os.SystemClock;
 
 /**
- * Drives a Mould King Module 6.0 hub by broadcasting its telegrams as BLE
- * advertisements (the hub is not connected to; it only listens).
+ * Drives one to three Mould King Module 6.0 hubs by broadcasting their telegrams
+ * as BLE advertisements (the hubs are not connected to; they only listen).
  *
  * Telegram layout (10 bytes): 0x61+module, 0x7B, 0xA7, six channel bytes
  * (0x80 = stop, above = forward, below = reverse), 0x9E-module.
+ * With one hub the telegram is updated whenever the values change. With several
+ * hubs the telegrams are broadcast in turn, one every ROTATE_MS.
  * Protocol credit: J0EK3R (MIT). See NOTICE.
  *
  * All methods must be called on the main thread.
@@ -36,8 +38,10 @@ final class Mk6Advertiser {
     };
     private static final long CONNECT_MS = 3000;
     private static final long MIN_GAP_MS = 60;
+    private static final long ROTATE_MS = 100;
     private static final long NEUTRAL_BEFORE_STOP_MS = 250;
     private static final int CHANNELS = 6;
+    private static final int MAX_HUBS = 3;
 
     private final BluetoothAdapter adapter;
     private final Listener listener;
@@ -52,8 +56,9 @@ final class Mk6Advertiser {
     private boolean stopping;
     private long lastPushAt;
     private int failCount;
-    private int module;
-    private final int[] latest = new int[CHANNELS];
+    private int rotateIdx;
+    private int[] modules = {0};
+    private int[][] latest = new int[1][CHANNELS];
 
     private final AdvertisingSetCallback callback = new AdvertisingSetCallback() {
         @Override
@@ -86,10 +91,10 @@ final class Mk6Advertiser {
                 }
                 if (!running || connecting || stopping) return;
                 failCount++;
-                if (failCount > 20) {
+                if (failCount > 40) {
                     stopNow();
                     listener.onState("error");
-                } else {
+                } else if (modules.length == 1) {
                     schedulePush();
                 }
             });
@@ -110,8 +115,24 @@ final class Mk6Advertiser {
         public void run() {
             if (!running) return;
             connecting = false;
-            pushNow();
+            if (modules.length > 1) {
+                handler.removeCallbacks(rotateTask);
+                handler.post(rotateTask);
+            } else {
+                pushModule(0);
+            }
             listener.onState("ready");
+        }
+    };
+
+    private final Runnable rotateTask = new Runnable() {
+        @Override
+        public void run() {
+            if (!running || connecting) return;
+            if (rotateIdx >= modules.length) rotateIdx = 0;
+            pushModule(rotateIdx);
+            rotateIdx = (rotateIdx + 1) % modules.length;
+            handler.postDelayed(this, ROTATE_MS);
         }
     };
 
@@ -119,7 +140,7 @@ final class Mk6Advertiser {
         @Override
         public void run() {
             pushScheduled = false;
-            pushNow();
+            pushModule(0);
         }
     };
 
@@ -139,8 +160,25 @@ final class Mk6Advertiser {
         return running || starting;
     }
 
-    void start(int moduleNo) {
+    /** modules: one to three distinct module numbers, each 0..2 (M1..M3). */
+    void start(int[] mods) {
         if (running || starting) return;
+        if (mods == null || mods.length < 1 || mods.length > MAX_HUBS) {
+            listener.onState("error");
+            return;
+        }
+        for (int i = 0; i < mods.length; i++) {
+            if (mods[i] < 0 || mods[i] > 2) {
+                listener.onState("error");
+                return;
+            }
+            for (int j = 0; j < i; j++) {
+                if (mods[i] == mods[j]) {
+                    listener.onState("error");
+                    return;
+                }
+            }
+        }
         if (adapter == null) {
             listener.onState("unsupported");
             return;
@@ -154,8 +192,9 @@ final class Mk6Advertiser {
             listener.onState("unsupported");
             return;
         }
-        module = Math.max(0, Math.min(2, moduleNo));
-        for (int i = 0; i < CHANNELS; i++) latest[i] = 0;
+        modules = mods.clone();
+        latest = new int[modules.length][CHANNELS];
+        rotateIdx = 0;
         failCount = 0;
         stopping = false;
         starting = true;
@@ -177,10 +216,18 @@ final class Mk6Advertiser {
         }
     }
 
-    /** Remember the newest values (-100..100 per channel) and broadcast them. */
+    /**
+     * Remember the newest values (-100..100) and broadcast them. The array holds
+     * six values per hub, in the order the hubs were passed to start().
+     */
     void setFrame(int[] pct) {
-        for (int i = 0; i < CHANNELS && i < pct.length; i++) latest[i] = pct[i];
-        if (running && !connecting && set != null) schedulePush();
+        for (int k = 0; k < modules.length; k++) {
+            for (int j = 0; j < CHANNELS; j++) {
+                int idx = k * CHANNELS + j;
+                latest[k][j] = idx < pct.length ? pct[idx] : 0;
+            }
+        }
+        if (running && !connecting && set != null && modules.length == 1) schedulePush();
     }
 
     /** Broadcast neutral values, then stop advertising shortly after. */
@@ -191,10 +238,20 @@ final class Mk6Advertiser {
         handler.removeCallbacks(pushTask);
         pushScheduled = false;
         if (running && set != null) {
-            for (int i = 0; i < CHANNELS; i++) latest[i] = 0;
+            for (int k = 0; k < modules.length; k++) {
+                for (int j = 0; j < CHANNELS; j++) latest[k][j] = 0;
+            }
             connecting = false;
-            pushNow();
-            handler.postDelayed(stopTask, NEUTRAL_BEFORE_STOP_MS);
+            long wait;
+            if (modules.length > 1) {
+                handler.removeCallbacks(rotateTask);
+                handler.post(rotateTask);
+                wait = modules.length * ROTATE_MS * 2 + 150;
+            } else {
+                pushModule(0);
+                wait = NEUTRAL_BEFORE_STOP_MS;
+            }
+            handler.postDelayed(stopTask, wait);
         } else if (!starting) {
             stopNow();
         }
@@ -209,6 +266,7 @@ final class Mk6Advertiser {
         handler.removeCallbacks(stopTask);
         handler.removeCallbacks(finishConnect);
         handler.removeCallbacks(pushTask);
+        handler.removeCallbacks(rotateTask);
         pushScheduled = false;
         connecting = false;
         try {
@@ -232,10 +290,10 @@ final class Mk6Advertiser {
         handler.postDelayed(pushTask, wait);
     }
 
-    private void pushNow() {
-        if (!running || set == null) return;
+    private void pushModule(int k) {
+        if (!running || set == null || k >= modules.length) return;
         try {
-            set.setAdvertisingData(dataFor(telegram(module, latest)));
+            set.setAdvertisingData(dataFor(telegram(modules[k], latest[k])));
             lastPushAt = SystemClock.uptimeMillis();
         } catch (RuntimeException e) {
             // Never keep broadcasting a stale command if the update could not be applied.

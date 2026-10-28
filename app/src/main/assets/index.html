@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ms">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: sticky bar (brand, link state, E-STOP), a model bar, then two columns: channel strips | joystick, limits, frame log.
-   "Joystick utama" layout hides the channels the joystick drives and puts the joystick first on phones.
+/* Layout: sticky bar (brand, link state, E-STOP), a model bar, then two columns: channel strips | sticks, record, limits, log, backup.
+   "Joystick" layout hides the channels stick 1 drives and puts the stick first on phones; "Dual stick" shows two sticks side by side.
    Colour: cool workshop greys, orange = forward, blue = reverse, red reserved for E-STOP.
    Type: Barlow Condensed for labels, IBM Plex Sans for UI, IBM Plex Mono for every number. */
 :root{
@@ -38,7 +38,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.4}
 [hidden]{display:none!important}
-button,input,select{font:inherit;color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--fwd);outline-offset:2px}
 
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -57,7 +57,6 @@ button,input,select{font:inherit;color:inherit}
 .estop:active{transform:scale(.97)}
 .estop[aria-pressed="true"]{background:var(--panel);color:var(--danger);outline:2px solid var(--danger);outline-offset:-2px}
 .bar-banner{background:var(--danger);color:#fff;font-size:13px;font-weight:600;text-align:center;padding:6px 16px}
-.cols.locked #chCard,.cols.locked #joyCard{opacity:.5}
 
 main{max-width:1100px;margin:0 auto;padding-block:16px 40px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -65,23 +64,26 @@ main{max-width:1100px;margin:0 auto;padding-block:16px 40px;
 .stack{display:grid;gap:16px;min-width:0}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cols.locked #chCard,.cols.locked #joyCard{opacity:.5}
 
 .btn{min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:13px;font-weight:500;cursor:pointer}
 .btn[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .btn:disabled{opacity:.45;cursor:default}
 .btn.warn{background:var(--danger);color:#fff;border-color:var(--danger)}
 .txt,select{min-height:36px;padding:0 8px;border:1px solid var(--line);border-radius:6px;background:var(--well);width:100%;min-width:0}
+textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.4}
 
 .model{margin-bottom:16px;display:grid;gap:12px}
 .model-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .model-row label{display:grid;gap:4px;flex:1 1 170px;min-width:0;font-size:12px;color:var(--muted)}
-.model-row .seg{margin:0;flex:1 1 200px}
+.model-row .seg{margin:0;flex:1 1 260px}
 
+.grp{margin-top:6px;padding-top:10px;border-top:2px solid var(--fg);font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .ch{display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--line)}
 .ch.first{border-top:0;padding-top:4px}
-.ch:last-child{padding-bottom:4px}
+.grp + .ch{border-top:0;padding-top:8px}
 .ch-head{display:flex;align-items:center;gap:10px;min-width:0}
-.tag{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:4px;background:var(--well);font-family:var(--f-mono);font-weight:500;font-size:13px}
+.tag{flex:none;display:grid;place-items:center;min-width:28px;height:28px;padding:0 6px;border-radius:4px;background:var(--well);font-family:var(--f-mono);font-weight:500;font-size:13px}
 .name{flex:1;min-width:0;padding:4px 6px;border:1px solid transparent;border-radius:4px;background:transparent;font-weight:600}
 .name:hover{border-color:var(--line)}
 .track{position:relative;height:44px;border-radius:6px;background:var(--well);overflow:hidden}
@@ -111,9 +113,15 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
 .adv label{display:grid;gap:2px}
 .adv input[type=range]{width:100%;accent-color:var(--fwd);min-height:28px}
 .adv .seg{margin:0}
+.curve{width:100%;max-width:160px;height:auto;border-radius:6px;background:var(--well)}
+.cgrid{fill:none;stroke:var(--line);stroke-width:1}
+.cv{fill:none;stroke:var(--fwd);stroke-width:2;stroke-linejoin:round}
 
 .seg{display:flex;gap:8px;margin-bottom:12px}
 .seg .btn{flex:1}
+.pads{display:grid;grid-template-columns:1fr;gap:16px}
+.padbox{min-width:0}
+.pb-title{display:none;margin:0 0 8px;font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .pad{position:relative;width:min(100%,300px);aspect-ratio:1;margin:0 auto 12px;border-radius:50%;
   background:
     linear-gradient(var(--line),var(--line)) center/1px 100% no-repeat,
@@ -127,6 +135,13 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
 .maprow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .maprow label,.set label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
 
+.cols.dual{grid-template-columns:1fr}
+.cols.dual .stack{display:contents}
+.cols.dual #joyCard{order:-1}
+.cols.dual .pads{grid-template-columns:1fr 1fr}
+.cols.dual .pb-title{display:block}
+.cols.dual .pad{width:min(100%,300px)}
+
 .set{display:grid;gap:14px}
 .set-row{display:grid;gap:4px}
 .set-top{display:flex;justify-content:space-between;font-size:13px}
@@ -134,6 +149,12 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
 .set input[type=range]{width:100%;accent-color:var(--fwd);min-height:28px}
 .check{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--fg)}
 .check input{width:18px;height:18px;accent-color:var(--fwd)}
+.hubrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+.rec-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:10px}
+.rec-row .btn{flex:1 1 auto}
+.rec-stat{font-family:var(--f-mono);font-size:12px;color:var(--muted);min-height:1.4em;margin:0 0 10px}
+.rec-label{display:grid;gap:4px;font-size:12px;color:var(--muted);margin-bottom:10px}
 
 .log{margin:0;height:11.5em;padding:10px;border-radius:6px;background:var(--well);font-family:var(--f-mono);font-size:12px;line-height:1.5;overflow:auto;white-space:pre;font-variant-numeric:tabular-nums}
 .stats{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
@@ -146,10 +167,23 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
   .cols.joy #joyCard{order:-1}
   .cap{display:none}
 }
+@media (max-width:520px){
+  .cols.dual .pads{gap:8px}
+  .cols.dual .maprow{grid-template-columns:1fr}
+  .cols.dual .pad{width:100%}
+  .cols.dual .knob{width:44px;height:44px;left:calc(50% - 22px);top:calc(50% - 22px)}
+}
 @media (max-width:420px){
   .brand h1{font-size:22px}
   .pill{padding:0 10px}
   .estop{padding:0 14px}
+}
+@media (orientation:landscape) and (max-height:520px){
+  .bar-in{padding-block:6px}
+  .brand h1{font-size:22px}
+  .cap{display:none}
+  .cols.dual .pad{width:min(100%,62vh)}
+  .cols.dual .maprow{grid-template-columns:1fr 1fr}
 }
 @media (prefers-reduced-motion:reduce){.knob.rest{transition:none}}
 </style>
@@ -160,13 +194,13 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
   <div class="bar-in">
     <div class="brand">
       <h1><b>MK6</b> Console</h1>
-      <div class="cap">Mould King 6.0 · 6 saluran</div>
+      <div class="cap">Mould King 6.0 · up to 3 hubs</div>
     </div>
     <div class="spacer"></div>
-    <button class="pill" id="link" type="button" aria-pressed="true" title="Hidupkan atau matikan hab"><span class="dot"></span><span id="linkText">Simulasi aktif</span></button>
+    <button class="pill" id="link" type="button" aria-pressed="true" title="Turn the hub link on or off"><span class="dot"></span><span id="linkText">Simulation on</span></button>
     <button class="estop" id="estop" type="button" aria-pressed="false">E-Stop</button>
   </div>
-  <div class="bar-banner" id="esBanner" role="alert" hidden>E-Stop aktif. Semua saluran dikunci pada 0. Tekan Lepas E-Stop untuk sambung semula.</div>
+  <div class="bar-banner" id="esBanner" role="alert" hidden>E-Stop is on. Every channel is locked at 0. Tap Release E-Stop to continue.</div>
 </header>
 <div class="live" id="live" role="status" aria-live="polite"></div>
 
@@ -174,56 +208,80 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
   <section class="card model" aria-label="Model">
     <div class="model-row">
       <label>Model<select id="prof"></select></label>
-      <label>Nama model<input class="txt" id="profName" type="text" maxlength="24" autocomplete="off"></label>
+      <label>Model name<input class="txt" id="profName" type="text" maxlength="24" autocomplete="off"></label>
     </div>
     <div class="model-row">
-      <div class="seg" role="group" aria-label="Susun atur">
+      <div class="seg" role="group" aria-label="Layout">
         <button class="btn" id="lStd" type="button" aria-pressed="true">Standard</button>
-        <button class="btn" id="lJoy" type="button" aria-pressed="false">Joystick utama</button>
+        <button class="btn" id="lJoy" type="button" aria-pressed="false">Joystick</button>
+        <button class="btn" id="lDual" type="button" aria-pressed="false">Dual stick</button>
       </div>
-      <button class="btn" id="profNew" type="button">Model baharu</button>
-      <button class="btn" id="profDel" type="button">Padam</button>
+      <button class="btn" id="profNew" type="button">New model</button>
+      <button class="btn" id="profDel" type="button">Delete</button>
     </div>
   </section>
 
   <div class="cols" id="cols">
-    <section class="card" id="chCard" aria-label="Saluran kuasa">
-      <h2>Saluran</h2>
+    <section class="card" id="chCard" aria-label="Power channels">
+      <h2>Channels</h2>
       <div id="channels"></div>
     </section>
 
     <div class="stack">
       <section class="card" id="joyCard">
-        <h2>Joystick</h2>
-        <div class="seg" role="group" aria-label="Mod joystick">
-          <button class="btn" id="mAxis" type="button" aria-pressed="true">Paksi</button>
-          <button class="btn" id="mTank" type="button" aria-pressed="false">Tank</button>
+        <h2 id="joyTitle">Joystick</h2>
+        <div class="pads" id="pads"></div>
+      </section>
+
+      <section class="card" id="recCard">
+        <h2>Record &amp; replay</h2>
+        <div class="rec-row">
+          <button class="btn" id="recBtn" type="button" aria-pressed="false">Record</button>
+          <button class="btn" id="playBtn" type="button" aria-pressed="false">Play</button>
+          <label class="check" for="loop"><input id="loop" type="checkbox">Loop</label>
         </div>
-        <div class="pad" id="pad"><div class="knob rest" id="knob"></div></div>
-        <div class="maprow">
-          <label><span id="la">Pemacu (atas/bawah)</span><select id="selA"></select></label>
-          <label><span id="lb">Stereng (kiri/kanan)</span><select id="selB"></select></label>
+        <p class="rec-stat" id="recStat">Ready</p>
+        <label class="rec-label">Recordings<select id="recSel"></select></label>
+        <div class="rec-row">
+          <input class="txt" id="recName" type="text" maxlength="24" autocomplete="off" aria-label="Recording name" style="flex:1 1 140px">
+          <button class="btn" id="recDel" type="button">Delete</button>
         </div>
       </section>
 
       <section class="card" id="setCard">
-        <h2>Had &amp; kelancaran</h2>
+        <h2>Limits &amp; hubs</h2>
         <div class="set">
-          <div class="set-row"><label for="limit"><span class="set-top"><span>Had kuasa (semua saluran)</span><output id="limitOut">100%</output></span></label>
+          <div class="set-row"><label for="limit"><span class="set-top"><span>Power limit (all channels)</span><output id="limitOut">100%</output></span></label>
             <input id="limit" type="range" min="10" max="100" step="5" value="100"></div>
-          <div class="set-row"><label for="ramp"><span class="set-top"><span>Kelancaran pecutan</span><output id="rampOut">60</output></span></label>
+          <div class="set-row"><label for="ramp"><span class="set-top"><span>Acceleration smoothing</span><output id="rampOut">60</output></span></label>
             <input id="ramp" type="range" min="0" max="100" step="5" value="60"></div>
-          <label class="check" for="spring"><input id="spring" type="checkbox" checked>Slider kembali ke 0 bila dilepaskan</label>
-          <div class="set-row" id="modRow" hidden><label for="mod"><span class="set-top"><span>Modul hab</span></span></label>
-            <select id="mod"><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
+          <label class="check" for="spring"><input id="spring" type="checkbox" checked>Sliders return to 0 when released</label>
+          <div class="set-row"><span class="set-top"><span>Hubs (module number of each)</span></span>
+            <div class="hubrow">
+              <label>Hub 1<select id="hub0"><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
+              <label>Hub 2<select id="hub1"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
+              <label>Hub 3<select id="hub2"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
+            </div>
+          </div>
         </div>
       </section>
 
       <section class="card" id="logCard">
-        <h2>Bingkai dihantar</h2>
-        <pre class="log" id="log" aria-label="Log bingkai"></pre>
-        <div class="stats"><span id="rate">20 Hz</span><span id="count">0 bingkai</span></div>
-        <p class="note" id="note">Setiap bingkai ialah enam nilai dari -100 hingga +100, satu untuk setiap saluran. Hab Bluetooth sebenar belum disambung kerana halaman ini tidak boleh akses Bluetooth; hab maya di sini hanya mencatat bingkai.</p>
+        <h2>Frames sent</h2>
+        <pre class="log" id="log" aria-label="Frame log"></pre>
+        <div class="stats"><span id="rate">20 Hz</span><span id="count">0 frames</span></div>
+        <p class="note" id="note">Each frame is six values from -100 to +100, one per channel, for every active hub. This page is running in simulation: no Bluetooth is used, frames are only logged.</p>
+      </section>
+
+      <section class="card" id="ioCard">
+        <h2>Backup</h2>
+        <div class="rec-row">
+          <button class="btn" id="exBtn" type="button">Export models</button>
+          <button class="btn" id="imBtn" type="button">Import models</button>
+        </div>
+        <textarea class="txt" id="ioText" rows="5" spellcheck="false" hidden aria-label="Model data"></textarea>
+        <button class="btn" id="ioApply" type="button" hidden style="margin-top:8px">Apply import</button>
+        <p class="note" id="ioMsg">Exports every model, including recordings, as one file.</p>
       </section>
     </div>
   </div>
@@ -231,51 +289,88 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
 
 <script>
 (function(){
-  var N=6, L='ABCDEF';
+  var NMAX=18, PER=6, L='ABCDEF';
+  var MAX_REC_MS=90000, MAX_PTS=1800, MAX_RECS=10, MAX_MODELS=30;
   var NB=window.MK6Bridge||null;
+  var S={connected:!NB,estop:false,rec:null,play:null,loop:false};
   var $=function(s,r){return (r||document).querySelector(s)};
   var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
   var fmt=function(n){return n>0?'+'+n:String(n)};
-  var DEF=['Roda kiri','Roda kanan','Lengan','Penyodok','Winch','Lampu'];
+  function fmtTime(ms){var s=Math.floor(ms/1000);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
+  function num(v,lo,hi,d){v=+v;return (v>=lo&&v<=hi)?v:d}
+  function uid(){return 'p'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36)}
 
   /* ---------- Models (profiles) ---------- */
-  function defCh(name){return {name:name,inv:false,max:100,off:0,kind:'slider'}}
+  var DEF=['Left wheel','Right wheel','Arm','Scoop','Winch','Lights'];
+  var TR={'Tetapan asas':'Basic setup','Kereta 2 motor (contoh)':'2-motor car (example)','Jentera (contoh)':'Excavator (example)',
+    'Roda kiri':'Left wheel','Roda kanan':'Right wheel','Lengan':'Arm','Penyodok':'Scoop','Lampu':'Lights','Lampu depan':'Headlights',
+    'Saluran D':'Channel D','Saluran E':'Channel E','Saluran F':'Channel F','Track kiri':'Left track','Track kanan':'Right track','Baldi':'Bucket','Putar':'Swing'};
+  function tr(s){return Object.prototype.hasOwnProperty.call(TR,s)?TR[s]:s}
   function baseCfg(names){
-    return {ch:names.map(defCh),limit:100,ramp:60,spring:true,mode:'axis',a:0,b:1,mod:0,layout:'std'};
+    var ch=[];
+    for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider'});
+    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',rec:[]};
   }
-  function uid(){return 'p'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36)}
-  function num(v,lo,hi,d){v=+v;return (v>=lo&&v<=hi)?v:d}
+  function cleanHubs(h){
+    var out=[-1,-1,-1],s,t;
+    for(s=0;s<3;s++){var v=Math.round(+(h&&h[s]));out[s]=(v>=0&&v<=2)?v:-1}
+    for(s=1;s<3;s++) for(t=0;t<s;t++) if(out[s]>=0&&out[s]===out[t]) out[s]=-1;
+    if(out[0]<0){var m=0;while(out.indexOf(m)>=0) m++;out[0]=m}
+    return out;
+  }
+  function cleanRecs(r){
+    var out=[];
+    if(!Array.isArray(r)) return out;
+    r.slice(0,MAX_RECS).forEach(function(x){
+      if(!x||!Array.isArray(x.pts)||x.pts.length<2) return;
+      var pts=[];
+      x.pts.slice(0,MAX_PTS).forEach(function(p){
+        if(!Array.isArray(p)||p.length<2) return;
+        var row=[Math.max(0,Math.round(+p[0])||0)];
+        for(var i=0;i<NMAX;i++) row.push(clamp(Math.round(+p[i+1])||0,-100,100));
+        pts.push(row);
+      });
+      if(pts.length<2) return;
+      var dur=pts[pts.length-1][0];
+      if(dur<=0) return;
+      out.push({id:typeof x.id==='string'?x.id:uid(),name:String(x.name||'Take').slice(0,24),dur:Math.min(dur,MAX_REC_MS),pts:pts});
+    });
+    return out;
+  }
+  function idxOf(v,def,allowNone){v=Math.round(+v);if(allowNone&&v===-1)return -1;return (v>=0&&v<NMAX)?v:def}
   function sanitizeCfg(c){
-    var d=baseCfg(DEF);
+    var d=baseCfg();
     if(!c||typeof c!=='object') return d;
-    if(Array.isArray(c.ch)) c.ch.slice(0,N).forEach(function(x,i){
+    if(Array.isArray(c.ch)) c.ch.slice(0,NMAX).forEach(function(x,i){
       if(!x||typeof x!=='object') return;
       var o=d.ch[i];
-      if(typeof x.name==='string') o.name=x.name.slice(0,16);
+      if(typeof x.name==='string') o.name=tr(x.name.slice(0,16));
       o.inv=!!x.inv;
       o.max=num(x.max,10,100,100);
       o.off=num(x.off,0,50,0);
+      o.expo=num(x.expo,0,100,0);
       o.kind=x.kind==='hold'?'hold':'slider';
     });
     d.limit=num(c.limit,10,100,100);
     d.ramp=num(c.ramp,0,100,60);
     if(typeof c.spring==='boolean') d.spring=c.spring;
-    d.mode=c.mode==='tank'?'tank':'axis';
-    d.a=Math.round(num(c.a,0,N-1,0));
-    d.b=Math.round(num(c.b,0,N-1,1));
-    d.mod=Math.round(num(c.mod,0,2,0));
-    d.layout=c.layout==='joy'?'joy':'std';
+    var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
+    d.s1={mode:s1.mode==='tank'?'tank':'axis',a:idxOf(s1.a,0,false),b:idxOf(s1.b,1,false)};
+    d.s2={mode:s2.mode==='tank'?'tank':'axis',a:idxOf(s2.a,2,true),b:idxOf(s2.b,3,true)};
+    d.hubs=cleanHubs(Array.isArray(c.hubs)?c.hubs:[num(c.mod,0,2,0),-1,-1]);
+    d.layout=(c.layout==='joy'||c.layout==='dual')?c.layout:'std';
+    d.rec=cleanRecs(c.rec);
     return d;
   }
   function starters(){
-    var car=baseCfg(['Roda kiri','Roda kanan','Lampu depan','Saluran D','Saluran E','Saluran F']);
-    car.mode='tank';car.layout='joy';car.ch[2].kind='hold';
-    var exc=baseCfg(['Track kiri','Track kanan','Lengan','Baldi','Putar','Lampu']);
-    exc.mode='tank';exc.layout='joy';exc.ch[4].kind='hold';exc.ch[4].max=60;exc.ch[5].kind='hold';
+    var car=baseCfg(['Left wheel','Right wheel','Headlights','Channel D','Channel E','Channel F']);
+    car.s1.mode='tank';car.layout='joy';car.ch[2].kind='hold';
+    var exc=baseCfg(['Left track','Right track','Arm','Bucket','Swing','Lights']);
+    exc.s1.mode='tank';exc.layout='dual';exc.ch[4].kind='hold';exc.ch[4].max=60;exc.ch[5].kind='hold';
     return [
-      {id:uid(),name:'Tetapan asas',cfg:baseCfg(DEF)},
-      {id:uid(),name:'Kereta 2 motor (contoh)',cfg:car},
-      {id:uid(),name:'Jentera (contoh)',cfg:exc}
+      {id:uid(),name:'Basic setup',cfg:baseCfg()},
+      {id:uid(),name:'2-motor car (example)',cfg:car},
+      {id:uid(),name:'Excavator (example)',cfg:exc}
     ];
   }
   var store={active:null,profiles:[]};
@@ -285,27 +380,31 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
       var sp=JSON.parse(raw);
       if(sp&&Array.isArray(sp.profiles)){
         sp.profiles.forEach(function(p){
-          if(p&&typeof p.id==='string'&&typeof p.name==='string') store.profiles.push({id:p.id,name:p.name.slice(0,24),cfg:sanitizeCfg(p.cfg)});
+          if(p&&typeof p.id==='string'&&typeof p.name==='string') store.profiles.push({id:p.id,name:tr(p.name.slice(0,24)),cfg:sanitizeCfg(p.cfg)});
         });
         store.active=sp.active;
       }
     }
     if(!store.profiles.length){
       var old=localStorage.getItem('mk6');
-      if(old){
-        var s=starters();
-        s[0].cfg=sanitizeCfg(JSON.parse(old));
-        store.profiles=s;
-      }
+      if(old){var s0=starters();s0[0].cfg=sanitizeCfg(JSON.parse(old));store.profiles=s0}
     }
   }catch(e){}
   if(!store.profiles.length) store.profiles=starters();
   if(!store.profiles.some(function(p){return p.id===store.active})) store.active=store.profiles[0].id;
   function activeProfile(){return store.profiles.filter(function(p){return p.id===store.active})[0]}
   var C=activeProfile().cfg;
+  var recSel=null, recNote='';
   function save(){try{localStorage.setItem('mk6v2',JSON.stringify(store))}catch(e){}}
 
-  var rt={t:[0,0,0,0,0,0],o:[0,0,0,0,0,0]};
+  var rt={t:[],o:[]};
+  for(var q=0;q<NMAX;q++){rt.t.push(0);rt.o.push(0)}
+
+  function slotOn(s){return C.hubs[s]>=0}
+  function isActive(i){return slotOn((i/PER)|0)}
+  function activeSlots(){var o=[];for(var s=0;s<3;s++) if(slotOn(s)) o.push(s);return o}
+  function activeIdx(){var o=[];for(var i=0;i<NMAX;i++) if(isActive(i)) o.push(i);return o}
+  function tagOf(i){var s=(i/PER)|0;return activeSlots().length>1?'M'+(C.hubs[s]+1)+L[i%PER]:L[i%PER]}
 
   /* Transport: broadcasts through the native bridge when running inside the Android app. */
   var transport={send:function(frame,changed){
@@ -313,36 +412,57 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
     if(changed)logFrame(frame);
   }};
 
+  /* ---------- Power curve ---------- */
+  function powerFor(a,c){
+    if(a<=1) return 0;
+    var x=Math.min(a,100)/100, e=c.expo/100;
+    var m=100*((1-e)*x+e*x*x*x);
+    return Math.min(m+c.off,c.max);
+  }
+  function goalOf(i){
+    var t=rt.t[i], m=powerFor(Math.abs(t),C.ch[i]);
+    return (t<0?-m:m)*C.limit/100;
+  }
+
   /* ---------- Channels ---------- */
-  var refs=[], wrap=$('#channels'), cols=$('#cols');
-  function setT(i,v,fromUI){
-    if(S.estop) v=0;
+  var refs=[], groups=[], wrap=$('#channels'), cols=$('#cols');
+  function setT(i,v,fromUI,force){
+    if(S.estop) v=0; else if(S.play&&!force) return;
     rt.t[i]=clamp(Math.round(v),-100,100);
     if(!fromUI||S.estop) refs[i].rng.value=rt.t[i];
     refs[i].val.textContent=fmt(rt.t[i]);
   }
-  for(var ci=0;ci<N;ci++){(function(i){
+  function zeroAll(){
+    for(var i=0;i<NMAX;i++){rt.t[i]=0;rt.o[i]=0;refs[i].rng.value=0;refs[i].val.textContent='0'}
+  }
+  function buildChannel(i){
     var el=document.createElement('article');el.className='ch';
-    el.innerHTML='<div class="ch-head"><span class="tag">'+L[i]+'</span><input class="name" maxlength="16" aria-label="Nama saluran '+L[i]+'"><button class="btn inv" type="button" aria-pressed="false">Songsang</button></div>'+
-      '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Kuasa saluran '+L[i]+'"></div>'+
-      '<div class="holds" hidden><button class="hold rev" type="button">Mundur</button><button class="hold fwd" type="button">Maju</button></div>'+
-      '<div class="ch-foot"><output class="val">0</output><span class="sent">keluar 0</span><button class="btn stop" type="button">Henti</button></div>'+
-      '<details class="adv"><summary>Tetapan saluran</summary><div class="adv-grid">'+
-        '<label><span class="set-top"><span>Kuasa maksimum</span><output class="maxOut"></output></span><input class="max" type="range" min="10" max="100" step="5"></label>'+
-        '<label><span class="set-top"><span>Kuasa mula</span><output class="offOut"></output></span><input class="off" type="range" min="0" max="50" step="5"></label>'+
-        '<div class="seg" role="group" aria-label="Jenis kawalan saluran '+L[i]+'"><button class="btn kS" type="button" aria-pressed="true">Slider</button><button class="btn kH" type="button" aria-pressed="false">Tahan</button></div>'+
+    el.innerHTML='<div class="ch-head"><span class="tag"></span><input class="name" maxlength="16" aria-label="Channel name"><button class="btn inv" type="button" aria-pressed="false">Reverse</button></div>'+
+      '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"></div>'+
+      '<div class="holds" hidden><button class="hold rev" type="button">Reverse</button><button class="hold fwd" type="button">Forward</button></div>'+
+      '<div class="ch-foot"><output class="val">0</output><span class="sent">out 0</span><button class="btn stop" type="button">Stop</button></div>'+
+      '<details class="adv"><summary>Channel settings</summary><div class="adv-grid">'+
+        '<label><span class="set-top"><span>Maximum power</span><output class="maxOut"></output></span><input class="max" type="range" min="10" max="100" step="5"></label>'+
+        '<label><span class="set-top"><span>Start power</span><output class="offOut"></output></span><input class="off" type="range" min="0" max="50" step="5"></label>'+
+        '<label><span class="set-top"><span>Fine control (expo)</span><output class="expOut"></output></span><input class="expo" type="range" min="0" max="100" step="5"></label>'+
+        '<svg class="curve" viewBox="0 0 100 60" role="img" aria-label="Response curve"><path class="cgrid" d="M0 59.5H100M0.5 0V60"/><polyline class="cv" points=""/></svg>'+
+        '<div class="seg" role="group" aria-label="Control type"><button class="btn kS" type="button" aria-pressed="true">Slider</button><button class="btn kH" type="button" aria-pressed="false">Hold</button></div>'+
       '</div></details>';
     wrap.appendChild(el);
-    var r={el:el,name:$('.name',el),inv:$('.inv',el),track:$('.track',el),fill:$('.fill',el),rng:$('.pwr',el),
+    var r={el:el,tag:$('.tag',el),name:$('.name',el),inv:$('.inv',el),track:$('.track',el),fill:$('.fill',el),rng:$('.pwr',el),
       holds:$('.holds',el),hRev:$('.hold.rev',el),hFwd:$('.hold.fwd',el),val:$('.val',el),sent:$('.sent',el),
-      max:$('.max',el),maxOut:$('.maxOut',el),off:$('.off',el),offOut:$('.offOut',el),kS:$('.kS',el),kH:$('.kH',el)};
+      max:$('.max',el),maxOut:$('.maxOut',el),off:$('.off',el),offOut:$('.offOut',el),expo:$('.expo',el),expOut:$('.expOut',el),
+      cv:$('.cv',el),kS:$('.kS',el),kH:$('.kH',el)};
     refs.push(r);
 
     r.rng.addEventListener('input',function(){setT(i,+r.rng.value,true)});
-    var rel=function(){ if(C.spring){r.rng.value=0;setT(i,0,true)} };
+    var rel=function(){ if(C.spring&&!S.play){r.rng.value=0;setT(i,0,true)} };
     r.rng.addEventListener('pointerup',rel);
     r.rng.addEventListener('pointercancel',rel);
-    $('.stop',el).addEventListener('click',function(){r.rng.value=0;setT(i,0,true);rt.o[i]=0;last=null});
+    $('.stop',el).addEventListener('click',function(){
+      if(S.play) return;
+      r.rng.value=0;setT(i,0,true);rt.o[i]=0;last=null;
+    });
 
     [r.hRev,r.hFwd].forEach(function(btn,k){
       var dir=k?1:-1, down=false;
@@ -363,230 +483,469 @@ h2{margin:0 0 10px;font-family:var(--f-display);font-weight:600;font-size:15px;l
     });
 
     r.inv.addEventListener('click',function(){C.ch[i].inv=!C.ch[i].inv;r.inv.setAttribute('aria-pressed',String(C.ch[i].inv));save()});
-    r.name.addEventListener('input',function(){C.ch[i].name=r.name.value;fillSelects()});
+    r.name.addEventListener('input',function(){C.ch[i].name=r.name.value;syncSticks()});
     r.name.addEventListener('change',save);
-    r.max.addEventListener('input',function(){C.ch[i].max=+r.max.value;r.maxOut.textContent=C.ch[i].max+'%'});
+    r.max.addEventListener('input',function(){C.ch[i].max=+r.max.value;r.maxOut.textContent=C.ch[i].max+'%';drawCurve(i)});
     r.max.addEventListener('change',save);
-    r.off.addEventListener('input',function(){C.ch[i].off=+r.off.value;r.offOut.textContent=C.ch[i].off+'%'});
+    r.off.addEventListener('input',function(){C.ch[i].off=+r.off.value;r.offOut.textContent=C.ch[i].off+'%';drawCurve(i)});
     r.off.addEventListener('change',save);
+    r.expo.addEventListener('input',function(){C.ch[i].expo=+r.expo.value;r.expOut.textContent=C.ch[i].expo+'%';drawCurve(i)});
+    r.expo.addEventListener('change',save);
     function setKind(k){C.ch[i].kind=k;r.rng.value=0;setT(i,0,true);syncChannel(i);save()}
     r.kS.addEventListener('click',function(){setKind('slider')});
     r.kH.addEventListener('click',function(){setKind('hold')});
-  })(ci);}
+  }
+  for(var gs=0;gs<3;gs++){
+    var g=document.createElement('div');g.className='grp';wrap.appendChild(g);groups.push(g);
+    for(var gj=0;gj<PER;gj++) buildChannel(gs*PER+gj);
+  }
 
+  function drawCurve(i){
+    var c=C.ch[i], pts=[];
+    for(var k=0;k<=20;k++){var m=powerFor(k*5,c);pts.push((k*5)+','+(60-m*0.6).toFixed(1))}
+    refs[i].cv.setAttribute('points',pts.join(' '));
+  }
   function syncChannel(i){
     var c=C.ch[i], r=refs[i], hold=c.kind==='hold';
+    r.tag.textContent=tagOf(i);
     r.name.value=c.name;
+    r.name.setAttribute('aria-label','Name of channel '+tagOf(i));
+    r.rng.setAttribute('aria-label','Power of channel '+tagOf(i));
     r.inv.setAttribute('aria-pressed',String(c.inv));
     r.max.value=c.max;r.maxOut.textContent=c.max+'%';
     r.off.value=c.off;r.offOut.textContent=c.off+'%';
+    r.expo.value=c.expo;r.expOut.textContent=c.expo+'%';
     r.track.hidden=hold;r.holds.hidden=!hold;
     r.kS.setAttribute('aria-pressed',String(!hold));
     r.kH.setAttribute('aria-pressed',String(hold));
+    drawCurve(i);
   }
 
-  /* ---------- Joystick ---------- */
-  var selA=$('#selA'), selB=$('#selB');
-  function fillSelects(){
-    [selA,selB].forEach(function(sel,k){
-      var cur=k?C.b:C.a;
-      sel.innerHTML='';
-      C.ch.forEach(function(c,i){var o=document.createElement('option');o.value=i;o.textContent=L[i]+' · '+c.name;sel.appendChild(o)});
-      sel.value=cur;
+  /* ---------- Sticks ---------- */
+  var sticks=[];
+  function cfgOf(k){return k?C.s2:C.s1}
+  function applyStick(k,x,y){
+    var cf=cfgOf(k), va, vb;
+    if(cf.mode==='axis'){va=y;vb=x}else{va=clamp(y+x,-1,1);vb=clamp(y-x,-1,1)}
+    if(cf.a>=0) setT(cf.a,va*100,false);
+    if(cf.b>=0) setT(cf.b,vb*100,false);
+  }
+  function buildStick(k){
+    var box=document.createElement('div');box.className='padbox';
+    box.innerHTML='<h3 class="pb-title"></h3>'+
+      '<div class="seg" role="group" aria-label="Stick mode"><button class="btn mA" type="button" aria-pressed="true">Axis</button><button class="btn mT" type="button" aria-pressed="false">Tank</button></div>'+
+      '<div class="pad"><div class="knob rest"></div></div>'+
+      '<div class="maprow"><label><span class="la"></span><select class="selA"></select></label><label><span class="lb"></span><select class="selB"></select></label></div>';
+    $('#pads').appendChild(box);
+    var st={box:box,title:$('.pb-title',box),mA:$('.mA',box),mT:$('.mT',box),pad:$('.pad',box),knob:$('.knob',box),
+      la:$('.la',box),lb:$('.lb',box),selA:$('.selA',box),selB:$('.selB',box),id:null};
+    sticks.push(st);
+    st.mA.addEventListener('click',function(){cfgOf(k).mode='axis';syncSticks();save()});
+    st.mT.addEventListener('click',function(){cfgOf(k).mode='tank';syncSticks();save()});
+    st.selA.addEventListener('change',function(){cfgOf(k).a=+st.selA.value;syncLayout();save()});
+    st.selB.addEventListener('change',function(){cfgOf(k).b=+st.selB.value;syncLayout();save()});
+    function move(e){
+      var r=st.pad.getBoundingClientRect(), R=r.width*0.4;
+      var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), m=Math.hypot(dx,dy);
+      if(m>R){dx*=R/m;dy*=R/m}
+      st.knob.style.transform='translate('+dx+'px,'+dy+'px)';
+      applyStick(k,dx/R,-dy/R);
+    }
+    st.pad.addEventListener('pointerdown',function(e){
+      st.id=e.pointerId;
+      try{st.pad.setPointerCapture(e.pointerId)}catch(_){}
+      st.knob.classList.remove('rest');move(e);
+    });
+    st.pad.addEventListener('pointermove',function(e){if(e.pointerId===st.id)move(e)});
+    function end(e){
+      if(e.pointerId!==st.id)return;
+      st.id=null;st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';applyStick(k,0,0);
+    }
+    st.pad.addEventListener('pointerup',end);
+    st.pad.addEventListener('pointercancel',end);
+  }
+  buildStick(0);buildStick(1);
+
+  function syncSticks(){
+    var idxs=activeIdx();
+    sticks.forEach(function(st,k){
+      var cf=cfgOf(k);
+      st.mA.setAttribute('aria-pressed',String(cf.mode==='axis'));
+      st.mT.setAttribute('aria-pressed',String(cf.mode==='tank'));
+      st.la.textContent=cf.mode==='axis'?'Drive (up/down)':'Left motor';
+      st.lb.textContent=cf.mode==='axis'?'Steer (left/right)':'Right motor';
+      st.title.textContent=k?'Right stick':'Left stick';
+      [st.selA,st.selB].forEach(function(sel,q){
+        var key=q?'b':'a';
+        sel.innerHTML='';
+        if(k===1){var none=document.createElement('option');none.value='-1';none.textContent='None';sel.appendChild(none)}
+        idxs.forEach(function(i){var o=document.createElement('option');o.value=String(i);o.textContent=tagOf(i)+' · '+C.ch[i].name;sel.appendChild(o)});
+        var cur=cf[key];
+        if(!(k===1&&cur===-1)&&idxs.indexOf(cur)<0){cur=idxs[Math.min(q+k*2,idxs.length-1)];cf[key]=cur}
+        sel.value=String(cur);
+      });
     });
   }
-  function syncJoy(){
-    $('#mAxis').setAttribute('aria-pressed',String(C.mode==='axis'));
-    $('#mTank').setAttribute('aria-pressed',String(C.mode==='tank'));
-    $('#la').textContent=C.mode==='axis'?'Pemacu (atas/bawah)':'Motor kiri';
-    $('#lb').textContent=C.mode==='axis'?'Stereng (kiri/kanan)':'Motor kanan';
-    fillSelects();
+  function mappedSet(){
+    var m={};
+    if(C.layout==='joy'||C.layout==='dual'){m[C.s1.a]=1;m[C.s1.b]=1}
+    if(C.layout==='dual'){if(C.s2.a>=0)m[C.s2.a]=1;if(C.s2.b>=0)m[C.s2.b]=1}
+    return m;
   }
   function syncLayout(){
     cols.classList.toggle('joy',C.layout==='joy');
+    cols.classList.toggle('dual',C.layout==='dual');
     $('#lStd').setAttribute('aria-pressed',String(C.layout==='std'));
     $('#lJoy').setAttribute('aria-pressed',String(C.layout==='joy'));
-    var first=false;
+    $('#lDual').setAttribute('aria-pressed',String(C.layout==='dual'));
+    sticks[1].box.hidden=C.layout!=='dual';
+    $('#joyTitle').textContent=C.layout==='dual'?'Sticks':'Joystick';
+    var mapped=mappedSet(), multi=activeSlots().length>1, first=false, visible=[0,0,0];
     refs.forEach(function(r,i){
-      var hid=C.layout==='joy'&&(i===C.a||i===C.b);
+      var hid=!isActive(i)||!!mapped[i];
       r.el.hidden=hid;
       r.el.classList.remove('first');
-      if(!hid&&!first){r.el.classList.add('first');first=true}
+      if(!hid){visible[(i/PER)|0]++;if(!first&&!(multi)){r.el.classList.add('first');first=true}}
+    });
+    groups.forEach(function(g,s){
+      g.hidden=!(multi&&slotOn(s)&&visible[s]>0);
+      g.textContent='Hub M'+(C.hubs[s]+1);
     });
   }
-  selA.addEventListener('change',function(){C.a=+selA.value;syncLayout();save()});
-  selB.addEventListener('change',function(){C.b=+selB.value;syncLayout();save()});
-  $('#mAxis').addEventListener('click',function(){C.mode='axis';syncJoy();save()});
-  $('#mTank').addEventListener('click',function(){C.mode='tank';syncJoy();save()});
-  $('#lStd').addEventListener('click',function(){C.layout='std';syncLayout();save()});
-  $('#lJoy').addEventListener('click',function(){C.layout='joy';syncLayout();save()});
 
-  var pad=$('#pad'), knob=$('#knob'), padId=null;
-  function applyJoy(x,y){
-    if(C.mode==='axis'){ setT(C.a,y*100,false); setT(C.b,x*100,false); }
-    else { setT(C.a,clamp(y+x,-1,1)*100,false); setT(C.b,clamp(y-x,-1,1)*100,false); }
-  }
-  function padMove(e){
-    var r=pad.getBoundingClientRect(), R=r.width*0.4;
-    var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), m=Math.hypot(dx,dy);
-    if(m>R){dx*=R/m;dy*=R/m}
-    knob.style.transform='translate('+dx+'px,'+dy+'px)';
-    applyJoy(dx/R,-dy/R);
-  }
-  pad.addEventListener('pointerdown',function(e){padId=e.pointerId;pad.setPointerCapture(e.pointerId);knob.classList.remove('rest');padMove(e)});
-  pad.addEventListener('pointermove',function(e){if(e.pointerId===padId)padMove(e)});
-  function padEnd(e){
-    if(e.pointerId!==padId)return;
-    padId=null;knob.classList.add('rest');knob.style.transform='translate(0,0)';applyJoy(0,0);
-  }
-  pad.addEventListener('pointerup',padEnd);
-  pad.addEventListener('pointercancel',padEnd);
-
-  /* ---------- Settings ---------- */
-  var limit=$('#limit'), ramp=$('#ramp'), spring=$('#spring'), mod=$('#mod');
+  /* ---------- Settings & hubs ---------- */
+  var limit=$('#limit'), ramp=$('#ramp'), spring=$('#spring'), loopBox=$('#loop');
   function syncSettings(){
-    limit.value=C.limit;ramp.value=C.ramp;spring.checked=C.spring;mod.value=String(C.mod);
+    limit.value=C.limit;ramp.value=C.ramp;spring.checked=C.spring;loopBox.checked=S.loop;
     $('#limitOut').textContent=C.limit+'%';$('#rampOut').textContent=C.ramp;
+    for(var s=0;s<3;s++) $('#hub'+s).value=String(C.hubs[s]);
   }
   limit.addEventListener('input',function(){C.limit=+limit.value;$('#limitOut').textContent=C.limit+'%'});
   ramp.addEventListener('input',function(){C.ramp=+ramp.value;$('#rampOut').textContent=C.ramp});
   limit.addEventListener('change',save);ramp.addEventListener('change',save);
   spring.addEventListener('change',function(){C.spring=spring.checked;save()});
-  mod.addEventListener('change',function(){C.mod=+mod.value;save()});
-  if(NB){
-    $('#modRow').hidden=false;
-    $('#note').textContent='Bingkai disiarkan melalui Bluetooth terus ke hab Mould King. Hidupkan hab dalam mod Bluetooth, tekan Sambung hab, dan tunggu sehingga status bertukar kepada Hab aktif.';
+  loopBox.addEventListener('change',function(){S.loop=loopBox.checked});
+  function onHubChange(s,v){
+    var h=C.hubs.slice();h[s]=v;
+    for(var t=0;t<3;t++) if(t!==s&&v>=0&&h[t]===v) h[t]=-1;
+    C.hubs=cleanHubs(h);
+    stopPlay(true);
+    for(var i=0;i<NMAX;i++) if(!isActive(i)){rt.t[i]=0;rt.o[i]=0;refs[i].rng.value=0;refs[i].val.textContent='0'}
+    if(NB&&S.connected){NB.stop();S.connected=false;hubMsg='';live.textContent='Hub setup changed. Tap Connect hub to reconnect.'}
+    last=null;
+    syncAll();paintLink();save();
   }
+  [0,1,2].forEach(function(s){var sel=$('#hub'+s);sel.addEventListener('change',function(){onHubChange(s,+sel.value)})});
+  if(NB){
+    $('#note').textContent='Frames are broadcast over Bluetooth straight to the Mould King hubs. Put each hub in Bluetooth mode, tap Connect hub and wait until it says Hub active. With several hubs each one is updated in turn, so expect slightly slower response.';
+  }
+
+  /* ---------- Layout buttons ---------- */
+  ['Std','Joy','Dual'].forEach(function(n){
+    $('#l'+n).addEventListener('click',function(){C.layout=n.toLowerCase();syncLayout();save()});
+  });
 
   /* ---------- Model bar ---------- */
   var prof=$('#prof'), profName=$('#profName'), profDel=$('#profDel'), delArmed=0;
   function syncProfiles(){
     prof.innerHTML='';
-    store.profiles.forEach(function(p){var o=document.createElement('option');o.value=p.id;o.textContent=p.name||'(tanpa nama)';prof.appendChild(o)});
+    store.profiles.forEach(function(p){var o=document.createElement('option');o.value=p.id;o.textContent=p.name||'(unnamed)';prof.appendChild(o)});
     prof.value=store.active;
     profName.value=activeProfile().name;
     profDel.disabled=store.profiles.length<=1;
   }
   function syncAll(){
     refs.forEach(function(r,i){syncChannel(i)});
-    syncJoy();syncSettings();syncLayout();syncProfiles();
+    syncSticks();syncSettings();syncLayout();syncProfiles();syncRec();
   }
   function switchProfile(id){
     var p=store.profiles.filter(function(x){return x.id===id})[0];
     if(!p)return;
-    store.active=id;C=p.cfg;
-    for(var i=0;i<N;i++){rt.t[i]=0;rt.o[i]=0;refs[i].rng.value=0;refs[i].val.textContent='0'}
-    last=null;
-    syncAll();save();
+    S.rec=null;stopPlay(false);
+    store.active=id;C=p.cfg;recSel=null;recNote='';
+    zeroAll();last=null;
+    syncAll();paintRec();save();
   }
   prof.addEventListener('change',function(){switchProfile(prof.value)});
   profName.addEventListener('input',function(){
     activeProfile().name=profName.value.slice(0,24);
-    var o=prof.options[prof.selectedIndex];if(o)o.textContent=activeProfile().name||'(tanpa nama)';
+    var o=prof.options[prof.selectedIndex];if(o)o.textContent=activeProfile().name||'(unnamed)';
   });
   profName.addEventListener('change',save);
   $('#profNew').addEventListener('click',function(){
+    if(store.profiles.length>=MAX_MODELS){live.textContent='Model list is full.';return}
     var copy=sanitizeCfg(JSON.parse(JSON.stringify(C)));
     var p={id:uid(),name:'Model '+(store.profiles.length+1),cfg:copy};
     store.profiles.push(p);
     switchProfile(p.id);
-    live.textContent='Model baharu dibuat daripada tetapan semasa';
+    live.textContent='New model created from the current settings';
   });
   profDel.addEventListener('click',function(){
     if(store.profiles.length<=1)return;
     if(!delArmed){
-      delArmed=setTimeout(function(){delArmed=0;profDel.textContent='Padam';profDel.classList.remove('warn')},3000);
-      profDel.textContent='Sahkan padam';profDel.classList.add('warn');
+      delArmed=setTimeout(function(){delArmed=0;profDel.textContent='Delete';profDel.classList.remove('warn')},3000);
+      profDel.textContent='Confirm delete';profDel.classList.add('warn');
       return;
     }
-    clearTimeout(delArmed);delArmed=0;profDel.textContent='Padam';profDel.classList.remove('warn');
+    clearTimeout(delArmed);delArmed=0;profDel.textContent='Delete';profDel.classList.remove('warn');
     var id=store.active;
     store.profiles=store.profiles.filter(function(p){return p.id!==id});
     switchProfile(store.profiles[0].id);
   });
 
+  /* ---------- Record & replay ---------- */
+  var recBtn=$('#recBtn'), playBtn=$('#playBtn'), recStat=$('#recStat'), recSelEl=$('#recSel'), recName=$('#recName'), recDel=$('#recDel'), recDelArmed=0;
+  function selectedRec(){
+    var f=C.rec.filter(function(r){return r.id===recSel})[0];
+    return f||C.rec[0]||null;
+  }
+  function syncRec(){
+    var cur=selectedRec();
+    recSel=cur?cur.id:null;
+    recSelEl.innerHTML='';
+    if(!C.rec.length){var o=document.createElement('option');o.value='';o.textContent='No recordings yet';recSelEl.appendChild(o)}
+    C.rec.forEach(function(r){var o=document.createElement('option');o.value=r.id;o.textContent=r.name+' · '+fmtTime(r.dur);recSelEl.appendChild(o)});
+    if(recSel) recSelEl.value=recSel;
+    recName.value=cur?cur.name:'';
+    paintRec();
+  }
+  function paintRec(){
+    var cur=selectedRec();
+    recBtn.textContent=S.rec?'Stop recording':'Record';
+    recBtn.setAttribute('aria-pressed',String(!!S.rec));
+    recBtn.disabled=!S.rec&&(!!S.play||S.estop);
+    playBtn.textContent=S.play?'Stop':'Play';
+    playBtn.setAttribute('aria-pressed',String(!!S.play));
+    playBtn.disabled=!S.play&&(!cur||!!S.rec||S.estop);
+    recDel.disabled=!cur||!!S.rec||!!S.play;
+    recName.disabled=!cur;
+    recSelEl.disabled=!!S.rec||!!S.play||!C.rec.length;
+    paintRecStatus(performance.now());
+  }
+  function paintRecStatus(now){
+    var t='';
+    if(S.rec) t='Recording '+fmtTime(now-S.rec.start)+' / '+fmtTime(MAX_REC_MS);
+    else if(S.play) t='Playing '+fmtTime(Math.min(now-S.play.start,S.play.rec.dur))+' / '+fmtTime(S.play.rec.dur)+(S.loop?' (loop)':'');
+    else t=recNote||'Ready';
+    if(recStat.textContent!==t) recStat.textContent=t;
+  }
+  function syncLock(){cols.classList.toggle('locked',S.estop||!!S.play)}
+  function recordSample(el,force){
+    var v=rt.t.slice();
+    var changed=force||!S.rec.last||v.some(function(x,i){return x!==S.rec.last[i]});
+    if(changed){S.rec.pts.push([Math.round(el)].concat(v));S.rec.last=v}
+  }
+  function startRecord(){
+    if(S.estop||S.play||S.rec) return;
+    recNote='';
+    S.rec={start:performance.now(),pts:[],last:null};
+    recordSample(0,true);
+    paintRec();
+  }
+  function stopRecord(){
+    if(!S.rec) return;
+    var el=Math.min(performance.now()-S.rec.start,MAX_REC_MS);
+    recordSample(el,true);
+    var pts=S.rec.pts;S.rec=null;
+    var moved=pts.some(function(p){return p.slice(1).some(function(x){return x!==0})});
+    if(pts.length<2||!moved){recNote='Nothing was recorded.';paintRec();return}
+    if(C.rec.length>=MAX_RECS){recNote='Recording list is full. Delete one first.';paintRec();return}
+    var rec={id:uid(),name:'Take '+(C.rec.length+1),dur:pts[pts.length-1][0],pts:pts};
+    C.rec.push(rec);recSel=rec.id;recNote='Saved '+rec.name+' ('+fmtTime(rec.dur)+').';
+    save();syncRec();
+  }
+  function startPlay(){
+    var rec=selectedRec();
+    if(!rec||S.estop||S.rec||S.play) return;
+    if(NB&&!S.connected){recNote='Connect the hub first.';paintRec();return}
+    S.play={rec:rec,start:performance.now(),idx:0};
+    paintRec();syncLock();
+  }
+  function stopPlay(zero){
+    if(!S.play) return;
+    S.play=null;
+    if(zero) zeroAll();
+    paintRec();syncLock();
+  }
+  function stepPlay(now){
+    var p=S.play;
+    if(!p) return;
+    var el=now-p.start, dur=p.rec.dur;
+    if(el>=dur){
+      if(S.loop&&dur>200){p.start=now-(el%dur);el=el%dur;p.idx=0}
+      else{stopPlay(true);return}
+    }
+    var pts=p.rec.pts;
+    while(p.idx+1<pts.length&&pts[p.idx+1][0]<=el) p.idx++;
+    var pt=pts[p.idx];
+    for(var i=0;i<NMAX;i++) setT(i,isActive(i)?pt[i+1]:0,false,true);
+  }
+  function stepRecord(now){
+    if(!S.rec) return;
+    var el=now-S.rec.start;
+    if(el>=MAX_REC_MS||S.rec.pts.length>=MAX_PTS){stopRecord();return}
+    recordSample(el,false);
+  }
+  recBtn.addEventListener('click',function(){if(S.rec)stopRecord();else startRecord()});
+  playBtn.addEventListener('click',function(){if(S.play)stopPlay(true);else startPlay()});
+  recSelEl.addEventListener('change',function(){recSel=recSelEl.value;recNote='';syncRec()});
+  recName.addEventListener('input',function(){
+    var cur=selectedRec();
+    if(!cur) return;
+    cur.name=recName.value.slice(0,24);
+    var o=recSelEl.options[recSelEl.selectedIndex];if(o)o.textContent=cur.name+' · '+fmtTime(cur.dur);
+  });
+  recName.addEventListener('change',save);
+  recDel.addEventListener('click',function(){
+    var cur=selectedRec();
+    if(!cur) return;
+    if(!recDelArmed){
+      recDelArmed=setTimeout(function(){recDelArmed=0;recDel.textContent='Delete';recDel.classList.remove('warn')},3000);
+      recDel.textContent='Confirm';recDel.classList.add('warn');
+      return;
+    }
+    clearTimeout(recDelArmed);recDelArmed=0;recDel.textContent='Delete';recDel.classList.remove('warn');
+    C.rec=C.rec.filter(function(r){return r.id!==cur.id});
+    recSel=null;recNote='Recording deleted.';save();syncRec();
+  });
+
+  /* ---------- Backup ---------- */
+  var ioText=$('#ioText'), ioApply=$('#ioApply'), ioMsg=$('#ioMsg');
+  function exportJson(){
+    return JSON.stringify({app:'mk6console',version:3,profiles:store.profiles.map(function(p){return {name:p.name,cfg:p.cfg}})});
+  }
+  function uniqueName(n){
+    var base=n||'Imported model', name=base, k=2;
+    while(store.profiles.some(function(p){return p.name===name})){name=(base.slice(0,20)+' ('+k+')');k++}
+    return name;
+  }
+  function importText(text){
+    ioApply.hidden=true;ioText.hidden=true;
+    if(typeof text!=='string'||text.length>1500000){ioMsg.textContent='That file is too large to import.';return}
+    var data;
+    try{data=JSON.parse(text)}catch(e){ioMsg.textContent='That is not valid model data.';return}
+    var list=data&&Array.isArray(data.profiles)?data.profiles:(data&&data.cfg?[data]:null);
+    if(!list||!list.length){ioMsg.textContent='No models found in that data.';return}
+    var added=0;
+    list.slice(0,10).forEach(function(p){
+      if(!p||typeof p!=='object'||store.profiles.length>=MAX_MODELS) return;
+      store.profiles.push({id:uid(),name:uniqueName(tr(String(p.name||'Imported model').slice(0,24))),cfg:sanitizeCfg(p.cfg)});
+      added++;
+    });
+    if(added){save();syncProfiles()}
+    ioMsg.textContent=added?('Imported '+added+' model'+(added===1?'':'s')+'. Pick them in the Model list.'):'Nothing could be imported.';
+  }
+  window.onImportText=importText;
+  window.onFileResult=function(kind,result){
+    if(result==='ok') ioMsg.textContent='Models saved to file.';
+    else if(result==='cancel') ioMsg.textContent='Cancelled.';
+    else ioMsg.textContent=kind==='export'?'Could not save the file.':'Could not read that file.';
+  };
+  $('#exBtn').addEventListener('click',function(){
+    var json=exportJson();
+    if(NB){ioMsg.textContent='Choose where to save the file.';try{NB.exportFile('mk6-models.json',json)}catch(e){ioMsg.textContent='Could not save the file.'}return}
+    ioText.hidden=false;ioApply.hidden=true;ioText.readOnly=true;ioText.value=json;ioText.focus();ioText.select();
+    try{navigator.clipboard.writeText(json).catch(function(){})}catch(e){}
+    ioMsg.textContent='Copy this text and keep it somewhere safe.';
+  });
+  $('#imBtn').addEventListener('click',function(){
+    if(NB){ioMsg.textContent='Choose a model file.';try{NB.importFile()}catch(e){ioMsg.textContent='Could not read that file.'}return}
+    ioText.hidden=false;ioApply.hidden=false;ioText.readOnly=false;ioText.value='';ioText.focus();
+    ioMsg.textContent='Paste exported model data, then tap Apply import.';
+  });
+  ioApply.addEventListener('click',function(){importText(ioText.value)});
+
   /* ---------- Link, E-STOP, frames ---------- */
-  var S={connected:!NB,estop:false};
   var link=$('#link'), live=$('#live'), last=null, lastSend=0, sent=0, t0=performance.now(), lines=[];
   var hubMsg='';
-  var HUB_TEXT={off:'Bluetooth mati',denied:'Kebenaran ditolak',unsupported:'Peranti tak sokong siaran BLE',error:'Ralat Bluetooth'};
+  var HUB_TEXT={off:'Bluetooth is off',denied:'Permission denied',unsupported:'BLE advertising not supported',error:'Bluetooth error'};
   function paintLink(){
     link.setAttribute('aria-pressed',String(S.connected));
-    var t=NB?(hubMsg||(S.connected?'Hab aktif':'Sambung hab')):(S.connected?'Simulasi aktif':'Sambung hab');
+    var t=NB?(hubMsg||(S.connected?'Hub active':'Connect hub')):(S.connected?'Simulation on':'Simulation off');
     $('#linkText').textContent=t;
-    if(!S.connected) refs.forEach(function(r){r.sent.textContent='tidak dihantar'});
+    if(!S.connected) refs.forEach(function(r){r.sent.textContent='not sent'});
   }
   link.addEventListener('click',function(){
     last=null;
     if(NB){
-      if(S.connected){NB.stop();S.connected=false;hubMsg=''}
-      else{hubMsg='Memadankan…';S.connected=true;NB.start(C.mod)}
+      if(S.connected){NB.stop();S.connected=false;hubMsg='';stopPlay(true)}
+      else{
+        hubMsg='Pairing…';S.connected=true;
+        NB.start(activeSlots().map(function(s){return C.hubs[s]}).join(','));
+      }
       paintLink();return;
     }
     S.connected=!S.connected;paintLink();
   });
   window.onHubState=function(s){
     last=null;
-    if(s==='connecting'){S.connected=true;hubMsg='Memadankan…'}
+    if(s==='connecting'){S.connected=true;hubMsg='Pairing…'}
     else if(s==='ready'){S.connected=true;hubMsg=''}
-    else if(s==='stopped'){S.connected=false;hubMsg=''}
-    else{S.connected=false;hubMsg=HUB_TEXT[s]||'Ralat';live.textContent=hubMsg}
+    else if(s==='stopped'){S.connected=false;hubMsg='';stopPlay(true)}
+    else{S.connected=false;hubMsg=HUB_TEXT[s]||'Error';live.textContent=hubMsg;stopPlay(true)}
     paintLink();
   };
   var es=$('#estop'), banner=$('#esBanner');
   function paintEstop(){
     es.setAttribute('aria-pressed',String(S.estop));
-    es.textContent=S.estop?'Lepas E-Stop':'E-Stop';
+    es.textContent=S.estop?'Release E-Stop':'E-Stop';
     banner.hidden=!S.estop;
-    cols.classList.toggle('locked',S.estop);
+    syncLock();paintRec();
   }
   es.addEventListener('click',function(){
     S.estop=!S.estop;
-    for(var i=0;i<N;i++){rt.t[i]=0;rt.o[i]=0;refs[i].rng.value=0;refs[i].val.textContent='0'}
+    stopRecord();stopPlay(false);
+    zeroAll();
     last=null;tick();paintEstop();
-    live.textContent=S.estop?'E-Stop aktif: semua saluran dikunci pada 0':'E-Stop dilepaskan';
+    live.textContent=S.estop?'E-Stop is on: every channel is locked at 0':'E-Stop released';
   });
 
   function logFrame(f){
     var s=((performance.now()-t0)/1000).toFixed(1).padStart(6,' ');
-    lines.push(s+'s  '+f.map(function(v,i){return L[i]+fmt(v).padStart(4,' ')}).join(' '));
+    var slots=activeSlots(), multi=slots.length>1;
+    var parts=[];
+    f.forEach(function(v,n){
+      var s2=(n/PER)|0, j=n%PER;
+      parts.push((multi&&j===0?'| M'+(C.hubs[slots[s2]]+1)+' ':'')+L[j]+fmt(v).padStart(4,' '));
+    });
+    lines.push(s+'s  '+parts.join(' '));
     if(lines.length>60) lines.shift();
     var el=$('#log');el.textContent=lines.join('\n');el.scrollTop=el.scrollHeight;
   }
 
-  function goalOf(i){
-    var c=C.ch[i], t=rt.t[i];
-    if(Math.abs(t)<=1) return 0;
-    var mag=Math.min(Math.abs(t)+c.off,c.max);
-    return (t<0?-1:1)*mag*C.limit/100;
-  }
-
   function tick(){
-    var step=Math.max(2,200*Math.pow(1-C.ramp/100,2)), frame=[];
-    for(var i=0;i<N;i++){
+    var now=performance.now();
+    stepRecord(now);stepPlay(now);
+    var step=Math.max(2,200*Math.pow(1-C.ramp/100,2)), vals=new Array(NMAX);
+    for(var i=0;i<NMAX;i++){
+      if(!isActive(i)){vals[i]=0;continue}
       var goal=S.estop?0:goalOf(i);
       if(S.estop) rt.o[i]=0;
       var d=goal-rt.o[i];
       rt.o[i]=Math.abs(d)<=step?goal:rt.o[i]+(d<0?-1:1)*step;
       var o=Math.round(rt.o[i]), v=(C.ch[i].inv?-o:o)||0;
-      frame.push(v);
+      vals[i]=v;
       var r=refs[i];
       r.fill.style.setProperty('--l',(50+Math.min(0,o)/2)+'%');
       r.fill.style.setProperty('--w',(Math.abs(o)/2)+'%');
       r.track.classList.toggle('neg',o<0);
-      if(S.connected) r.sent.textContent='keluar '+fmt(v);
+      if(S.connected) r.sent.textContent='out '+fmt(v);
     }
+    if(S.rec||S.play) paintRecStatus(now);
     if(!S.connected) return;
-    var now=performance.now(), changed=!last||frame.some(function(v,k){return v!==last[k]});
+    var frame=[];
+    activeSlots().forEach(function(s){for(var j=0;j<PER;j++) frame.push(vals[s*PER+j])});
+    var changed=!last||last.length!==frame.length||frame.some(function(v,k){return v!==last[k]});
     if(changed||now-lastSend>1000){
       transport.send(frame,changed);
       last=frame;lastSend=now;sent++;
-      $('#count').textContent=sent+' bingkai';
+      $('#count').textContent=sent+' frames';
     }
   }
 
   syncAll();
   paintLink();
+  paintEstop();
   setInterval(tick,50);
 })();
 </script>
