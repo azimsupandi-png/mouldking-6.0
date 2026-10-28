@@ -11,18 +11,18 @@ import android.os.Looper;
 import android.os.SystemClock;
 
 /**
- * Drives one to three Mould King Module 6.0 hubs by broadcasting their telegrams
- * as BLE advertisements (the hubs are not connected to; they only listen).
+ * Drives one to three Mould King hubs (Module 6.0 and/or 4.0) by broadcasting their
+ * telegrams as BLE advertisements (the hubs are not connected to; they only listen).
  *
- * Telegram layout (10 bytes): 0x61+module, 0x7B, 0xA7, six channel bytes
- * (0x80 = stop, above = forward, below = reverse), 0x9E-module.
- * With one hub the telegram is updated whenever the values change. With several
- * hubs the telegrams are broadcast in turn, one every ROTATE_MS.
- * Protocol credit: J0EK3R (MIT). See NOTICE.
+ * See HubProtocol for the telegram layouts. A "unit" is one advertisement: every MK 6.0 hub
+ * has its own unit, and all MK 4.0 hubs share a single unit. With one unit the telegram is
+ * updated whenever the values change. With several units they are broadcast in turn,
+ * one every ROTATE_MS.
+ * Protocol credit: J0EK3R and pink0D (MIT). See NOTICE.
  *
  * All methods must be called on the main thread.
  */
-final class Mk6Advertiser {
+final class HubAdvertiser {
 
     interface Listener {
         void onState(String state);
@@ -33,9 +33,6 @@ final class Mk6Advertiser {
     };
     private static final int CTX = 0x25;
     private static final int COMPANY_ID = 0xFFF0;
-    private static final byte[] CONNECT = {
-        0x6D, 0x7B, (byte) 0xA7, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x92
-    };
     private static final long CONNECT_MS = 3000;
     private static final long MIN_GAP_MS = 60;
     private static final long ROTATE_MS = 100;
@@ -57,7 +54,12 @@ final class Mk6Advertiser {
     private long lastPushAt;
     private int failCount;
     private int rotateIdx;
+    private int connectIdx;
+    private int[] kinds = {HubProtocol.MK6};
     private int[] modules = {0};
+    private int[] unitKind = {HubProtocol.MK6};
+    private int[] unitSlot = {0};
+    private int[] connectKinds = {HubProtocol.MK6};
     private int[][] latest = new int[1][CHANNELS];
 
     private final AdvertisingSetCallback callback = new AdvertisingSetCallback() {
@@ -70,6 +72,10 @@ final class Mk6Advertiser {
                     running = true;
                     connecting = true;
                     listener.onState("connecting");
+                    connectIdx = 0;
+                    if (connectKinds.length > 1) {
+                        handler.postDelayed(connectRotateTask, ROTATE_MS);
+                    }
                     handler.postDelayed(finishConnect, CONNECT_MS);
                 } else if (status == AdvertisingSetCallback.ADVERTISE_SUCCESS) {
                     set = advertisingSet;
@@ -94,7 +100,7 @@ final class Mk6Advertiser {
                 if (failCount > 40) {
                     stopNow();
                     listener.onState("error");
-                } else if (modules.length == 1) {
+                } else if (unitKind.length == 1) {
                     schedulePush();
                 }
             });
@@ -115,13 +121,31 @@ final class Mk6Advertiser {
         public void run() {
             if (!running) return;
             connecting = false;
-            if (modules.length > 1) {
+            handler.removeCallbacks(connectRotateTask);
+            if (unitKind.length > 1) {
                 handler.removeCallbacks(rotateTask);
                 handler.post(rotateTask);
             } else {
-                pushModule(0);
+                pushUnit(0);
             }
             listener.onState("ready");
+        }
+    };
+
+    /** While connecting with mixed hub types, alternate the connect telegrams. */
+    private final Runnable connectRotateTask = new Runnable() {
+        @Override
+        public void run() {
+            if (!running || !connecting || set == null) return;
+            connectIdx = (connectIdx + 1) % connectKinds.length;
+            try {
+                set.setAdvertisingData(dataFor(HubProtocol.connectFor(connectKinds[connectIdx])));
+            } catch (RuntimeException e) {
+                stopNow();
+                listener.onState("error");
+                return;
+            }
+            handler.postDelayed(this, ROTATE_MS);
         }
     };
 
@@ -129,9 +153,9 @@ final class Mk6Advertiser {
         @Override
         public void run() {
             if (!running || connecting) return;
-            if (rotateIdx >= modules.length) rotateIdx = 0;
-            pushModule(rotateIdx);
-            rotateIdx = (rotateIdx + 1) % modules.length;
+            if (rotateIdx >= unitKind.length) rotateIdx = 0;
+            pushUnit(rotateIdx);
+            rotateIdx = (rotateIdx + 1) % unitKind.length;
             handler.postDelayed(this, ROTATE_MS);
         }
     };
@@ -140,7 +164,7 @@ final class Mk6Advertiser {
         @Override
         public void run() {
             pushScheduled = false;
-            pushModule(0);
+            pushUnit(0);
         }
     };
 
@@ -151,7 +175,7 @@ final class Mk6Advertiser {
         }
     };
 
-    Mk6Advertiser(BluetoothAdapter adapter, Listener listener) {
+    HubAdvertiser(BluetoothAdapter adapter, Listener listener) {
         this.adapter = adapter;
         this.listener = listener;
     }
@@ -160,20 +184,25 @@ final class Mk6Advertiser {
         return running || starting;
     }
 
-    /** modules: one to three distinct module numbers, each 0..2 (M1..M3). */
-    void start(int[] mods) {
+    /**
+     * kinds: HubProtocol.MK6 or MK4 for each hub; mods: its module number 0..2 (M1..M3).
+     * One to three hubs. Module numbers must be distinct among hubs of the same kind.
+     */
+    void start(int[] kindsIn, int[] mods) {
         if (running || starting) return;
-        if (mods == null || mods.length < 1 || mods.length > MAX_HUBS) {
+        if (kindsIn == null || mods == null || kindsIn.length != mods.length
+                || mods.length < 1 || mods.length > MAX_HUBS) {
             listener.onState("error");
             return;
         }
         for (int i = 0; i < mods.length; i++) {
-            if (mods[i] < 0 || mods[i] > 2) {
+            if (mods[i] < 0 || mods[i] > 2
+                    || (kindsIn[i] != HubProtocol.MK6 && kindsIn[i] != HubProtocol.MK4)) {
                 listener.onState("error");
                 return;
             }
             for (int j = 0; j < i; j++) {
-                if (mods[i] == mods[j]) {
+                if (mods[i] == mods[j] && kindsIn[i] == kindsIn[j]) {
                     listener.onState("error");
                     return;
                 }
@@ -192,8 +221,10 @@ final class Mk6Advertiser {
             listener.onState("unsupported");
             return;
         }
+        kinds = kindsIn.clone();
         modules = mods.clone();
         latest = new int[modules.length][CHANNELS];
+        buildUnits();
         rotateIdx = 0;
         failCount = 0;
         stopping = false;
@@ -206,7 +237,8 @@ final class Mk6Advertiser {
                 .setInterval(AdvertisingSetParameters.INTERVAL_LOW)
                 .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_HIGH)
                 .build();
-            advertiser.startAdvertisingSet(params, dataFor(CONNECT), null, null, null, callback);
+            advertiser.startAdvertisingSet(
+                params, dataFor(HubProtocol.connectFor(connectKinds[0])), null, null, null, callback);
         } catch (SecurityException e) {
             starting = false;
             listener.onState("denied");
@@ -214,6 +246,35 @@ final class Mk6Advertiser {
             starting = false;
             listener.onState("error");
         }
+    }
+
+    /** Work out which advertisements are needed: one per MK 6.0 hub, one shared for all MK 4.0 hubs. */
+    private void buildUnits() {
+        int[] uk = new int[MAX_HUBS];
+        int[] us = new int[MAX_HUBS];
+        int n = 0;
+        boolean has4 = false;
+        boolean has6 = false;
+        for (int k = 0; k < kinds.length; k++) {
+            if (kinds[k] == HubProtocol.MK4) {
+                if (!has4) {
+                    has4 = true;
+                    uk[n] = HubProtocol.MK4;
+                    us[n] = k;
+                    n++;
+                }
+            } else {
+                has6 = true;
+                uk[n] = HubProtocol.MK6;
+                us[n] = k;
+                n++;
+            }
+        }
+        unitKind = java.util.Arrays.copyOf(uk, n);
+        unitSlot = java.util.Arrays.copyOf(us, n);
+        connectKinds = (has4 && has6)
+            ? new int[] {HubProtocol.MK6, HubProtocol.MK4}
+            : new int[] {has4 ? HubProtocol.MK4 : HubProtocol.MK6};
     }
 
     /**
@@ -227,7 +288,7 @@ final class Mk6Advertiser {
                 latest[k][j] = idx < pct.length ? pct[idx] : 0;
             }
         }
-        if (running && !connecting && set != null && modules.length == 1) schedulePush();
+        if (running && !connecting && set != null && unitKind.length == 1) schedulePush();
     }
 
     /** Broadcast neutral values, then stop advertising shortly after. */
@@ -242,13 +303,14 @@ final class Mk6Advertiser {
                 for (int j = 0; j < CHANNELS; j++) latest[k][j] = 0;
             }
             connecting = false;
+            handler.removeCallbacks(connectRotateTask);
             long wait;
-            if (modules.length > 1) {
+            if (unitKind.length > 1) {
                 handler.removeCallbacks(rotateTask);
                 handler.post(rotateTask);
-                wait = modules.length * ROTATE_MS * 2 + 150;
+                wait = unitKind.length * ROTATE_MS * 2 + 150;
             } else {
-                pushModule(0);
+                pushUnit(0);
                 wait = NEUTRAL_BEFORE_STOP_MS;
             }
             handler.postDelayed(stopTask, wait);
@@ -267,6 +329,7 @@ final class Mk6Advertiser {
         handler.removeCallbacks(finishConnect);
         handler.removeCallbacks(pushTask);
         handler.removeCallbacks(rotateTask);
+        handler.removeCallbacks(connectRotateTask);
         pushScheduled = false;
         connecting = false;
         try {
@@ -290,10 +353,13 @@ final class Mk6Advertiser {
         handler.postDelayed(pushTask, wait);
     }
 
-    private void pushModule(int k) {
-        if (!running || set == null || k >= modules.length) return;
+    private void pushUnit(int u) {
+        if (!running || set == null || u >= unitKind.length) return;
         try {
-            set.setAdvertisingData(dataFor(telegram(modules[k], latest[k])));
+            byte[] t = unitKind[u] == HubProtocol.MK4
+                ? HubProtocol.mk4(kinds, modules, latest)
+                : HubProtocol.mk6(modules[unitSlot[u]], latest[unitSlot[u]]);
+            set.setAdvertisingData(dataFor(t));
             lastPushAt = SystemClock.uptimeMillis();
         } catch (RuntimeException e) {
             // Never keep broadcasting a stale command if the update could not be applied.
@@ -309,23 +375,5 @@ final class Mk6Advertiser {
             .setIncludeTxPowerLevel(false)
             .addManufacturerData(COMPANY_ID, payload)
             .build();
-    }
-
-    static byte[] telegram(int moduleNo, int[] pct) {
-        byte[] t = new byte[10];
-        t[0] = (byte) (0x61 + moduleNo);
-        t[1] = 0x7B;
-        t[2] = (byte) 0xA7;
-        for (int i = 0; i < CHANNELS; i++) t[3 + i] = (byte) channelByte(pct[i]);
-        t[9] = (byte) (0x9E - moduleNo);
-        return t;
-    }
-
-    static int channelByte(float pct) {
-        if (pct >= -1f && pct <= 1f) return 0x80;
-        float a = Math.min(Math.abs(pct), 100f);
-        float r = Math.min(0x80, a * 0x80 / 100f);
-        if (pct < 0) return (int) Math.max(0, 0x80 - r);
-        return (int) Math.min(0xFF, 0x80 + r);
     }
 }

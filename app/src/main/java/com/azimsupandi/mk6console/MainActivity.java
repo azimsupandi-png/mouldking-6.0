@@ -42,7 +42,8 @@ public class MainActivity extends Activity {
     private static final String PAGE = "file:///android_asset/index.html";
 
     private WebView web;
-    private Mk6Advertiser mk6;
+    private HubAdvertiser mk6;
+    private int[] pendingKinds;
     private int[] pendingMods;
     private String pendingExport;
     private String pendingModel;
@@ -56,7 +57,7 @@ public class MainActivity extends Activity {
 
         BluetoothManager manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter adapter = manager != null ? manager.getAdapter() : null;
-        mk6 = new Mk6Advertiser(adapter, this::notifyPage);
+        mk6 = new HubAdvertiser(adapter, this::notifyPage);
 
         web = new WebView(this);
         setContentView(web);
@@ -151,15 +152,16 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-    private void requestStart(int[] mods) {
+    private void requestStart(int[] kinds, int[] mods) {
         if (Build.VERSION.SDK_INT >= 31
                 && checkSelfPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
                     != PackageManager.PERMISSION_GRANTED) {
+            pendingKinds = kinds;
             pendingMods = mods;
             requestPermissions(new String[] {Manifest.permission.BLUETOOTH_ADVERTISE}, REQ_BLUETOOTH);
             return;
         }
-        mk6.start(mods);
+        mk6.start(kinds, mods);
     }
 
     @Override
@@ -167,12 +169,13 @@ public class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode != REQ_BLUETOOTH) return;
         boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        if (granted && pendingMods != null) {
-            mk6.start(pendingMods);
+        if (granted && pendingMods != null && pendingKinds != null) {
+            mk6.start(pendingKinds, pendingMods);
         } else {
             notifyPage("denied");
         }
         pendingMods = null;
+        pendingKinds = null;
     }
 
     @Override
@@ -241,17 +244,32 @@ public class MainActivity extends Activity {
             "window.onFileResult&&window.onFileResult('" + kind + "','" + result + "')", null));
     }
 
-    private static int[] parseMods(String csv) {
+    /**
+     * Hubs as comma separated tokens: "1" is an MK 6.0 hub with module number 1 (M2),
+     * "4:2" is an MK 4.0 hub with module number 2 (M3). Returns {kinds, modules} or null.
+     */
+    private static int[][] parseHubs(String csv) {
         if (csv == null) return null;
         String[] parts = csv.split(",");
         if (parts.length < 1 || parts.length > 3) return null;
-        int[] out = new int[parts.length];
+        int[] kinds = new int[parts.length];
+        int[] mods = new int[parts.length];
         try {
-            for (int i = 0; i < parts.length; i++) out[i] = Integer.parseInt(parts[i].trim());
+            for (int i = 0; i < parts.length; i++) {
+                String t = parts[i].trim();
+                int colon = t.indexOf(':');
+                if (colon >= 0) {
+                    kinds[i] = Integer.parseInt(t.substring(0, colon).trim());
+                    mods[i] = Integer.parseInt(t.substring(colon + 1).trim());
+                } else {
+                    kinds[i] = HubProtocol.MK6;
+                    mods[i] = Integer.parseInt(t);
+                }
+            }
         } catch (NumberFormatException e) {
             return null;
         }
-        return out;
+        return new int[][] {kinds, mods};
     }
 
     private static int[] parseFrame(String csv) {
@@ -273,12 +291,12 @@ public class MainActivity extends Activity {
     private final class Bridge {
         @JavascriptInterface
         public void start(final String mods) {
-            final int[] parsed = parseMods(mods);
+            final int[][] parsed = parseHubs(mods);
             runOnUiThread(() -> {
                 if (parsed == null) {
                     notifyPage("error");
                 } else {
-                    requestStart(parsed);
+                    requestStart(parsed[0], parsed[1]);
                 }
             });
         }
