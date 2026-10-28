@@ -190,6 +190,19 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .log{margin:0;height:11.5em;padding:10px;border-radius:6px;background:var(--well);font-family:var(--f-mono);font-size:12px;line-height:1.5;overflow:auto;white-space:pre;font-variant-numeric:tabular-nums}
 .stats{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
 .note{margin:10px 0 0;font-size:12px;color:var(--muted);max-width:65ch}
+.guide{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.72)}
+.guide-box{width:min(100%,440px);max-height:92vh;overflow:auto;padding:20px;border-radius:14px;background:var(--panel);border:1px solid var(--line);box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.guide-box h2{color:var(--fg);font-size:22px;margin:6px 0 10px}
+.guide-box p{margin:0 0 16px;font-size:15px;line-height:1.5}
+.guide-dots{display:flex;gap:6px}
+.guide-dots i{width:22px;height:5px;border-radius:3px;background:var(--line)}
+.guide-dots i.on{background:var(--acc)}
+.guide-nav{margin:16px 0 0}
+.guide-nav .btn[id=gNext]{background:var(--acc);color:#111;border-color:var(--acc);font-weight:600}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;max-width:min(92vw,420px);padding:12px 16px;border-radius:10px;
+  background:var(--fg);color:var(--bg);font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.45);animation:slide .2s ease-out}
+.pm{display:grid;grid-template-columns:minmax(0,5.5em) minmax(0,1fr);align-items:center;gap:8px;font-size:13px}
+.pm span{color:var(--muted);font-family:var(--f-mono);font-size:12px}
 .quick{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .qbtn{min-height:56px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--well);color:var(--fg);cursor:pointer;
   font-family:var(--f-display);font-weight:600;font-size:18px;letter-spacing:.06em;text-transform:uppercase;border-left:4px solid var(--acc);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -218,6 +231,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   .cols.dual .pad{width:100%}
   .cols.dual .knob{width:44px;height:44px;left:calc(50% - 22px);top:calc(50% - 22px)}
 }
+@media (max-width:400px){.bw{display:none}}
 @media (max-width:420px){
   .bar-in{gap:8px}
   .brand h1{font-size:19px}
@@ -302,6 +316,21 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   <div class="bar-banner" id="esBanner" role="alert" hidden>E-Stop is on. Every channel is locked at 0. Tap Release E-Stop to continue.</div>
 </header>
 <div class="live" id="live" role="status" aria-live="polite"></div>
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="guide" id="guide" role="dialog" aria-modal="true" aria-labelledby="gTitle" hidden>
+  <div class="guide-box">
+    <div class="guide-dots" id="gDots" aria-hidden="true"></div>
+    <h2 id="gTitle"></h2>
+    <p id="gBody"></p>
+    <div class="rec-row" id="gExtra"></div>
+    <div class="rec-row guide-nav">
+      <button class="btn" id="gSkip" type="button">Skip</button>
+      <span class="spacer"></span>
+      <button class="btn" id="gBack" type="button">Back</button>
+      <button class="btn" id="gNext" type="button">Next</button>
+    </div>
+  </div>
+</div>
 
 <main>
   <section class="card model" aria-label="Model">
@@ -371,6 +400,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
             <input id="gpDead" type="range" min="5" max="40" step="1" value="12"></div>
           <label>Trigger channel (RT forward, LT reverse)<select id="gpTrig"></select></label>
         </div>
+        <details class="adv"><summary>Button mapping</summary><div class="set" id="gpMap" style="margin-top:8px"></div></details>
         <p class="note">Left stick = stick 1, right stick = stick 2 (Dual stick layout). Back = E-Stop, Start = release. The sticks use the channels chosen in the stick cards.</p>
       </section>
 
@@ -397,6 +427,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <div class="set-row"><label for="ramp"><span class="set-top"><span>Acceleration smoothing</span><output id="rampOut">60</output></span></label>
             <input id="ramp" type="range" min="0" max="100" step="5" value="60"></div>
           <label class="check" for="spring"><input id="spring" type="checkbox" checked>Sliders return to 0 when released</label>
+          <label>Auto-stop when idle<select id="sfIdle"><option value="0">Off</option><option value="10">10 s</option><option value="30">30 s</option><option value="60">60 s</option><option value="120">2 min</option></select></label>
+          <label>Warn after long full power<select id="sfWarn"><option value="0">Off</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <div class="set-row"><span class="set-top"><span>Hubs (module number of each)</span></span>
             <div class="hubrow">
               <label>Hub 1<select id="hub0"><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
@@ -424,6 +456,17 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         <button class="btn" id="ioApply" type="button" hidden style="margin-top:8px">Apply import</button>
         <p class="note" id="ioMsg">Exports every model, including recordings, as one file.</p>
       </section>
+
+      <section class="card" id="appCard">
+        <h2>App</h2>
+        <label class="rec-label">Language<select id="lang"><option value="en">English</option><option value="ms">Bahasa Melayu</option></select></label>
+        <label class="check" for="optSound"><input id="optSound" type="checkbox" checked>Sound</label>
+        <label class="check" for="optHaptic"><input id="optHaptic" type="checkbox" checked>Vibration</label>
+        <div class="rec-row" style="margin-top:12px">
+          <button class="btn" id="guideBtn" type="button">Show guide</button>
+          <button class="btn" id="pinBtn" type="button" hidden>Add model to home screen</button>
+        </div>
+      </section>
     </div>
   </div>
 </main>
@@ -450,7 +493,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider'});
-    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -459,6 +502,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(out[0]<0){var m=0;while(out.indexOf(m)>=0) m++;out[0]=m}
     return out;
   }
+  var PAD_BTNS=[0,1,2,3,4,5,10,11,12,13,14,15];
+  function pickOf(v,list,def){v=+v;return list.indexOf(v)>=0?v:def}
   var MAX_SEQ=10, MAX_STEPS=30;
   function cleanSeqs(r){
     var out=[];
@@ -550,7 +595,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.accentV=2;
     d.theme=c.theme==='build'?'build':'std';
     var pd=(c.pad&&typeof c.pad==='object')?c.pad:{};
-    d.pad={on:pd.on!==false,dead:Math.round(num(pd.dead,5,40,12)),trig:Math.round(num(pd.trig,-1,NMAX-1,-1))};
+    d.pad={on:pd.on!==false,dead:Math.round(num(pd.dead,5,40,12)),trig:Math.round(num(pd.trig,-1,NMAX-1,-1)),map:{}};
+    var msrc=(pd.map&&typeof pd.map==='object')?pd.map:{};
+    PAD_BTNS.forEach(function(b){
+      var v=msrc[b];
+      if(typeof v!=='string'||!/^([fr]\d{1,2}|z|s:[A-Za-z0-9_-]{1,40})$/.test(v)) return;
+      if((v.charAt(0)==='f'||v.charAt(0)==='r')&&+v.slice(1)>=NMAX) return;
+      d.pad.map[b]=v;
+    });
+    var sf=(c.safety&&typeof c.safety==='object')?c.safety:{};
+    d.safety={idle:pickOf(sf.idle,[0,10,30,60,120],60),warn:pickOf(sf.warn,[0,15,30,60],30)};
     d.seq=cleanSeqs(c.seq);
     d.rec=cleanRecs(c.rec);
     return d;
@@ -568,7 +622,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       {id:uid(),name:'Excavator (example)',cfg:exc}
     ];
   }
-  var store={active:null,profiles:[]};
+  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true}}
+  var store={active:null,profiles:[],prefs:cleanPrefs()};
   try{
     var raw=localStorage.getItem('mk6v2');
     if(raw){
@@ -578,6 +633,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           if(p&&typeof p.id==='string'&&typeof p.name==='string') store.profiles.push({id:p.id,name:tr(p.name.slice(0,24)),cfg:sanitizeCfg(p.cfg)});
         });
         store.active=sp.active;
+        store.prefs=cleanPrefs(sp.prefs);
       }
     }
     if(!store.profiles.length){
@@ -590,7 +646,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function activeProfile(){return store.profiles.filter(function(p){return p.id===store.active})[0]}
   var C=activeProfile().cfg;
   var recSel=null, recNote='';
-  function save(){try{localStorage.setItem('mk6v2',JSON.stringify(store))}catch(e){}}
+  var scTimer=0;
+  function save(){
+    try{localStorage.setItem('mk6v2',JSON.stringify(store))}catch(e){}
+    if(NB&&NB.shortcuts){clearTimeout(scTimer);scTimer=setTimeout(pushShortcuts,1500)}
+  }
+  function pushShortcuts(){
+    try{
+      var list=store.profiles.slice().sort(function(a,b){return (b.id===store.active)-(a.id===store.active)}).slice(0,4)
+        .map(function(p){return {id:p.id,name:p.name}});
+      NB.shortcuts(JSON.stringify(list));
+    }catch(e){}
+  }
 
   var rt={t:[],o:[]};
   for(var q=0;q<NMAX;q++){rt.t.push(0);rt.o.push(0)}
@@ -863,7 +930,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   function syncAll(){
     refs.forEach(function(r,i){syncChannel(i)});
-    syncSticks();syncSettings();syncLayout();syncProfiles();syncRec();paintAccent();paintSkin();paintLamps();syncSeq();
+    syncSticks();syncSettings();syncLayout();syncProfiles();syncRec();paintAccent();paintSkin();paintLamps();syncSeq();syncSafety();syncApp();buildGpMap();
   }
   var ACC=['#FF7A2F','#FF4B3E','#F5B800'];
   var swBox=$('#swatches'),swBtns=ACC.map(function(c,n){
@@ -1118,9 +1185,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   window.onHubState=function(s){
     last=null;
     if(s==='connecting'){S.connected=true;hubMsg='Pairing…'}
-    else if(s==='ready'){S.connected=true;hubMsg=''}
+    else if(s==='ready'){S.connected=true;hubMsg='';feedback('ok')}
     else if(s==='stopped'){S.connected=false;hubMsg='';stopPlay(true)}
-    else{S.connected=false;hubMsg=HUB_TEXT[s]||'Error';live.textContent=hubMsg;stopPlay(true)}
+    else{S.connected=false;hubMsg=HUB_TEXT[s]||'Error';live.textContent=hubMsg;stopPlay(true);feedback('lost')}
     paintLink();
   };
   var es=$('#estop'), banner=$('#esBanner');
@@ -1138,6 +1205,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     zeroAll();
     last=null;tick();paintEstop();
     live.textContent=S.estop?'E-Stop is on: every channel is locked at 0':'E-Stop released';
+    feedback(S.estop?'estop':'release');
   }
   es.addEventListener('click',function(){setEstop(!S.estop)});
 
@@ -1156,6 +1224,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     padPoll();
     var now=performance.now();
     stepRecord(now);stepPlay(now);
+    safetyStep(now);
     var step=Math.max(2,200*Math.pow(1-C.ramp/100,2)), vals=new Array(NMAX);
     for(var i=0;i<NMAX;i++){
       if(!isActive(i)){vals[i]=0;continue}
@@ -1284,7 +1353,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     $('#seqDup').disabled=!cur||C.seq.length>=MAX_SEQ;
     $('#seqDel').disabled=!cur;
     $('#seqNew').disabled=C.seq.length>=MAX_SEQ;
-    renderSteps();paintSeqInfo();renderQuick();
+    renderSteps();paintSeqInfo();renderQuick();buildGpMap();
   }
   seqSel.addEventListener('change',function(){seqCur_=seqSel.value;syncSeq()});
   seqName.addEventListener('input',function(){
@@ -1318,8 +1387,123 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   seqRun.addEventListener('click',function(){var c=seqCur();if(c) runSeq(c.id)});
   syncSeq();
 
+  // ---- Feedback (sound, vibration), toast, safety ----
+  var AC=null, toastEl=$('#toast'), toastTimer=0;
+  function beep(freqs,dur){
+    if(!store.prefs.sound) return;
+    try{
+      AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+      if(AC.state==='suspended'&&AC.resume) AC.resume();
+      var t=AC.currentTime;
+      freqs.forEach(function(f,i){
+        var o=AC.createOscillator(),g=AC.createGain(),st=t+i*dur;
+        o.type='square';o.frequency.value=f;
+        g.gain.setValueAtTime(0.07,st);g.gain.exponentialRampToValueAtTime(0.0001,st+dur*0.9);
+        o.connect(g);g.connect(AC.destination);o.start(st);o.stop(st+dur);
+      });
+    }catch(e){}
+  }
+  var FB={estop:[[440,440],0.12,'estop'],release:[[600,800],0.1,'ok'],ok:[[700,900],0.09,'ok'],lost:[[500,300],0.2,'lost'],warn:[[880,880,880],0.16,'warn'],idle:[[700,500,350],0.14,'warn']};
+  function feedback(kind){
+    var f=FB[kind];if(!f) return;
+    beep(f[0],f[1]);
+    if(store.prefs.haptic&&NB&&NB.haptic){try{NB.haptic(f[2])}catch(e){}}
+  }
+  function toast(msg,ms){
+    if(!toastEl) return;
+    toastEl.textContent=msg;toastEl.hidden=false;
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){toastEl.hidden=true},ms||4500);
+  }
+  var lastInput=performance.now(), ptrDown=0, hotSince=[], hotWarned=[];
+  function noteInput(){lastInput=performance.now()}
+  if(document.addEventListener){
+    document.addEventListener('pointerdown',function(){ptrDown++;noteInput()},{passive:true});
+    document.addEventListener('pointermove',noteInput,{passive:true});
+    var pu=function(){ptrDown=Math.max(0,ptrDown-1);noteInput()};
+    document.addEventListener('pointerup',pu,{passive:true});
+    document.addEventListener('pointercancel',pu,{passive:true});
+    document.addEventListener('keydown',noteInput,{passive:true});
+  }
+  if(typeof window.addEventListener==='function') window.addEventListener('blur',function(){ptrDown=0});
+  for(var hq=0;hq<NMAX;hq++){hotSince.push(0);hotWarned.push(false)}
+  function safetyStep(now){
+    if(!Array.isArray(hotSince)||!hotSince.length) return;
+    var sf=C.safety, any=false, i;
+    for(i=0;i<NMAX;i++) if(isActive(i)&&(rt.t[i]!==0||rt.o[i]!==0)) any=true;
+    if(ptrDown>0||S.play) lastInput=now;
+    if(sf.idle>0&&any&&!S.estop&&!S.play&&now-lastInput>sf.idle*1000){
+      zeroAll();lastInput=now;
+      toast('Stopped: no input for '+sf.idle+' s');feedback('idle');
+    }
+    for(i=0;i<NMAX;i++){
+      if(isActive(i)&&Math.abs(rt.o[i])>=90){
+        if(!hotSince[i]) hotSince[i]=now;
+        else if(sf.warn>0&&!hotWarned[i]&&now-hotSince[i]>sf.warn*1000){
+          hotWarned[i]=true;
+          toast('Channel '+tagOf(i)+' has run near full power for '+sf.warn+' s. Let the motor rest.',6000);feedback('warn');
+        }
+      }else{hotSince[i]=0;hotWarned[i]=false}
+    }
+  }
+  window.onAppEvent=function(ev){
+    if(ev==='nopin') toast('This launcher cannot add a shortcut.');
+  };
+  window.openModel=function(id){
+    if(!store.profiles.some(function(p){return p.id===id})) return;
+    if(id!==store.active) switchProfile(id);
+  };
+
+  var sfIdle=$('#sfIdle'), sfWarn=$('#sfWarn');
+  function syncSafety(){if(!sfIdle) return;sfIdle.value=String(C.safety.idle);sfWarn.value=String(C.safety.warn)}
+  sfIdle.addEventListener('change',function(){C.safety.idle=pickOf(sfIdle.value,[0,10,30,60,120],60);save()});
+  sfWarn.addEventListener('change',function(){C.safety.warn=pickOf(sfWarn.value,[0,15,30,60],30);save()});
+
+  var optSound=$('#optSound'), optHaptic=$('#optHaptic'), pinBtn=$('#pinBtn');
+  function syncApp(){
+    if(!optSound) return;
+    optSound.checked=store.prefs.sound;optHaptic.checked=store.prefs.haptic;
+    $('#lang').value=store.prefs.lang;
+    pinBtn.hidden=!(NB&&NB.pinModel);
+  }
+  optSound.addEventListener('change',function(){store.prefs.sound=optSound.checked;save();if(optSound.checked) beep([700,900],0.09)});
+  optHaptic.addEventListener('change',function(){store.prefs.haptic=optHaptic.checked;save();if(optHaptic.checked) feedback('ok')});
+  pinBtn.addEventListener('click',function(){try{NB.pinModel(store.active,activeProfile().name)}catch(e){toast('This launcher cannot add a shortcut.')}});
+  syncSafety();syncApp();
+
+  // ---- Gamepad button mapping ----
+  var BTN_NAMES={0:'A',1:'B',2:'X',3:'Y',4:'LB',5:'RB',10:'L3',11:'R3',12:'D-pad up',13:'D-pad down',14:'D-pad left',15:'D-pad right'};
+  function buildGpMap(){
+    var box=$('#gpMap');if(!BTN_NAMES||!box||!box.appendChild) return;
+    box.innerHTML='';
+    PAD_BTNS.forEach(function(b){
+      var row=document.createElement('label');row.className='pm';
+      var nm=document.createElement('span');nm.textContent=BTN_NAMES[b];
+      var sel=document.createElement('select');
+      var o=document.createElement('option');o.value='';o.textContent='Nothing';sel.appendChild(o);
+      o=document.createElement('option');o.value='z';o.textContent='Stop all channels';sel.appendChild(o);
+      activeIdx().forEach(function(i){
+        [['f','forward'],['r','reverse']].forEach(function(d){
+          var op=document.createElement('option');op.value=d[0]+i;op.textContent=tagOf(i)+' · '+C.ch[i].name+' '+d[1];sel.appendChild(op);
+        });
+      });
+      C.seq.forEach(function(q){var op=document.createElement('option');op.value='s:'+q.id;op.textContent='Run: '+q.name;sel.appendChild(op)});
+      var cur=C.pad.map[b]||'';
+      if(cur&&!Array.prototype.some.call(sel.options,function(x){return x.value===cur})){delete C.pad.map[b];cur=''}
+      sel.value=cur;
+      sel.addEventListener('change',function(){
+        releasePad();
+        if(sel.value) C.pad.map[b]=sel.value; else delete C.pad.map[b];
+        save();
+      });
+      row.appendChild(nm);row.appendChild(sel);box.appendChild(row);
+    });
+  }
+
+  buildGpMap();
+
   // ---- Gamepad (browser Gamepad API; standard mapping) ----
-  var GP={on:[false,false],trig:false,btn:{},stat:''};
+  var GP={on:[false,false],trig:false,btn:{},stat:'',had:false,hold:{},mb:{}};
   function padInfo(){
     try{
       var l=navigator.getGamepads?navigator.getGamepads():[];
@@ -1338,6 +1522,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function releasePad(){
     for(var k=0;k<2;k++) if(GP.on[k]){GP.on[k]=false;showKnob(k,0,0);applyStick(k,0,0)}
     if(GP.trig){GP.trig=false;if(C.pad.trig>=0) setT(C.pad.trig,0,false)}
+    Object.keys(GP.hold).forEach(function(b){setT(GP.hold[b],0,false);delete GP.hold[b]});
   }
   function padEdge(g,n){
     var b=g.buttons[n],down=!!(b&&(b.pressed||b.value>0.5)),was=!!GP.btn[n];
@@ -1351,26 +1536,215 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function padPoll(){
     var g=padInfo();
     padStatus(g);
+    if(!!g!==GP.had){GP.had=!!g;if(g) feedback('ok'); else{feedback('lost');GP.mb={}}}
     if(!g||!C.pad.on){releasePad();return}
     if(padEdge(g,8)) setEstop(true);
     if(padEdge(g,9)) setEstop(false);
+    var m=C.pad.map||{};
+    Object.keys(m).forEach(function(b){
+      var a=m[b],pb=g.buttons[+b],down=!!(pb&&(pb.pressed||pb.value>0.5)),was=!!GP.mb[b];
+      GP.mb[b]=down;
+      if(down) noteInput();
+      if(a.charAt(0)==='s'){if(down&&!was) runSeq(a.slice(2))}
+      else if(a==='z'){if(down&&!was&&!S.play&&!S.estop) zeroAll()}
+    });
     if(S.estop||S.play){releasePad();return}
+    Object.keys(m).forEach(function(b){
+      var a=m[b],c0=a.charAt(0);
+      if(c0!=='f'&&c0!=='r') return;
+      var ch=+a.slice(1);
+      if(!isActive(ch)) return;
+      if(GP.mb[b]){setT(ch,c0==='f'?100:-100,false);GP.hold[b]=ch}
+      else if(GP.hold[b]!==undefined){setT(GP.hold[b],0,false);delete GP.hold[b]}
+    });
     var d=C.pad.dead/100, ax=g.axes||[];
     var xs=[[padDz(ax[0],d),padDz(ax[1],d)],[padDz(ax[2],d),padDz(ax[3],d)]];
     var n=C.layout==='dual'?2:1;
     for(var k=0;k<n;k++){
       var x=xs[k][0],y=-xs[k][1],act=x!==0||y!==0;
+      if(act) noteInput();
       if(act||GP.on[k]){applyStick(k,x,y);showKnob(k,x,y)}
       GP.on[k]=act;
     }
     if(C.pad.trig>=0&&isActive(C.pad.trig)){
       var rt_=g.buttons[7]?g.buttons[7].value:0, lt_=g.buttons[6]?g.buttons[6].value:0;
       var tv=rt_-lt_; if(Math.abs(tv)<0.05) tv=0;
+      if(tv!==0) noteInput();
       if(tv!==0||GP.trig) setT(C.pad.trig,tv*100,false);
       GP.trig=tv!==0;
     }
   }
   if(typeof window.addEventListener==='function') window.addEventListener('gamepaddisconnected',function(){releasePad()});
+  // ---- Language (English / Bahasa Melayu) and first-run guide ----
+  var MS={
+    'Console':'Konsol','Mould King 6.0 · up to 3 hubs':'Mould King 6.0 · sehingga 3 hab',
+    'Simulation on':'Simulasi hidup','Simulation off':'Simulasi mati','Connect hub':'Sambung hab','Hub active':'Hab aktif','Pairing…':'Memasangkan…',
+    'Release':'Lepas','Turn the hub link on or off':'Hidupkan atau matikan sambungan hab',
+    'E-Stop is on. Every channel is locked at 0. Tap Release E-Stop to continue.':'E-Stop aktif. Semua saluran dikunci pada 0. Tekan Lepas untuk sambung semula.',
+    'E-Stop is on: every channel is locked at 0':'E-Stop aktif: semua saluran dikunci pada 0','E-Stop released':'E-Stop dilepaskan',
+    'Bluetooth is off':'Bluetooth dimatikan','Permission denied':'Kebenaran ditolak','BLE advertising not supported':'Siaran BLE tidak disokong','Bluetooth error':'Ralat Bluetooth','Error':'Ralat',
+    'Model':'Model','Model name':'Nama model','Colour':'Warna','Classic':'Klasik','Construction':'Pembinaan','Standard':'Standard','Dual stick':'Dua stick',
+    'New model':'Model baharu','Delete':'Padam','Confirm delete':'Sahkan padam','Confirm':'Sahkan','Model colour':'Warna model','Theme':'Tema','Layout':'Susun atur',
+    'Model list is full.':'Senarai model penuh.','New model created from the current settings':'Model baharu dicipta daripada tetapan semasa',
+    'Quick actions':'Tindakan pantas',
+    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula',
+    'Fine control (expo)':'Kawalan halus (expo)','Slider':'Gelangsar','Hold':'Tahan','Control type':'Jenis kawalan','Response curve':'Lengkung tindak balas',
+    'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
+    'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
+    'Drive (up/down)':'Pandu (atas/bawah)','Steer (left/right)':'Stereng (kiri/kanan)','Left motor':'Motor kiri','Right motor':'Motor kanan','None':'Tiada',
+    'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
+    'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
+    'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',
+    'Power %':'Kuasa %','Seconds':'Saat','Together':'Serentak','Wait (all stopped)':'Tunggu (semua henti)','No sequence yet.':'Belum ada jujukan.','No sequences yet':'Belum ada jujukan',
+    'Move up':'Naik','Move down':'Turun','Delete step':'Padam langkah',
+    'Each sequence becomes a quick action button. Steps run one after another; tick "together" to start a step with the one above.':'Setiap jujukan menjadi butang tindakan pantas. Langkah berjalan satu demi satu; tanda "Serentak" untuk memulakan langkah bersama langkah di atasnya.',
+    'Gamepad':'Gamepad','Use gamepad':'Guna gamepad','Stick dead zone':'Zon mati stick','Trigger channel (RT forward, LT reverse)':'Saluran picu (RT depan, LT undur)',
+    'Left stick = stick 1, right stick = stick 2 (Dual stick layout). Back = E-Stop, Start = release. The sticks use the channels chosen in the stick cards.':'Stick kiri = stick 1, stick kanan = stick 2 (susun atur Dua stick). Back = E-Stop, Start = lepas. Stick menggunakan saluran yang dipilih dalam kad stick.',
+    'No gamepad found. Pair it in Android Bluetooth settings, then press any button.':'Tiada gamepad ditemui. Pasangkan dalam tetapan Bluetooth Android, kemudian tekan mana-mana butang.',
+    'Connected but switched off':'Disambung tetapi dimatikan','Button mapping':'Pemetaan butang','Nothing':'Tiada','Stop all channels':'Henti semua saluran',
+    'D-pad up':'D-pad atas','D-pad down':'D-pad bawah','D-pad left':'D-pad kiri','D-pad right':'D-pad kanan',
+    'Limits & hubs':'Had & hab','Power limit (all channels)':'Had kuasa (semua saluran)','Acceleration smoothing':'Pelicinan pecutan',
+    'Sliders return to 0 when released':'Gelangsar kembali ke 0 bila dilepas','Auto-stop when idle':'Henti automatik bila tiada input','Warn after long full power':'Amaran selepas kuasa penuh lama',
+    'Off':'Mati','Hubs (module number of each)':'Hab (nombor modul setiap satu)',
+    'Frames sent':'Bingkai dihantar','Frame log':'Log bingkai',
+    'Each frame is six values from -100 to +100, one per channel, for every active hub. This page is running in simulation: no Bluetooth is used, frames are only logged.':'Setiap bingkai ialah enam nilai dari -100 hingga +100, satu setiap saluran, untuk setiap hab aktif. Halaman ini berjalan dalam simulasi: Bluetooth tidak digunakan, bingkai hanya dicatat.',
+    'Frames are broadcast over Bluetooth straight to the Mould King hubs. Put each hub in Bluetooth mode, tap Connect hub and wait until it says Hub active. With several hubs each one is updated in turn, so expect slightly slower response.':'Bingkai disiarkan melalui Bluetooth terus ke hab Mould King. Letakkan setiap hab dalam mod Bluetooth, tekan Sambung hab dan tunggu sehingga tertulis Hab aktif. Dengan beberapa hab, setiap satu dikemas kini bergilir, jadi tindak balas sedikit lebih perlahan.',
+    'Backup':'Sandaran','Export models':'Eksport model','Import models':'Import model','Apply import':'Gunakan import','Model data':'Data model',
+    'Exports every model, including recordings, as one file.':'Mengeksport semua model, termasuk rakaman, sebagai satu fail.',
+    'That file is too large to import.':'Fail itu terlalu besar untuk diimport.','That is not valid model data.':'Itu bukan data model yang sah.',
+    'No models found in that data.':'Tiada model ditemui dalam data itu.','Nothing could be imported.':'Tiada apa yang dapat diimport.',
+    'Models saved to file.':'Model disimpan ke fail.','Cancelled.':'Dibatalkan.','Could not save the file.':'Tidak dapat menyimpan fail.','Could not read that file.':'Tidak dapat membaca fail itu.',
+    'Choose where to save the file.':'Pilih tempat menyimpan fail.','Copy this text and keep it somewhere safe.':'Salin teks ini dan simpan di tempat selamat.',
+    'Choose a model file.':'Pilih fail model.','Paste exported model data, then tap Apply import.':'Tampal data model yang dieksport, kemudian tekan Gunakan import.',
+    'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
+    'This launcher cannot add a shortcut.':'Pelancar ini tidak dapat menambah pintasan.',
+    'Skip':'Langkau','Back':'Kembali','Next':'Seterusnya','Done':'Selesai',
+    'Welcome to MK6 Console':'Selamat datang ke MK6 Console',
+    'Control up to three Mould King 6.0 hubs from your phone over Bluetooth. This short guide covers the setup.':'Kawal sehingga tiga hab Mould King 6.0 dari telefon anda melalui Bluetooth. Panduan ringkas ini merangkumi persediaan.',
+    'Set each hub number':'Tetapkan nombor setiap hab',
+    'Press the power button on the hub briefly. The LED flashes 1, 2 or 3 times: that is its number (M1, M2, M3). Give every hub a different number, then pick the same numbers under Limits & hubs.':'Tekan butang power pada hab sekejap. LED berkelip 1, 2 atau 3 kali: itulah nombornya (M1, M2, M3). Beri setiap hab nombor berbeza, kemudian pilih nombor yang sama di bawah Had & hab.',
+    'Connect':'Sambung',
+    'Switch the hub into Bluetooth mode and power it on. Tap Connect hub, allow the Bluetooth permission, and wait about 3 seconds until it says Hub active.':'Tukar hab ke mod Bluetooth dan hidupkannya. Tekan Sambung hab, benarkan kebenaran Bluetooth, dan tunggu kira-kira 3 saat sehingga tertulis Hab aktif.',
+    'Drive safely':'Pandu dengan selamat',
+    'E-Stop locks every channel at 0 until you release it. On a gamepad, Back is E-Stop and Start releases it. Motors also stop when the app leaves the screen or after the idle time you set.':'E-Stop mengunci semua saluran pada 0 sehingga anda melepaskannya. Pada gamepad, Back ialah E-Stop dan Start melepaskannya. Motor juga berhenti bila app meninggalkan skrin atau selepas masa tiada input yang anda tetapkan.',
+    'Make it yours':'Jadikan milik anda',
+    'Pick a colour and a theme per model, build sequences and quick action buttons, and map gamepad buttons. You can reopen this guide from the App card.':'Pilih warna dan tema bagi setiap model, bina jujukan dan butang tindakan pantas, dan petakan butang gamepad. Anda boleh buka semula panduan ini dari kad Aplikasi.'
+  };
+  var MS_RE=[
+    [/^Colour (\d)$/,function(m){return 'Warna '+m[1]}],
+    [/^Name of channel (\S+)$/,function(m){return 'Nama saluran '+m[1]}],
+    [/^Power of channel (\S+)$/,function(m){return 'Kuasa saluran '+m[1]}],
+    [/^Hub (M?\d)$/,function(m){return 'Hab '+m[1]}],
+    [/^(\d+) frames$/,function(m){return m[1]+' bingkai'}],
+    [/^Recording (\d+:\d\d \/ \d+:\d\d)$/,function(m){return 'Merakam '+m[1]}],
+    [/^Playing (\d+:\d\d \/ \d+:\d\d)( \(loop\))?$/,function(m){return 'Memainkan '+m[1]+(m[2]?' (ulang)':'')}],
+    [/^(\d+) steps? · ([\d.]+) s( \(too long: only the first 90 s run\))?$/,function(m){return m[1]+' langkah · '+m[2]+' s'+(m[3]?' (terlalu panjang: hanya 90 s pertama dijalankan)':'')}],
+    [/^Run: (.+)$/,function(m){return 'Jalankan: '+m[1]}],
+    [/^(.+ · .+) forward$/,function(m){return m[1]+' depan'}],
+    [/^(.+ · .+) reverse$/,function(m){return m[1]+' undur'}],
+    [/^(.+) \(hub off\)$/,function(m){return m[1]+' (hab mati)'}],
+    [/^Connected: (.+)$/,function(m){return 'Disambung: '+m[1]}],
+    [/^Imported (\d+) models?\. Pick them in the Model list\.$/,function(m){return m[1]+' model diimport. Pilih dalam senarai Model.'}],
+    [/^Stopped: no input for (\d+) s$/,function(m){return 'Berhenti: tiada input selama '+m[1]+' s'}],
+    [/^Channel (\S+) has run near full power for (\d+) s\. Let the motor rest\.$/,function(m){return 'Saluran '+m[1]+' telah berjalan hampir kuasa penuh selama '+m[2]+' s. Biarkan motor berehat.'}]
+  ];
+  function msLookup(text){
+    if(Object.prototype.hasOwnProperty.call(MS,text)) return MS[text];
+    for(var i=0;i<MS_RE.length;i++){var m=MS_RE[i][0].exec(text);if(m) return MS_RE[i][1](m)}
+    return null;
+  }
+  var trOrig=typeof WeakMap==='function'?new WeakMap():null, trShown=typeof WeakMap==='function'?new WeakMap():null;
+  var ATTRS=['aria-label','title','placeholder'];
+  function trSkip(el){return !el||el.tagName==='SCRIPT'||el.tagName==='STYLE'||(el.closest&&el.closest('.log'))}
+  function trText(n){
+    if(!trOrig) return;
+    var cur=n.data;
+    if(trShown.get(n)===cur){
+      if(store.prefs.lang!=='ms'){n.data=trOrig.get(n);trShown.delete(n);trOrig.delete(n)}
+      return;
+    }
+    if(store.prefs.lang!=='ms'||trSkip(n.parentElement)) return;
+    var key=cur.trim();if(!key) return;
+    var t=msLookup(key);if(t===null) return;
+    var out=cur.replace(key,function(){return t});
+    trOrig.set(n,cur);trShown.set(n,out);n.data=out;
+  }
+  function trAttr(el,a){
+    if(!trOrig||!el.getAttribute) return;
+    var cur=el.getAttribute(a);if(cur===null) return;
+    var rec=trOrig.get(el)||{};
+    if(rec[a]&&rec[a].shown===cur){
+      if(store.prefs.lang!=='ms'){el.setAttribute(a,rec[a].orig);delete rec[a]}
+      return;
+    }
+    if(store.prefs.lang!=='ms') return;
+    var t=msLookup(cur.trim());if(t===null) return;
+    rec[a]={orig:cur,shown:t};trOrig.set(el,rec);el.setAttribute(a,t);
+  }
+  function trWalk(root){
+    if(!root||!document.createTreeWalker||!trOrig) return;
+    if(root.nodeType===3){trText(root);return}
+    if(root.nodeType!==1) return;
+    var w=document.createTreeWalker(root,4),n,list=[];
+    while((n=w.nextNode())) list.push(n);
+    list.forEach(trText);
+    var els=root.querySelectorAll?[].slice.call(root.querySelectorAll('[aria-label],[title],[placeholder]')):[];
+    if(root.getAttribute) els.push(root);
+    els.forEach(function(e){ATTRS.forEach(function(a){trAttr(e,a)})});
+  }
+  function applyLang(){
+    var de=document.documentElement;
+    if(de&&de.setAttribute) de.setAttribute('lang',store.prefs.lang==='ms'?'ms':'en');
+    if(document.body) trWalk(document.body);
+    $('#lang').value=store.prefs.lang;
+    if(typeof guideRender==='function'&&!$('#guide').hidden) guideRender();
+  }
+  if(document.body&&typeof MutationObserver==='function'){
+    new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        if(m.type==='characterData') trText(m.target);
+        else if(m.type==='attributes') trAttr(m.target,m.attributeName);
+        else m.addedNodes.forEach(trWalk);
+      });
+    }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRS});
+  }
+  $('#lang').addEventListener('change',function(){store.prefs.lang=$('#lang').value==='ms'?'ms':'en';save();applyLang()});
+
+  var GUIDE=[
+    ['Welcome to MK6 Console','Control up to three Mould King 6.0 hubs from your phone over Bluetooth. This short guide covers the setup.'],
+    ['Set each hub number','Press the power button on the hub briefly. The LED flashes 1, 2 or 3 times: that is its number (M1, M2, M3). Give every hub a different number, then pick the same numbers under Limits & hubs.'],
+    ['Connect','Switch the hub into Bluetooth mode and power it on. Tap Connect hub, allow the Bluetooth permission, and wait about 3 seconds until it says Hub active.'],
+    ['Drive safely','E-Stop locks every channel at 0 until you release it. On a gamepad, Back is E-Stop and Start releases it. Motors also stop when the app leaves the screen or after the idle time you set.'],
+    ['Make it yours','Pick a colour and a theme per model, build sequences and quick action buttons, and map gamepad buttons. You can reopen this guide from the App card.']
+  ];
+  var gIdx=0, guideEl=$('#guide');
+  function guideRender(){
+    var g=GUIDE[gIdx];
+    $('#gTitle').textContent=g[0];$('#gBody').textContent=g[1];
+    $('#gBack').hidden=gIdx===0;
+    $('#gNext').textContent=gIdx===GUIDE.length-1?'Done':'Next';
+    $('#gSkip').hidden=gIdx===GUIDE.length-1;
+    var dots=$('#gDots');dots.innerHTML='';
+    GUIDE.forEach(function(_,i){var d=document.createElement('i');if(i===gIdx) d.className='on';dots.appendChild(d)});
+    var ex=$('#gExtra');ex.innerHTML='';
+    if(gIdx===0){
+      [['en','English'],['ms','Bahasa Melayu']].forEach(function(l){
+        var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=l[1];
+        b.setAttribute('aria-pressed',String(store.prefs.lang===l[0]));
+        b.addEventListener('click',function(){store.prefs.lang=l[0];save();applyLang()});
+        ex.appendChild(b);
+      });
+    }
+  }
+  function guideOpen(){gIdx=0;guideEl.hidden=false;guideRender()}
+  function guideClose(){guideEl.hidden=true;if(!store.prefs.seen){store.prefs.seen=true;save()}}
+  $('#gNext').addEventListener('click',function(){if(gIdx>=GUIDE.length-1){guideClose();return}gIdx++;guideRender()});
+  $('#gBack').addEventListener('click',function(){if(gIdx>0){gIdx--;guideRender()}});
+  $('#gSkip').addEventListener('click',guideClose);
+  $('#guideBtn').addEventListener('click',guideOpen);
+  applyLang();
+  if(!store.prefs.seen) guideOpen();
+
   setInterval(tick,50);
 })();
 </script>

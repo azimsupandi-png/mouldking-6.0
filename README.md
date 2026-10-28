@@ -21,6 +21,10 @@ You can also start a build by hand from the **Actions** tab (Run workflow).
 
 The app stops broadcasting when it leaves the screen, so motors do not keep running in the background.
 
+## Setting the hub number
+
+Each hub needs its own number (M1, M2 or M3) when you use more than one. Press the hub's power button briefly: the LED flashes 1, 2 or 3 times, which is its number. Pick the same numbers under **Limits & hubs** in the app.
+
 ## Features
 
 - **Models:** every model stores channel names, reverse, limits, stick mapping, layout and recordings. Two examples are included.
@@ -32,6 +36,10 @@ The app stops broadcasting when it leaves the screen, so motors do not keep runn
 - **Backup:** export all models to a file and import them again (in the app, through the system file picker).
 - **Sequences & quick actions:** build timed step lists (channel, power, seconds, "together" with the previous step, optional loop). Every sequence gets a big button at the top of the page. A second tap or E-Stop stops it and every channel returns to 0.
 - **Gamepad:** pair a Bluetooth controller in Android settings and press a button. Left stick = stick 1, right stick = stick 2 (Dual stick layout), RT/LT drive a trigger channel, Back = E-Stop, Start = release. Dead zone is adjustable, and unplugging the pad stops the motors.
+- **Safety:** auto-stop after a set idle time, a warning after long full-power running, E-Stop on the gamepad (Back/Start), and motors stop when the app leaves the screen.
+- **Gamepad buttons:** map A/B/X/Y, bumpers, sticks' clicks and the D-pad to hold a channel forward or reverse, run a sequence, or stop everything.
+- **Sound and vibration** feedback (can be switched off) and **home-screen shortcuts**: long-press the app icon for your models, or add one model to the home screen from the App card.
+- **Language:** English or Bahasa Melayu, plus a short first-run guide (reopen it from the App card).
 - **Several hubs:** up to three hubs, each with its own module number (M1 to M3). The hubs are updated in turn, so response is slower than with one hub.
 
 The hub only listens, so the app cannot show battery level or motor state.
