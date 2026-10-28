@@ -197,7 +197,8 @@ final class HubAdvertiser {
         }
         for (int i = 0; i < mods.length; i++) {
             if (mods[i] < 0 || mods[i] > 2
-                    || (kindsIn[i] != HubProtocol.MK6 && kindsIn[i] != HubProtocol.MK4)) {
+                    || (kindsIn[i] != HubProtocol.MK6 && kindsIn[i] != HubProtocol.MK4
+                        && kindsIn[i] != HubProtocol.MK4_OLD)) {
                 listener.onState("error");
                 return;
             }
@@ -255,6 +256,7 @@ final class HubAdvertiser {
         int n = 0;
         boolean has4 = false;
         boolean has6 = false;
+        boolean hasOld = false;
         for (int k = 0; k < kinds.length; k++) {
             if (kinds[k] == HubProtocol.MK4) {
                 if (!has4) {
@@ -264,17 +266,20 @@ final class HubAdvertiser {
                     n++;
                 }
             } else {
-                has6 = true;
-                uk[n] = HubProtocol.MK6;
+                if (kinds[k] == HubProtocol.MK4_OLD) hasOld = true; else has6 = true;
+                uk[n] = kinds[k];
                 us[n] = k;
                 n++;
             }
         }
         unitKind = java.util.Arrays.copyOf(uk, n);
         unitSlot = java.util.Arrays.copyOf(us, n);
-        connectKinds = (has4 && has6)
-            ? new int[] {HubProtocol.MK6, HubProtocol.MK4}
-            : new int[] {has4 ? HubProtocol.MK4 : HubProtocol.MK6};
+        int[] ck = new int[3];
+        int c = 0;
+        if (has6) ck[c++] = HubProtocol.MK6;
+        if (has4) ck[c++] = HubProtocol.MK4;
+        if (hasOld) ck[c++] = HubProtocol.MK4_OLD;
+        connectKinds = java.util.Arrays.copyOf(ck, c);
     }
 
     /**
@@ -356,9 +361,10 @@ final class HubAdvertiser {
     private void pushUnit(int u) {
         if (!running || set == null || u >= unitKind.length) return;
         try {
-            byte[] t = unitKind[u] == HubProtocol.MK4
-                ? HubProtocol.mk4(kinds, modules, latest)
-                : HubProtocol.mk6(modules[unitSlot[u]], latest[unitSlot[u]]);
+            byte[] t;
+            if (unitKind[u] == HubProtocol.MK4) t = HubProtocol.mk4(kinds, modules, latest);
+            else if (unitKind[u] == HubProtocol.MK4_OLD) t = HubProtocol.mk4Old(latest[unitSlot[u]]);
+            else t = HubProtocol.mk6(modules[unitSlot[u]], latest[unitSlot[u]]);
             set.setAdvertisingData(dataFor(t));
             lastPushAt = SystemClock.uptimeMillis();
         } catch (RuntimeException e) {

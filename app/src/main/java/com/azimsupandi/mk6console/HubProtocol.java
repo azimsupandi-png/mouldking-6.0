@@ -16,6 +16,8 @@ final class HubProtocol {
 
     static final int MK6 = 6;
     static final int MK4 = 4;
+    /** Older MK 4.0 style hubs: byte-per-channel telegram as used by the MK 3.0 family (experimental). */
+    static final int MK4_OLD = 3;
 
     static final byte[] CONNECT_MK6 = {
         0x6D, 0x7B, (byte) 0xA7, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x92
@@ -24,9 +26,14 @@ final class HubProtocol {
         (byte) 0xAD, 0x7B, (byte) 0xA7, (byte) 0x80, (byte) 0x80, (byte) 0x80, 0x4F, 0x52
     };
 
+    static final byte[] CONNECT_OLD = {
+        (byte) 0xAA, 0x7B, (byte) 0xA7, 0x00, 0x00, 0x00, 0x00, 0x55
+    };
+
     private HubProtocol() {}
 
     static byte[] connectFor(int kind) {
+        if (kind == MK4_OLD) return CONNECT_OLD;
         return kind == MK4 ? CONNECT_MK4 : CONNECT_MK6;
     }
 
@@ -38,6 +45,17 @@ final class HubProtocol {
         t[2] = (byte) 0xA7;
         for (int i = 0; i < 6; i++) t[3 + i] = (byte) channelByte(i < pct.length ? pct[i] : 0);
         t[9] = (byte) (0x9E - moduleNo);
+        return t;
+    }
+
+    /** Older MK 4.0 hub: 0x66, 0x7B, 0xA7, four channel bytes (0x80 = stop), 0x99. */
+    static byte[] mk4Old(int[] pct) {
+        byte[] t = new byte[8];
+        t[0] = 0x66;
+        t[1] = 0x7B;
+        t[2] = (byte) 0xA7;
+        for (int i = 0; i < 4; i++) t[3 + i] = (byte) channelByte(i < pct.length ? pct[i] : 0);
+        t[7] = (byte) 0x99;
         return t;
     }
 

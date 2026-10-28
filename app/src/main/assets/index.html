@@ -432,11 +432,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <label>Warn after long full power<select id="sfWarn"><option value="0">Off</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <div class="set-row"><span class="set-top"><span>Hubs (module number of each)</span></span>
             <div class="hubrow">
-              <div class="hcell"><span>Hub 1</span><select id="hubK0" aria-label="Hub 1 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option></select><select id="hub0" aria-label="Hub 1 number"><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
-              <div class="hcell"><span>Hub 2</span><select id="hubK1" aria-label="Hub 2 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option></select><select id="hub1" aria-label="Hub 2 number"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
-              <div class="hcell"><span>Hub 3</span><select id="hubK2" aria-label="Hub 3 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option></select><select id="hub2" aria-label="Hub 3 number"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
+              <div class="hcell"><span>Hub 1</span><select id="hubK0" aria-label="Hub 1 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option><option value="3">MK 4.0 (old)</option></select><select id="hub0" aria-label="Hub 1 number"><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
+              <div class="hcell"><span>Hub 2</span><select id="hubK1" aria-label="Hub 2 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option><option value="3">MK 4.0 (old)</option></select><select id="hub1" aria-label="Hub 2 number"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
+              <div class="hcell"><span>Hub 3</span><select id="hubK2" aria-label="Hub 3 type"><option value="6">MK 6.0</option><option value="4">MK 4.0</option><option value="3">MK 4.0 (old)</option></select><select id="hub2" aria-label="Hub 3 number"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></div>
             </div>
-            <p class="note" style="margin:6px 0 0">MK 4.0 hubs have four channels (A to D) and share one broadcast, so several MK 4.0 hubs update as fast as one.</p>
+            <p class="note" style="margin:6px 0 0">"MK 4.0 (old)" is for older MK 4.0 hubs that do not respond to "MK 4.0" (experimental, one hub per number). MK 4.0 hubs have four channels (A to D) and share one broadcast, so several MK 4.0 hubs update as fast as one.</p>
           </div>
         </div>
       </section>
@@ -510,7 +510,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     }
     return out;
   }
-  function cleanKinds(k){return [0,1,2].map(function(i){return pickOf(k&&k[i],[4,6],6)})}
+  function cleanKinds(k){return [0,1,2].map(function(i){return pickOf(k&&k[i],[3,4,6],6)})}
   var PAD_BTNS=[0,1,2,3,4,5,10,11,12,13,14,15];
   function pickOf(v,list,def){v=+v;return list.indexOf(v)>=0?v:def}
   var MAX_SEQ=10, MAX_STEPS=30;
@@ -677,10 +677,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function isActive(i){var s=(i/PER)|0;return slotOn(s)&&(C.hubKinds[s]===6||(i%PER)<4)}
   function activeSlots(){var o=[];for(var s=0;s<3;s++) if(slotOn(s)) o.push(s);return o}
   function activeIdx(){var o=[];for(var i=0;i<NMAX;i++) if(isActive(i)) o.push(i);return o}
-  function kindsMixed(){var k=activeSlots().map(function(s){return C.hubKinds[s]});return k.indexOf(4)>=0&&k.indexOf(6)>=0}
+  function kindsMixed(){var k=activeSlots().map(function(s){return C.hubKinds[s]});return k.some(function(x){return x!==k[0]})}
   // Hub list for the native side: "1" = MK 6.0 hub with module number 1, "4:2" = MK 4.0 hub with module number 2.
-  function hubCsv(){return activeSlots().map(function(s){return (C.hubKinds[s]===4?'4:':'')+C.hubs[s]}).join(',')}
-  function slotName(s){return (kindsMixed()&&C.hubKinds[s]===4?'4.':'')+'M'+(C.hubs[s]+1)}
+  function hubCsv(){return activeSlots().map(function(s){return (C.hubKinds[s]===6?'':C.hubKinds[s]+':')+C.hubs[s]}).join(',')}
+  function slotName(s){return (kindsMixed()&&C.hubKinds[s]!==6?(C.hubKinds[s]===3?'old ':'4.'):'')+'M'+(C.hubs[s]+1)}
   function tagOf(i){var s=(i/PER)|0;return activeSlots().length>1?slotName(s)+L[i%PER]:L[i%PER]}
 
   /* Transport: broadcasts through the native bridge when running inside the Android app. */
@@ -887,7 +887,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     groups.forEach(function(g,s){
       g.hidden=!(multi&&slotOn(s)&&visible[s]>0);
-      g.textContent='Hub M'+(C.hubs[s]+1)+(C.hubKinds[s]===4?' (MK 4.0)':'');
+      g.textContent='Hub M'+(C.hubs[s]+1)+(C.hubKinds[s]===4?' (MK 4.0)':C.hubKinds[s]===3?' (MK 4.0 old)':'');
     });
   }
 
@@ -921,7 +921,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     applyHubSetup();
   }
   function onKindChange(s,k){
-    C.hubKinds[s]=pickOf(k,[4,6],6);
+    C.hubKinds[s]=pickOf(k,[3,4,6],6);
     var h=C.hubs.slice();
     for(var t=0;t<3;t++) if(t!==s&&h[s]>=0&&h[t]===h[s]&&C.hubKinds[t]===C.hubKinds[s]) h[t]=-1;
     C.hubs=cleanHubs(h,C.hubKinds);
@@ -1634,7 +1634,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Limits & hubs':'Had & hab','Power limit (all channels)':'Had kuasa (semua saluran)','Acceleration smoothing':'Pelicinan pecutan',
     'Sliders return to 0 when released':'Gelangsar kembali ke 0 bila dilepas','Auto-stop when idle':'Henti automatik bila tiada input','Warn after long full power':'Amaran selepas kuasa penuh lama',
     'Off':'Mati','Hubs (module number of each)':'Hab (nombor modul setiap satu)',
-    'MK 4.0 hubs have four channels (A to D) and share one broadcast, so several MK 4.0 hubs update as fast as one.':'Hab MK 4.0 ada empat saluran (A hingga D) dan berkongsi satu siaran, jadi beberapa hab MK 4.0 dikemas kini sepantas satu hab.',
+    '"MK 4.0 (old)" is for older MK 4.0 hubs that do not respond to "MK 4.0" (experimental, one hub per number). MK 4.0 hubs have four channels (A to D) and share one broadcast, so several MK 4.0 hubs update as fast as one.':'"MK 4.0 (old)" untuk hab MK 4.0 lama yang tidak bergerak dengan "MK 4.0" (eksperimen, satu hab bagi setiap nombor). Hab MK 4.0 ada empat saluran (A hingga D) dan berkongsi satu siaran, jadi beberapa hab MK 4.0 dikemas kini sepantas satu hab.',
     'Frames sent':'Bingkai dihantar','Frame log':'Log bingkai',
     'Each frame is six values from -100 to +100, one per channel, for every active hub. This page is running in simulation: no Bluetooth is used, frames are only logged.':'Setiap bingkai ialah enam nilai dari -100 hingga +100, satu setiap saluran, untuk setiap hab aktif. Halaman ini berjalan dalam simulasi: Bluetooth tidak digunakan, bingkai hanya dicatat.',
     'Frames are broadcast over Bluetooth straight to the Mould King hubs. Put each hub in Bluetooth mode, tap Connect hub and wait until it says Hub active. With several hubs each one is updated in turn, so expect slightly slower response.':'Bingkai disiarkan melalui Bluetooth terus ke hab Mould King. Letakkan setiap hab dalam mod Bluetooth, tekan Sambung hab dan tunggu sehingga tertulis Hab aktif. Dengan beberapa hab, setiap satu dikemas kini bergilir, jadi tindak balas sedikit lebih perlahan.',
@@ -1663,7 +1663,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     [/^Colour (\d)$/,function(m){return 'Warna '+m[1]}],
     [/^Name of channel (\S+)$/,function(m){return 'Nama saluran '+m[1]}],
     [/^Power of channel (\S+)$/,function(m){return 'Kuasa saluran '+m[1]}],
-    [/^Hub (M?\d)( \(MK 4\.0\))?$/,function(m){return 'Hab '+m[1]+(m[2]||'')}],
+    [/^Hub (M?\d)( \(MK 4\.0( old)?\))?$/,function(m){return 'Hab '+m[1]+(m[2]||'')}],
     [/^Hub (\d) type$/,function(m){return 'Jenis hab '+m[1]}],
     [/^Hub (\d) number$/,function(m){return 'Nombor hab '+m[1]}],
     [/^(\d+) frames$/,function(m){return m[1]+' bingkai'}],
