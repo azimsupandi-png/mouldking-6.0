@@ -29,6 +29,7 @@ The app stops broadcasting when it leaves the screen, so motors do not keep runn
 - **Per channel:** maximum power, start power, fine control (expo curve with preview) and slider or hold-to-move control.
 - **Record & replay:** record up to 90 seconds of control movements, then replay once or in a loop. Manual input is locked during replay and E-Stop cancels it.
 - **Backup:** export all models to a file and import them again (in the app, through the system file picker).
+- **Sequences & quick actions:** build timed step lists (channel, power, seconds, "together" with the previous step, optional loop). Every sequence gets a big button at the top of the page. A second tap or E-Stop stops it and every channel returns to 0.
 - **Gamepad:** pair a Bluetooth controller in Android settings and press a button. Left stick = stick 1, right stick = stick 2 (Dual stick layout), RT/LT drive a trigger channel, Back = E-Stop, Start = release. Dead zone is adjustable, and unplugging the pad stops the motors.
 - **Several hubs:** up to three hubs, each with its own module number (M1 to M3). The hubs are updated in turn, so response is slower than with one hub.
 
