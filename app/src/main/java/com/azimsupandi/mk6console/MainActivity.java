@@ -9,6 +9,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.SystemClock;
+import java.util.Locale;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
@@ -160,12 +166,14 @@ public class MainActivity extends Activity {
     protected void onPause() {
         // Never leave motors running while the app is not on screen.
         mk6.stop();
+        setTilt(false);
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        notifyApp("resume");
         // The advertiser was stopped in onPause; make the page show that.
         if (!mk6.isActive() && pendingMods == null) notifyPage("stopped");
     }
@@ -176,8 +184,41 @@ public class MainActivity extends Activity {
             try { unregisterReceiver(btReceiver); } catch (RuntimeException ignored) { }
             btReceiverOn = false;
         }
+        setTilt(false);
         mk6.destroy();
         super.onDestroy();
+    }
+
+    private SensorManager sm;
+    private boolean tiltOn;
+    private long lastTilt;
+    private final SensorEventListener tiltL = new SensorEventListener() {
+        @Override public void onSensorChanged(SensorEvent e) {
+            long now = SystemClock.uptimeMillis();
+            if (now - lastTilt < 30) return;
+            lastTilt = now;
+            int rot = 0;
+            try { rot = getWindowManager().getDefaultDisplay().getRotation() * 90; } catch (RuntimeException ignored) { }
+            final String js = String.format(Locale.US,
+                "window.onTilt&&window.onTilt(%.2f,%.2f,%d)", e.values[0], e.values[1], rot);
+            web.evaluateJavascript(js, null);
+        }
+        @Override public void onAccuracyChanged(Sensor s, int a) { }
+    };
+
+    private void setTilt(boolean on) {
+        if (on == tiltOn) return;
+        if (sm == null) sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sm == null) { if (on) notifyApp("notilt"); return; }
+        if (on) {
+            Sensor a = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            if (a == null) { notifyApp("notilt"); return; }
+            sm.registerListener(tiltL, a, SensorManager.SENSOR_DELAY_GAME);
+            tiltOn = true;
+        } else {
+            sm.unregisterListener(tiltL);
+            tiltOn = false;
+        }
     }
 
     private void requestStart(int[] mods) {
@@ -332,6 +373,11 @@ public class MainActivity extends Activity {
 
     /** Methods the page can call; they run on a WebView thread, so hop to the UI thread. */
     private final class Bridge {
+        @JavascriptInterface
+        public void tilt(final boolean on) {
+            runOnUiThread(() -> setTilt(on));
+        }
+
         @JavascriptInterface
         public void start(final String mods) {
             final int[] parsed = parseMods(mods);
