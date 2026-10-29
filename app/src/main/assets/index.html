@@ -299,6 +299,23 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
 
 /* Player mode, settings lock, calibration, battery */
+/* Layout fixes: keep content inside its card whatever the number width */
+.ch{grid-template-columns:minmax(0,1fr)}
+.ch>*{min-width:0}
+.ch-foot{min-width:0;gap:8px}
+.ch-foot .val{flex:none;min-width:4.4ch}
+.ch-foot .sent{flex:1 1 auto;min-width:6ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+:root .ch-foot .btn{flex:none;min-width:0;padding:0 8px}
+.ch-foot .lock{min-width:0}
+@media (max-width:440px){.ch-foot .sent{display:none}.ch-foot .stop{margin-left:auto}}
+.ch-foot .stop{margin-left:0}
+.bdw{grid-template-columns:minmax(0,1fr)}
+.bdw>*{min-width:0}
+.bdw .holds{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.bdw:not(.w2) .holds{grid-template-columns:minmax(0,1fr)}
+:root .bdw-ed{min-width:0;width:100%}
+:root .bdw-ed .btn{min-width:0;padding:0;min-height:32px;flex:1 1 0}
+
 .cols:not(.board) #boardCard{display:none}
 .cols.board #chCard,.cols.board #joyCard{display:none}
 .bdgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
