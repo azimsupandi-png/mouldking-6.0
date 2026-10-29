@@ -970,9 +970,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     rt.t[i]=clamp(Math.round(v),-100,100)||0;
     if(!fromUI||S.estop) refs[i].rng.value=rt.t[i];
     refs[i].val.textContent=fmt(rt.t[i]);
+    if(refs[i].hRev){refs[i].hRev.classList.toggle('on',rt.t[i]<0);refs[i].hFwd.classList.toggle('on',rt.t[i]>0)}
   }
   function unlockCh(i){
     var r=refs[i];
+    if(r&&r.hRev){r.hRev.classList.remove('on');r.hFwd.classList.remove('on')}
     if(r&&r.locked){r.locked=false;r.lock.setAttribute('aria-pressed','false');r.lock.textContent='Lock'}
   }
   function zeroAll(){
@@ -1008,7 +1010,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       r.locked=!r.locked;
       r.lock.setAttribute('aria-pressed',String(r.locked));
       r.lock.textContent=r.locked?'Locked':'Lock';
-      if(!r.locked&&C.spring){r.rng.value=0;setT(i,0,true)}
+      if(!r.locked&&(C.spring||C.ch[i].kind==='hold')){r.rng.value=0;setT(i,0,true)}
     });
     $('.stop',el).addEventListener('click',function(){
       if(S.play) return;
@@ -1019,7 +1021,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     [r.hRev,r.hFwd].forEach(function(btn,k){
       var dir=k?1:-1, down=false;
       function press(){ if(down)return; down=true; btn.classList.add('on'); setT(i,dir*100,false); }
-      function lift(){ if(!down)return; down=false; btn.classList.remove('on'); setT(i,0,false); }
+      function lift(){ if(!down)return; down=false; if(r.locked) return; btn.classList.remove('on'); setT(i,0,false); }
       btn.addEventListener('pointerdown',function(e){
         e.preventDefault();
         try{btn.setPointerCapture(e.pointerId)}catch(_){}
@@ -1070,7 +1072,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     r.track.hidden=hold;r.holds.hidden=!hold;
     r.kS.setAttribute('aria-pressed',String(!hold));
     r.kH.setAttribute('aria-pressed',String(hold));
-    r.lock.hidden=hold;
     drawCurve(i);
   }
 
