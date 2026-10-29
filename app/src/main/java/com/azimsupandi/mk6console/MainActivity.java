@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
@@ -17,6 +18,8 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -235,6 +238,38 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Saves the models as Downloads/MK6-Console-backup.json (needs no permission on Android 10 and up). */
+    private boolean writeBackup(String text) {
+        if (text == null || Build.VERSION.SDK_INT < 29) return false;
+        byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length == 0 || bytes.length > MAX_IMPORT_BYTES) return false;
+        try {
+            android.content.ContentResolver cr = getContentResolver();
+            Uri coll = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+            String name = "MK6-Console-backup.json";
+            try {
+                cr.delete(coll,
+                    MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " + MediaStore.MediaColumns.RELATIVE_PATH + "=?",
+                    new String[] {name, Environment.DIRECTORY_DOWNLOADS + "/"});
+            } catch (RuntimeException ignored) {
+                // A copy from an earlier install cannot be replaced; a new one is added next to it.
+            }
+            ContentValues v = new ContentValues();
+            v.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+            v.put(MediaStore.MediaColumns.MIME_TYPE, "application/json");
+            v.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+            Uri u = cr.insert(coll, v);
+            if (u == null) return false;
+            try (OutputStream out = cr.openOutputStream(u, "wt")) {
+                if (out == null) return false;
+                out.write(bytes);
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private String readLimited(Uri uri) throws java.io.IOException {
         try (InputStream in = getContentResolver().openInputStream(uri)) {
             if (in == null) return null;
@@ -321,6 +356,11 @@ public class MainActivity extends Activity {
             } catch (RuntimeException e) {
                 return -1;
             }
+        }
+
+        @JavascriptInterface
+        public void autoBackup(final String json) {
+            new Thread(() -> notifyApp(writeBackup(json) ? "backupok" : "backupfail")).start();
         }
 
         @JavascriptInterface

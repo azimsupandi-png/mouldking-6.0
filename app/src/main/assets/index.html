@@ -299,6 +299,23 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
 
 /* Player mode, settings lock, calibration, battery */
+.cols:not(.board) #boardCard{display:none}
+.cols.board #chCard,.cols.board #joyCard{display:none}
+.bdgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.bdw{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--well);min-width:0;display:grid;gap:8px;align-content:start}
+.bdw.w2{grid-column:span 2}
+.bdw-h{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.bdw-h span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bdw-h output{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.bdw input[type=range]{width:100%;min-height:44px}
+.bdw .holds{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bdw .hold{min-height:64px}
+.bdw .qbtn{width:100%}
+.bdw-ed{display:flex;gap:6px;flex-wrap:wrap}
+.bdw-ed .btn{min-height:36px;padding:0 10px}
+.tilt-opt{display:grid;gap:8px;margin-top:8px}
+:root[data-lock] .tilt-row,:root[data-lock] #bdEdit,:root[data-lock] #bdEditor,:root[data-lock] .bdw-ed{display:none}
+
 #lockBtn.hold{background:var(--acc);color:#fff}
 .bat{margin-left:6px;font-family:var(--f-mono)}.bat::before{content:"\00b7 ";}.bat.low{color:var(--danger);font-weight:700}
 .spr-row{margin-top:8px}
@@ -362,11 +379,17 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     </div>
     <div class="swatches" id="swatches" role="group" aria-label="Model colour"><span>Colour</span></div>
     <div class="seg" role="group" aria-label="Theme"><button class="btn" id="thStd" type="button" aria-pressed="true">Classic</button><button class="btn" id="thBuild" type="button" aria-pressed="false">Construction</button></div>
+    <div class="seg" id="spdSeg" role="group" aria-label="Speed">
+      <button class="btn" id="spdSlow" type="button" aria-pressed="false">Slow</button>
+      <button class="btn" id="spdNorm" type="button" aria-pressed="false">Normal</button>
+      <button class="btn" id="spdFast" type="button" aria-pressed="true">Fast</button>
+    </div>
     <div class="model-row">
       <div class="seg" role="group" aria-label="Layout">
         <button class="btn" id="lStd" type="button" aria-pressed="true">Standard</button>
         <button class="btn" id="lJoy" type="button" aria-pressed="false">Joystick</button>
         <button class="btn" id="lDual" type="button" aria-pressed="false">Dual stick</button>
+        <button class="btn" id="lBoard" type="button" aria-pressed="false">Board</button>
       </div>
       <button class="btn" id="profNew" type="button">New model</button>
       <button class="btn" id="profDel" type="button">Delete</button>
@@ -383,6 +406,21 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     <section class="card" id="chCard" aria-label="Power channels">
       <h2>Channels</h2>
       <div id="channels"></div>
+    </section>
+
+    <section class="card" id="boardCard" aria-label="Control board">
+      <h2>Board</h2>
+      <div class="bdgrid" id="boardGrid"></div>
+      <p class="rec-stat" id="bdNote"></p>
+      <div class="rec-row"><button class="btn" id="bdEdit" type="button" aria-pressed="false">Edit board</button></div>
+      <div id="bdEditor" hidden>
+        <div class="rec-row">
+          <select id="bdKind" aria-label="Control type"><option value="s">Slider</option><option value="h">Hold buttons</option><option value="q">Sequence</option></select>
+          <select id="bdTarget" aria-label="Control target"></select>
+          <select id="bdWide" aria-label="Control width"><option value="1">Normal</option><option value="2">Wide</option></select>
+          <button class="btn" id="bdAdd" type="button">Add</button>
+        </div>
+      </div>
     </section>
 
     <div class="stack">
@@ -452,6 +490,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <input class="txt" id="recName" type="text" maxlength="24" autocomplete="off" aria-label="Recording name" style="flex:1 1 140px">
           <button class="btn" id="recDel" type="button">Delete</button>
         </div>
+        <details class="adv"><summary>Edit recording</summary>
+          <div class="set" style="margin-top:8px">
+            <div class="rec-row"><select id="recSpd" aria-label="Speed"><option value="0.5">Half speed</option><option value="0.75">Slower (0.75x)</option><option value="1.5">Faster (1.5x)</option><option value="2">Double speed</option></select><button class="btn" id="recSpdGo" type="button">Save as new</button></div>
+            <div class="rec-row"><label>From (s)<input class="txt" id="recFrom" type="number" min="0" step="0.1" value="0" inputmode="decimal"></label><label>To (s)<input class="txt" id="recTo" type="number" min="0.1" step="0.1" value="1" inputmode="decimal"></label><button class="btn" id="recTrim" type="button">Trim to new</button></div>
+            <div class="rec-row"><select id="recJoinSel" aria-label="Recording to join"></select><button class="btn" id="recJoin" type="button">Join to end</button></div>
+            <div class="rec-row"><button class="btn" id="recCopy" type="button">Copy</button></div>
+          </div>
+        </details>
       </section>
 
       <section class="card" id="setCard">
@@ -463,6 +509,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
             <input id="ramp" type="range" min="0" max="100" step="5" value="60"></div>
           <label class="check" for="spring"><input id="spring" type="checkbox" checked>Sliders return to 0 when released</label>
           <label>Auto-stop when idle<select id="sfIdle"><option value="0">Off</option><option value="10">10 s</option><option value="30">30 s</option><option value="60">60 s</option><option value="120">2 min</option></select></label>
+          <label>Stop a channel after running this long<select id="sfRun"><option value="0">Off</option><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <label>Warn after long full power<select id="sfWarn"><option value="0">Off</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <div class="set-row"><span class="set-top"><span>Hubs (module number of each)</span></span>
             <div class="hubrow">
@@ -489,6 +536,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         </div>
         <textarea class="txt" id="ioText" rows="5" spellcheck="false" hidden aria-label="Model data"></textarea>
         <button class="btn" id="ioApply" type="button" hidden style="margin-top:8px">Apply import</button>
+        <label class="check" for="bkAuto" style="margin-top:12px"><input id="bkAuto" type="checkbox" checked>Back up automatically every week</label>
+        <div class="rec-row" style="margin-top:8px"><button class="btn" id="bkNow" type="button" hidden>Back up now</button></div>
+        <p class="note" id="bkMsg"></p>
         <p class="note" id="ioMsg">Exports every model, including recordings, as one file.</p>
       </section>
 
@@ -501,6 +551,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <button class="btn" id="guideBtn" type="button">Show guide</button>
           <button class="btn" id="pinBtn" type="button" hidden>Add model to home screen</button>
         </div>
+        <label class="rec-label" style="margin-top:12px">Player mode power limit<select id="kidLim"><option value="100">100%</option><option value="70">70%</option><option value="50">50%</option><option value="30">30%</option></select></label>
         <div class="rec-row" style="margin-top:12px">
           <button class="btn" id="playerBtn" type="button">Player mode</button>
           <button class="btn" id="lockBtn" type="button">Lock settings</button>
@@ -533,7 +584,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider'});
-    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false},accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -607,6 +658,21 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     return out;
   }
+  function cleanBoard(b){
+    var out=[];
+    if(!Array.isArray(b)) return out;
+    b.slice(0,12).forEach(function(x){
+      if(!x||typeof x!=='object') return;
+      var w=x.w===2?2:1;
+      if(x.k==='s'||x.k==='h'){
+        var c=Math.round(+x.c);
+        if(c>=0&&c<NMAX) out.push({k:x.k,c:c,w:w});
+      }else if(x.k==='q'&&typeof x.c==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(x.c)){
+        out.push({k:'q',c:x.c,w:w});
+      }
+    });
+    return out;
+  }
   function idxOf(v,def,allowNone){v=Math.round(+v);if(allowNone&&v===-1)return -1;return (v>=0&&v<NMAX)?v:def}
   function sanitizeCfg(c){
     var d=baseCfg();
@@ -629,7 +695,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.s1={mode:s1.mode==='tank'?'tank':'axis',a:idxOf(s1.a,0,false),b:idxOf(s1.b,1,false),hold:typeof s1.hold==='boolean'?s1.hold:gh};
     d.s2={mode:s2.mode==='tank'?'tank':'axis',a:idxOf(s2.a,2,true),b:idxOf(s2.b,3,true),hold:typeof s2.hold==='boolean'?s2.hold:gh};
     d.hubs=cleanHubs(Array.isArray(c.hubs)?c.hubs:[num(c.mod,0,2,0),-1,-1]);
-    d.layout=(c.layout==='joy'||c.layout==='dual')?c.layout:'std';
+    d.layout=(c.layout==='joy'||c.layout==='dual'||c.layout==='board')?c.layout:'std';
+    d.speed=(c.speed==='slow'||c.speed==='normal')?c.speed:'fast';
+    d.board=cleanBoard(c.board);
+    var tl=(c.tilt&&typeof c.tilt==='object')?c.tilt:{};
+    d.tilt={on:tl.on===true,sens:pickOf(tl.sens,[30,45,60],45),inv:tl.inv===true};
     // Colour choices are now orange(0), red(1), yellow(2). Older saves used six: pink maps to red, yellow to yellow, the rest to orange.
     d.accent=Math.round(num(c.accent,0,5,0));
     if(c.accentV!==2) d.accent=({4:1,5:2})[d.accent]||0; else d.accent=Math.min(2,d.accent);
@@ -645,7 +715,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       d.pad.map[b]=v;
     });
     var sf=(c.safety&&typeof c.safety==='object')?c.safety:{};
-    d.safety={idle:pickOf(sf.idle,[0,10,30,60,120],60),warn:pickOf(sf.warn,[0,15,30,60],30)};
+    d.safety={idle:pickOf(sf.idle,[0,10,30,60,120],60),warn:pickOf(sf.warn,[0,15,30,60],30),run:pickOf(sf.run,[0,10,20,30,60],0)};
     d.seq=cleanSeqs(c.seq);
     d.rec=cleanRecs(c.rec);
     return d;
@@ -663,7 +733,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       {id:uid(),name:'Excavator (example)',cfg:exc}
     ];
   }
-  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true}}
+  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),autoBackup:p.autoBackup!==false,lastBackup:Math.max(0,+p.lastBackup||0)}}
   var store={active:null,profiles:[],prefs:cleanPrefs()};
   try{
     var raw=localStorage.getItem('mk6v2');
@@ -722,14 +792,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var m=100*((1-e)*x+e*x*x*x);
     return Math.min(m+c.off,c.max);
   }
+  var SPD={slow:0.4,normal:0.7,fast:1};
   function goalOf(i){
     var t=rt.t[i], m=powerFor(Math.abs(t),C.ch[i]);
-    return (t<0?-m:m)*C.limit/100;
+    var f=(SPD[C.speed]||1)*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
+    return (t<0?-m:m)*C.limit/100*f;
   }
 
   /* ---------- Channels ---------- */
   var refs=[], groups=[], wrap=$('#channels'), cols=$('#cols');
+  var runBlk=[], runSince=[];
   function setT(i,v,fromUI,force){
+    if(runBlk&&runBlk[i]&&!force){ if(v===0||S.estop) runBlk[i]=false; else return }
     if(S.estop) v=0; else if(S.play&&!force) return;
     rt.t[i]=clamp(Math.round(v),-100,100)||0;
     if(!fromUI||S.estop) refs[i].rng.value=rt.t[i];
@@ -740,7 +814,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(r&&r.locked){r.locked=false;r.lock.setAttribute('aria-pressed','false');r.lock.textContent='Lock'}
   }
   function zeroAll(){
-    for(var u=0;u<NMAX;u++) unlockCh(u);
+    for(var u=0;u<NMAX;u++){unlockCh(u);if(runBlk)runBlk[u]=false}
     for(var i=0;i<NMAX;i++){rt.t[i]=0;rt.o[i]=0;refs[i].rng.value=0;refs[i].val.textContent='0'}
   }
   function buildChannel(i){
@@ -840,6 +914,40 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
   /* ---------- Sticks ---------- */
   var sticks=[];
+  var TILT={g:[0,0],has:false,zero:null};
+  if(typeof window.addEventListener==='function'){
+    window.addEventListener('devicemotion',function(e){
+      var a=e&&e.accelerationIncludingGravity;
+      if(!a||a.x==null||a.y==null) return;
+      TILT.g=[a.x,a.y];TILT.has=true;
+    },{passive:true});
+  }
+  function tiltAngle(){
+    var ang=0;
+    try{ang=(typeof screen!=='undefined'&&screen.orientation&&screen.orientation.angle)||window.orientation||0}catch(e){}
+    ang=((ang%360)+360)%360;
+    var gx=TILT.g[0], gy=TILT.g[1], sx, sy;
+    if(ang===90){sx=gy;sy=-gx}else if(ang===180){sx=-gx;sy=-gy}else if(ang===270){sx=-gy;sy=gx}else{sx=gx;sy=gy}
+    if(Math.hypot(sx,sy)<3) return null;
+    return Math.atan2(sx,sy)*180/Math.PI;
+  }
+  function tiltActive(){return !!(C.tilt&&C.tilt.on&&TILT.has)}
+  function tiltVal(){
+    var a=tiltAngle();
+    if(a===null) return 0;
+    if(TILT.zero===null) TILT.zero=a;
+    var d=a-TILT.zero;
+    while(d>180) d-=360;
+    while(d<-180) d+=360;
+    var v=-d/C.tilt.sens;
+    if(C.tilt.inv) v=-v;
+    v=Math.max(-1,Math.min(1,v));
+    return Math.abs(v)<0.08?0:v;
+  }
+  function tiltStep(){
+    var st=sticks[0];
+    if(st&&st.id!==null&&tiltActive()) applyStick(0,tiltVal(),st.y||0);
+  }
   function cfgOf(k){return k?C.s2:C.s1}
   function applyStick(k,x,y){
     var cf=cfgOf(k), va, vb;
@@ -853,15 +961,27 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       '<div class="seg" role="group" aria-label="Stick mode"><button class="btn mA" type="button" aria-pressed="true">Axis</button><button class="btn mT" type="button" aria-pressed="false">Tank</button></div>'+
       '<div class="pad"><div class="knob rest"></div></div>'+
       '<div class="maprow"><label><span class="la"></span><select class="selA"></select></label><label><span class="lb"></span><select class="selB"></select></label></div>'+
-      '<label class="check spr-row"><input class="spr" type="checkbox" checked><span>Return to 0 when released</span></label>';
+      '<label class="check spr-row"><input class="spr" type="checkbox" checked><span>Return to 0 when released</span></label>'+
+      '<div class="tilt-row" hidden><label class="check"><input class="tl" type="checkbox"><span>Steer by tilting the phone (experimental)</span></label>'+
+      '<div class="tilt-opt" hidden><label>Tilt for full steering<select class="tls"><option value="60">Low sensitivity (60\u00b0)</option><option value="45">Medium (45\u00b0)</option><option value="30">High sensitivity (30\u00b0)</option></select></label>'+
+      '<label class="check"><input class="tli" type="checkbox"><span>Reverse tilt direction</span></label></div></div>';
     $('#pads').appendChild(box);
     var st={box:box,title:$('.pb-title',box),mA:$('.mA',box),mT:$('.mT',box),pad:$('.pad',box),knob:$('.knob',box),
-      spr:$('.spr',box),la:$('.la',box),lb:$('.lb',box),selA:$('.selA',box),selB:$('.selB',box),id:null};
+      spr:$('.spr',box),tiltRow:$('.tilt-row',box),tl:$('.tl',box),tls:$('.tls',box),tli:$('.tli',box),tiltOpt:$('.tilt-opt',box),y:0,la:$('.la',box),lb:$('.lb',box),selA:$('.selA',box),selB:$('.selB',box),id:null};
     sticks.push(st);
     st.spr.addEventListener('change',function(){
       cfgOf(k).hold=!st.spr.checked;save();
       if(!cfgOf(k).hold&&st.id===null){st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0)}
     });
+    if(k===0){
+      st.tiltRow.hidden=false;
+      st.tl.addEventListener('change',function(){
+        C.tilt.on=st.tl.checked;st.tiltOpt.hidden=!C.tilt.on;TILT.zero=null;save();
+        if(C.tilt.on) setTimeout(function(){if(!TILT.has) toast('No tilt sensor found on this phone.',5000)},800);
+      });
+      st.tls.addEventListener('change',function(){C.tilt.sens=pickOf(st.tls.value,[30,45,60],45);save()});
+      st.tli.addEventListener('change',function(){C.tilt.inv=st.tli.checked;save()});
+    }
     st.mA.addEventListener('click',function(){cfgOf(k).mode='axis';syncSticks();save()});
     st.mT.addEventListener('click',function(){cfgOf(k).mode='tank';syncSticks();save()});
     st.selA.addEventListener('change',function(){cfgOf(k).a=+st.selA.value;syncLayout();save()});
@@ -872,10 +992,12 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       if(m>R){dx*=R/m;dy*=R/m}
       st.knob.style.transform='translate('+dx+'px,'+dy+'px)';
       st.pad.style.setProperty('--m',Math.min(1,Math.hypot(dx,dy)/R).toFixed(2));
-      applyStick(k,dx/R,-dy/R);
+      st.y=-dy/R;
+      applyStick(k,(k===0&&tiltActive())?tiltVal():dx/R,-dy/R);
     }
     st.pad.addEventListener('pointerdown',function(e){
       st.id=e.pointerId;
+      if(k===0) TILT.zero=null;
       try{st.pad.setPointerCapture(e.pointerId)}catch(_){}
       st.knob.classList.remove('rest');move(e);
     });
@@ -910,6 +1032,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       });
     });
   }
+  function syncTiltUi(){
+    if(!sticks||!sticks[0]||!sticks[0].tl||!C.tilt) return;
+    var st=sticks[0];
+    st.tl.checked=C.tilt.on;st.tiltOpt.hidden=!C.tilt.on;st.tls.value=String(C.tilt.sens);st.tli.checked=C.tilt.inv;
+  }
   function mappedSet(){
     var m={};
     if(C.layout==='joy'||C.layout==='dual'){m[C.s1.a]=1;m[C.s1.b]=1}
@@ -919,6 +1046,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function syncLayout(){
     cols.classList.toggle('joy',C.layout==='joy');
     cols.classList.toggle('dual',C.layout==='dual');
+    cols.classList.toggle('board',C.layout==='board');
+    $('#lBoard').setAttribute('aria-pressed',String(C.layout==='board'));
+    syncBoard();
     $('#lStd').setAttribute('aria-pressed',String(C.layout==='std'));
     $('#lJoy').setAttribute('aria-pressed',String(C.layout==='joy'));
     $('#lDual').setAttribute('aria-pressed',String(C.layout==='dual'));
@@ -976,8 +1106,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
 
   /* ---------- Layout buttons ---------- */
-  ['Std','Joy','Dual'].forEach(function(n){
-    $('#l'+n).addEventListener('click',function(){C.layout=n.toLowerCase();syncLayout();save()});
+  ['Std','Joy','Dual','Board'].forEach(function(n){
+    $('#l'+n).addEventListener('click',function(){C.layout=n.toLowerCase();if(C.layout==='board'&&!C.board.length) prefillBoard();syncLayout();save()});
   });
 
   /* ---------- Model bar ---------- */
@@ -991,7 +1121,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   function syncAll(){
     refs.forEach(function(r,i){syncChannel(i)});
-    syncSticks();syncSettings();syncLayout();syncProfiles();syncRec();paintAccent();paintSkin();paintLamps();syncSeq();syncSafety();syncApp();buildGpMap();
+    syncSticks();syncSettings();syncLayout();syncProfiles();syncRec();paintAccent();paintSkin();paintLamps();syncSeq();syncSafety();syncApp();buildGpMap();syncSpeed();syncRecTools();bkPaint();syncBoard();syncTiltUi();
   }
   var ACC=['#FF7A2F','#FF4B3E','#F5B800'];
   var swBox=$('#swatches'),swBtns=ACC.map(function(c,n){
@@ -1071,6 +1201,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     C.rec.forEach(function(r){var o=document.createElement('option');o.value=r.id;o.textContent=r.name+' · '+fmtTime(r.dur);recSelEl.appendChild(o)});
     if(recSel) recSelEl.value=recSel;
     recName.value=cur?cur.name:'';
+    syncRecTools();
     paintRec();
   }
   function paintRec(){
@@ -1286,7 +1417,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
 
   function tick(){
-    padPoll();
+    padPoll();tiltStep();
+    if(C.layout==='board') paintBoard();
     var now=performance.now();
     stepRecord(now);stepPlay(now);
     safetyStep(now);
@@ -1396,6 +1528,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     seqRun.textContent=(S.play&&cur&&S.play.seq===cur.id)?'Stop':'Run';
     seqRun.disabled=!cur||!cur.steps.length||(!S.play&&(S.estop||!!S.rec))||(!!S.play&&S.play.seq!==cur.id);
     paintPlayer();
+    if(typeof paintBoard==='function') paintBoard();
   }
   function runSeq(id){
     var sq=C.seq.filter(function(x){return x.id===id})[0];
@@ -1503,6 +1636,15 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       toast('Stopped: no input for '+sf.idle+' s');feedback('idle');
     }
     for(i=0;i<NMAX;i++){
+      if(sf.run>0&&!S.play&&isActive(i)&&rt.t[i]!==0){
+        if(!runSince[i]) runSince[i]=now;
+        else if(now-runSince[i]>sf.run*1000){
+          runBlk[i]=true;runSince[i]=0;rt.t[i]=0;unlockCh(i);refs[i].rng.value=0;refs[i].val.textContent='0';
+          toast('Channel '+tagOf(i)+' stopped after '+sf.run+' s of running. Move it back to 0, then start again.',6000);feedback('warn');
+        }
+      }else runSince[i]=0;
+    }
+    for(i=0;i<NMAX;i++){
       if(isActive(i)&&Math.abs(rt.o[i])>=90){
         if(!hotSince[i]) hotSince[i]=now;
         else if(sf.warn>0&&!hotWarned[i]&&now-hotSince[i]>sf.warn*1000){
@@ -1514,6 +1656,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   window.onAppEvent=function(ev){
     if(ev==='nopin') toast('This launcher cannot add a shortcut.');
+    if(ev==='backupok'){store.prefs.lastBackup=Date.now();save();bkPaint();if(bkManual) toast('Backup saved to the Downloads folder.',4000);bkManual=false}
+    if(ev==='backupfail'){if(bkManual) toast('Backup failed. Use Export models instead.',5000);bkManual=false}
     if(ev==='btoff'){
       var wasOn=S.connected;
       S.connected=false;hubMsg=HUB_TEXT.btoff;last=null;stopPlay(true);zeroAll();paintLink();
@@ -1608,8 +1752,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     btn.addEventListener('contextmenu',function(e){e.preventDefault()});
     btn.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}});
   }
-  function openPlayer(){renderPlayer();player.hidden=false;feedback('ok')}
-  function closePlayer(){player.hidden=true}
+  function openPlayer(){renderPlayer();S.kid=true;player.hidden=false;feedback('ok')}
+  function closePlayer(){player.hidden=true;S.kid=false}
   $('#playerBtn').addEventListener('click',openPlayer);
   plStop.addEventListener('click',function(){setEstop(!S.estop)});
   holdBtn(plExit,1000,closePlayer);
@@ -1648,8 +1792,199 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   setInterval(pollBattery,30000);pollBattery();
 
+
+  // ---- Speed profiles, player limit, run limiter setting, recording tools, backup ----
+  var spdBtns={slow:$('#spdSlow'),normal:$('#spdNorm'),fast:$('#spdFast')};
+  function syncSpeed(){
+    if(!spdBtns) return;
+    Object.keys(spdBtns).forEach(function(k){spdBtns[k].setAttribute('aria-pressed',String(C.speed===k))});
+  }
+  Object.keys(spdBtns).forEach(function(k){
+    spdBtns[k].addEventListener('click',function(){C.speed=k;syncSpeed();save();feedback('ok')});
+  });
+  var kidLim=$('#kidLim');
+  kidLim.addEventListener('change',function(){store.prefs.kidLimit=pickOf(kidLim.value,[100,70,50,30],50);save()});
+  var sfRun=$('#sfRun');
+  sfRun.addEventListener('change',function(){C.safety.run=pickOf(sfRun.value,[0,10,20,30,60],0);save()});
+
+  var recFrom=$('#recFrom'), recTo=$('#recTo'), recJoinSel=$('#recJoinSel');
+  function recAddNew(name,pts){
+    if(C.rec.length>=MAX_RECS){recNote='Recording list is full. Delete one first.';paintRec();return}
+    var dur=pts.length?pts[pts.length-1][0]:0;
+    if(pts.length<2||pts.length>MAX_PTS||dur<=0||dur>MAX_REC_MS){recNote='That edit does not fit. Try a shorter one.';paintRec();return}
+    var r={id:uid(),name:String(name).slice(0,24),dur:dur,pts:pts};
+    C.rec.push(r);recSel=r.id;recNote='Saved '+r.name+' ('+fmtTime(r.dur)+').';save();syncRec();
+  }
+  function recRows(rec){return rec.pts.map(function(p){return p.slice()})}
+  $('#recSpdGo').addEventListener('click',function(){
+    var cur=selectedRec();if(!cur||S.rec||S.play) return;
+    var f=+$('#recSpd').value;if(!(f>0)) return;
+    var pts=cur.pts.map(function(p){return [Math.round(p[0]/f)].concat(p.slice(1))});
+    recAddNew(cur.name+' x'+f,pts);
+  });
+  $('#recTrim').addEventListener('click',function(){
+    var cur=selectedRec();if(!cur||S.rec||S.play) return;
+    var a=Math.round((+recFrom.value||0)*1000), b=Math.min(Math.round((+recTo.value||0)*1000),cur.dur);
+    if(!(a>=0&&b>a)){recNote='Set a start before the end.';paintRec();return}
+    var base=null, mid=[];
+    cur.pts.forEach(function(p){ if(p[0]<=a) base=p; else if(p[0]<b) mid.push(p) });
+    var first=(base||cur.pts[0]).slice(1);
+    var lastv=(mid.length?mid[mid.length-1]:(base||cur.pts[0])).slice(1);
+    var pts=[[0].concat(first)].concat(mid.map(function(p){return [p[0]-a].concat(p.slice(1))})).concat([[b-a].concat(lastv)]);
+    recAddNew(cur.name+' cut',pts);
+  });
+  $('#recJoin').addEventListener('click',function(){
+    var cur=selectedRec();if(!cur||S.rec||S.play) return;
+    var other=C.rec.filter(function(r){return r.id===recJoinSel.value})[0];
+    if(!other) return;
+    var pts=recRows(cur), gap=cur.dur+200, zero=[gap];
+    for(var z=0;z<NMAX;z++) zero.push(0);
+    pts.push(zero);
+    other.pts.forEach(function(p){pts.push([p[0]+gap+200].concat(p.slice(1)))});
+    recAddNew(cur.name+'+'+other.name,pts);
+  });
+  $('#recCopy').addEventListener('click',function(){
+    var cur=selectedRec();if(!cur||S.rec||S.play) return;
+    recAddNew(cur.name+' copy',recRows(cur));
+  });
+  function syncRecTools(){
+    var cur=selectedRec();
+    if(!recJoinSel) return;
+    recJoinSel.innerHTML='';
+    C.rec.forEach(function(r){var o=document.createElement('option');o.value=r.id;o.textContent=r.name;recJoinSel.appendChild(o)});
+    recFrom.value='0';recTo.value=cur?(cur.dur/1000).toFixed(1):'1';
+  }
+
+  // Backup to the Downloads folder (native side only)
+  var BK_MS=7*24*3600*1000, bkAuto=$('#bkAuto'), bkNow=$('#bkNow'), bkMsg=$('#bkMsg'), bkManual=false;
+  function bkPaint(){
+    if(!bkMsg) return;
+    var t=store.prefs.lastBackup;
+    bkMsg.textContent=t?('Last backup: '+new Date(t).toLocaleDateString()+'. File: Downloads/MK6-Console-backup.json'):'No backup yet. The file goes to Downloads/MK6-Console-backup.json.';
+    bkAuto.checked=store.prefs.autoBackup;
+    bkNow.hidden=!(NB&&NB.autoBackup);
+    bkAuto.disabled=!(NB&&NB.autoBackup);
+  }
+  function bkRun(manual){
+    if(!(NB&&NB.autoBackup)) return;
+    bkManual=!!manual;
+    try{NB.autoBackup(exportJson())}catch(e){}
+  }
+  function bkCheck(){
+    if(!(NB&&NB.autoBackup)||!store.prefs.autoBackup) return;
+    if(Date.now()-store.prefs.lastBackup>BK_MS) bkRun(false);
+  }
+  bkAuto.addEventListener('change',function(){store.prefs.autoBackup=bkAuto.checked;save()});
+  bkNow.addEventListener('click',function(){bkRun(true)});
+  setInterval(bkCheck,3600000);
+  setTimeout(bkCheck,4000);
+  bkPaint();
+
+  // ---- Board layout ----
+  var bdGrid=$('#boardGrid'), bdEditor=$('#bdEditor'), bdEditBtn=$('#bdEdit'), bdKind=$('#bdKind'), bdTarget=$('#bdTarget'), bdWide=$('#bdWide'), bdNote=$('#bdNote'), bdEditing=false, bdW=[];
+  function prefillBoard(){
+    var n=0;
+    activeIdx().forEach(function(i){if(n<4){C.board.push({k:C.ch[i].kind==='hold'?'h':'s',c:i,w:1});n++}});
+    C.seq.slice(0,4).forEach(function(sq){C.board.push({k:'q',c:sq.id,w:1})});
+  }
+  function bdFill(){
+    var k=bdKind.value;bdTarget.innerHTML='';
+    function opt(v,t){var o=document.createElement('option');o.value=v;o.textContent=t;bdTarget.appendChild(o)}
+    if(k==='q') C.seq.forEach(function(sq){opt(sq.id,sq.name||'(unnamed)')});
+    else activeIdx().forEach(function(i){opt(String(i),tagOf(i)+' · '+C.ch[i].name)});
+  }
+  function bdMove(it,d){
+    var n=C.board.indexOf(it), m=n+d;if(n<0||m<0||m>=C.board.length) return;
+    var t=C.board[n];C.board[n]=C.board[m];C.board[m]=t;save();syncBoard();
+  }
+  function syncBoard(){
+    if(!bdGrid||!C.board) return;
+    bdFill();
+    bdGrid.innerHTML='';bdW=[];
+    bdEditor.hidden=!bdEditing;bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
+    C.board.forEach(function(it,n){
+      var el=document.createElement('div');el.className='bdw'+(it.w===2?' w2':'');
+      var w={it:it,drag:false,out:null,rng:null,btn:null,sq:null};
+      if(it.k==='q'){
+        var sq=C.seq.filter(function(x){return x.id===it.c})[0];
+        if(!sq) return;
+        var qb=document.createElement('button');qb.type='button';qb.className='qbtn';
+        qb.addEventListener('click',function(){noteInput();runSeq(sq.id)});
+        el.appendChild(qb);w.btn=qb;w.sq=sq;
+      }else{
+        var c=it.c;
+        if(!isActive(c)) return;
+        var head=document.createElement('div');head.className='bdw-h';
+        var nm=document.createElement('span');nm.textContent=tagOf(c)+' · '+C.ch[c].name;
+        var ou=document.createElement('output');ou.textContent='0';
+        head.appendChild(nm);head.appendChild(ou);el.appendChild(head);w.out=ou;
+        if(it.k==='s'){
+          var r=document.createElement('input');r.type='range';r.min='-100';r.max='100';r.step='1';r.value='0';
+          r.setAttribute('aria-label','Power of channel '+tagOf(c));
+          r.addEventListener('pointerdown',function(){w.drag=true});
+          r.addEventListener('input',function(){noteInput();setT(c,+r.value,true)});
+          var rel=function(){
+            w.drag=false;
+            if(C.spring&&!S.play&&!(refs[c]&&refs[c].locked)){r.value='0';setT(c,0,true)}
+          };
+          r.addEventListener('pointerup',rel);r.addEventListener('pointercancel',rel);
+          el.appendChild(r);w.rng=r;
+        }else{
+          var hb=document.createElement('div');hb.className='holds';
+          [['Reverse',-1],['Forward',1]].forEach(function(d){
+            var b=document.createElement('button');b.type='button';b.className='hold '+(d[1]<0?'rev':'fwd');b.textContent=d[0];
+            var down=false;
+            function press(){if(down)return;down=true;b.classList.add('on');noteInput();setT(c,d[1]*100,false)}
+            function lift(){if(!down)return;down=false;b.classList.remove('on');setT(c,0,false)}
+            b.addEventListener('pointerdown',function(e){e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}press()});
+            ['pointerup','pointercancel','lostpointercapture','blur'].forEach(function(ev){b.addEventListener(ev,lift)});
+            b.addEventListener('contextmenu',function(e){e.preventDefault()});
+            hb.appendChild(b);
+          });
+          el.appendChild(hb);
+        }
+      }
+      if(bdEditing){
+        var ed=document.createElement('div');ed.className='bdw-ed';
+        [['◀','Move earlier',function(){bdMove(it,-1)}],['▶','Move later',function(){bdMove(it,1)}],
+         ['↔','Wide or normal',function(){it.w=it.w===2?1:2;save();syncBoard()}],
+         ['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0)C.board.splice(q,1);save();syncBoard()}]].forEach(function(d){
+          var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=d[0];b.setAttribute('aria-label',d[1]);
+          b.addEventListener('click',d[2]);ed.appendChild(b);
+        });
+        el.appendChild(ed);
+      }
+      bdGrid.appendChild(el);bdW.push(w);
+    });
+    bdNote.textContent=C.board.length?'':'The board is empty. Tap Edit board to add controls.';
+    paintBoard();
+  }
+  function paintBoard(){
+    if(!bdW||!bdW.length) return;
+    bdW.forEach(function(w){
+      if(w.btn){
+        var mine=!!(S.play&&S.play.seq===w.sq.id);
+        w.btn.classList.toggle('on',mine);
+        w.btn.textContent=(mine?'■ ':'▶ ')+w.sq.name;
+        w.btn.disabled=!mine&&(!!S.rec||!!S.play||S.estop||!w.sq.steps.length);
+      }else{
+        var v=rt.t[w.it.c];
+        if(w.out) w.out.textContent=fmt(v);
+        if(w.rng&&!w.drag&&+w.rng.value!==v) w.rng.value=String(v);
+      }
+    });
+  }
+  bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;syncBoard()});
+  bdKind.addEventListener('change',bdFill);
+  $('#bdAdd').addEventListener('click',function(){
+    if(C.board.length>=12){bdNote.textContent='The board is full (12 controls).';return}
+    var k=bdKind.value, v=bdTarget.value;
+    if(!v){bdNote.textContent='Nothing to add. Make a sequence first.';return}
+    C.board.push({k:k,c:k==='q'?v:Math.round(+v),w:+bdWide.value===2?2:1});
+    save();syncBoard();
+  });
   var sfIdle=$('#sfIdle'), sfWarn=$('#sfWarn');
-  function syncSafety(){if(!sfIdle) return;sfIdle.value=String(C.safety.idle);sfWarn.value=String(C.safety.warn)}
+  function syncSafety(){if(!sfIdle) return;sfIdle.value=String(C.safety.idle);sfWarn.value=String(C.safety.warn);if(sfRun)sfRun.value=String(C.safety.run)}
   sfIdle.addEventListener('change',function(){C.safety.idle=pickOf(sfIdle.value,[0,10,30,60,120],60);save()});
   sfWarn.addEventListener('change',function(){C.safety.warn=pickOf(sfWarn.value,[0,15,30,60],30);save()});
 
@@ -1659,6 +1994,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     optSound.checked=store.prefs.sound;optHaptic.checked=store.prefs.haptic;
     $('#lang').value=store.prefs.lang;
     pinBtn.hidden=!(NB&&NB.pinModel);
+    if(kidLim) kidLim.value=String(store.prefs.kidLimit);
     applyLock();
   }
   optSound.addEventListener('change',function(){store.prefs.sound=optSound.checked;save();if(optSound.checked) beep([700,900],0.09)});
@@ -1809,6 +2145,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Player mode shows only big sequence buttons and E-Stop. Lock settings hides everything that changes the model. Hold the button for 2 seconds to unlock or leave.':'Mod pemain hanya menunjukkan butang jujukan besar dan E-Stop. Kunci tetapan menyembunyikan semua yang mengubah model. Tahan butang selama 2 saat untuk buka kunci atau keluar.',
     'No sequences yet. Leave player mode and make one first.':'Belum ada jujukan. Keluar dari mod pemain dan buat satu dahulu.',
     'Settings locked. Hold the button in the App card for 2 seconds to unlock.':'Tetapan dikunci. Tahan butang dalam kad App selama 2 saat untuk buka kunci.',
+    'Slow':'Perlahan','Hold buttons':'Butang tahan','Slider':'Gelangsar','Sequence':'Jujukan','Wide':'Lebar','Add':'Tambah','Edit board':'Sunting papan',
+    'The board is empty. Tap Edit board to add controls.':'Papan kosong. Tekan Sunting papan untuk tambah kawalan.','The board is full (12 controls).':'Papan penuh (12 kawalan).','Nothing to add. Make a sequence first.':'Tiada untuk ditambah. Buat jujukan dahulu.',
+    'Steer by tilting the phone (experimental)':'Pusing dengan condongkan telefon (eksperimen)','Tilt for full steering':'Condong untuk pusing penuh','Low sensitivity (60\u00b0)':'Kepekaan rendah (60\u00b0)','Medium (45\u00b0)':'Sederhana (45\u00b0)','High sensitivity (30\u00b0)':'Kepekaan tinggi (30\u00b0)','Reverse tilt direction':'Terbalikkan arah condong','No tilt sensor found on this phone.':'Tiada sensor condong pada telefon ini.','Normal':'Biasa','Fast':'Laju','Board':'Papan',
+    'Stop a channel after running this long':'Henti saluran selepas berjalan selama ini','Player mode power limit':'Had kuasa mod pemain',
+    'Edit recording':'Sunting rakaman','Half speed':'Separuh laju','Slower (0.75x)':'Lebih perlahan (0.75x)','Faster (1.5x)':'Lebih laju (1.5x)','Double speed':'Dua kali laju',
+    'Save as new':'Simpan sebagai baru','From (s)':'Dari (s)','To (s)':'Hingga (s)','Trim to new':'Potong ke baru','Join to end':'Sambung ke hujung','Copy':'Salin',
+    'Back up automatically every week':'Sandar automatik setiap minggu','Back up now':'Sandar sekarang',
+    'No backup yet. The file goes to Downloads/MK6-Console-backup.json.':'Belum ada sandaran. Fail disimpan di Downloads/MK6-Console-backup.json.',
+    'Backup saved to the Downloads folder.':'Sandaran disimpan dalam folder Downloads.','Backup failed. Use Export models instead.':'Sandaran gagal. Guna Export models.',
+    'Set a start before the end.':'Tetapkan mula sebelum tamat.','That edit does not fit. Try a shorter one.':'Suntingan itu terlalu panjang. Cuba yang lebih pendek.',
     'Hub link lost. Motors stopped.':'Sambungan hab terputus. Motor dihentikan.',
     'Bluetooth was switched off. Motors stopped.':'Bluetooth dimatikan. Motor dihentikan.','Bluetooth was switched off':'Bluetooth dimatikan','Sticks return to 0 when released':'Stick kembali ke 0 bila dilepas','Auto-stop when idle':'Henti automatik bila tiada input','Warn after long full power':'Amaran selepas kuasa penuh lama',
     'Off':'Mati','Hubs (module number of each)':'Hab (nombor modul setiap satu)',
@@ -1841,6 +2187,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     [/^Name of channel (\S+)$/,function(m){return 'Nama saluran '+m[1]}],
     [/^Power of channel (\S+)$/,function(m){return 'Kuasa saluran '+m[1]}],
     [/^Hub (M?\d)$/,function(m){return 'Hab '+m[1]}],
+    [/^Last backup: (.*)\. File: Downloads\/MK6-Console-backup\.json$/,function(m){return 'Sandaran terakhir: '+m[1]+'. Fail: Downloads/MK6-Console-backup.json'}],
+    [/^Channel (\S+) stopped after (\d+) s of running\. Move it back to 0, then start again\.$/,function(m){return 'Saluran '+m[1]+' dihentikan selepas '+m[2]+' s berjalan. Gerakkan kembali ke 0, kemudian mula semula.'}],
     [/^Phone (\d+)%$/,function(m){return 'Telefon '+m[1]+'%'}],
     [/^Phone battery is low \((\d+)%\)\. Charge it before driving\.$/,function(m){return 'Bateri telefon rendah ('+m[1]+'%). Cas sebelum memandu.'}],
     [/^Testing channel (\S+) \((.*)\) forward at (\d+)%$/,function(m){return 'Menguji saluran '+m[1]+' ('+m[2]+') ke depan pada '+m[3]+'%'}],
