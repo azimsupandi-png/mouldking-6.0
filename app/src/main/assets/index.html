@@ -399,6 +399,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .pad::after{inset:19%}
 :root[data-skin="studs"] .bdw>.pad .knob,:root[data-skin="studs"] .cols.joy .knob{width:112px;height:112px;left:calc(50% - 56px);top:calc(50% - 56px)}
 :root[data-skin="studs"] .bdw>.pad::after,:root[data-skin="studs"] .cols.joy .pad::after{inset:24%}
+:root[data-skin="studs"] #swatches{display:none}
+:root[data-skin="studs"] .bdw>.pad .knob,:root[data-skin="studs"] .cols.joy .knob{width:min(42%,118px);height:auto;aspect-ratio:1;left:calc(50% - min(21%,59px));top:calc(50% - min(21%,59px))}
+:root[data-skin="studs"] .bd-pads .knob{width:min(44%,64px);height:auto;aspect-ratio:1;left:calc(50% - min(22%,32px));top:calc(50% - min(22%,32px))}
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
 
 /* Player mode, settings lock, calibration, battery */
@@ -1309,7 +1312,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     swBox.appendChild(b);return b;
   });
   function paintAccent(){
-    var n=C.accent>=0&&C.accent<ACC.length?C.accent:0;
+    var n=C.theme==='studs'?2:(C.accent>=0&&C.accent<ACC.length?C.accent:0);
     var de=document.documentElement;if(de&&de.style)de.style.setProperty('--acc',ACC[n]);
     swBtns.forEach(function(b,q){b.setAttribute('aria-pressed',String(q===n))});
   }
