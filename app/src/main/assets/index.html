@@ -451,7 +451,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .tilt-opt{display:grid;gap:8px;margin:10px 0}
 :root[data-lock] #tiltCard,:root[data-lock] #bdEdit,:root[data-lock] #bdEditor,:root[data-lock] .bdw-ed{display:none}
 
-#lockBtn.hold{background:var(--acc);color:#fff}
+.btn.holding{background:var(--acc);color:#111;border-color:var(--acc)}
 .bat{margin-left:6px;font-family:var(--f-mono)}.bat::before{content:"\00b7 ";}.bat.low{color:var(--danger);font-weight:700}
 .spr-row{margin-top:8px}
 .ch-foot .lock{min-width:64px}
@@ -464,7 +464,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .pl-note{color:var(--muted);font-size:14px}
 .pl-stop{min-height:88px;border:0;border-radius:10px;background:var(--danger);color:#fff;font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .pl-exit.hold{background:var(--acc);color:#fff}
-:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #ioCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
+:root[data-lock] #spdSeg,:root[data-lock] #recCard,:root[data-lock] #kidRow,:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #ioCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
 :root[data-lock] #profName,:root[data-lock] .ch .name{pointer-events:none}
 </style>
 </head>
@@ -712,7 +712,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <button class="btn" id="guideBtn" type="button">Show guide</button>
           <button class="btn" id="pinBtn" type="button" hidden>Add model to home screen</button>
         </div>
-        <label class="rec-label" style="margin-top:12px">Player mode power limit<select id="kidLim"><option value="100">100%</option><option value="70">70%</option><option value="50">50%</option><option value="30">30%</option></select></label>
+        <label class="rec-label" id="kidRow" style="margin-top:12px">Player mode power limit<select id="kidLim"><option value="100">100%</option><option value="70">70%</option><option value="50">50%</option><option value="30">30%</option></select></label>
         <div class="rec-row" style="margin-top:12px">
           <button class="btn" id="playerBtn" type="button">Player mode</button>
           <button class="btn" id="lockBtn" type="button">Lock settings</button>
@@ -1923,11 +1923,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   var holdT=0;
   function holdBtn(btn,ms,fn){
-    function up(){if(holdT){clearTimeout(holdT);holdT=0}btn.classList.remove('hold')}
+    function up(){if(holdT){clearTimeout(holdT);holdT=0}btn.classList.remove('holding')}
     btn.addEventListener('pointerdown',function(e){
       if(btn.dataset.tap==='1') return;
-      up();btn.classList.add('hold');
-      holdT=setTimeout(function(){holdT=0;btn.classList.remove('hold');fn()},ms);
+      up();btn.classList.add('holding');
+      holdT=setTimeout(function(){holdT=0;btn.classList.remove('holding');fn()},ms);
     });
     ['pointerup','pointercancel','pointerleave','blur'].forEach(function(ev){btn.addEventListener(ev,up)});
     btn.addEventListener('contextmenu',function(e){e.preventDefault()});
@@ -1952,11 +1952,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     toast('Settings locked. Hold the button in the App card for 2 seconds to unlock.',5000);
   });
   (function(){
-    function up(){if(holdT){clearTimeout(holdT);holdT=0}lockBtn.classList.remove('hold')}
+    function up(){if(holdT){clearTimeout(holdT);holdT=0}lockBtn.classList.remove('holding')}
     lockBtn.addEventListener('pointerdown',function(){
       if(!store.prefs.lock) return;
-      up();lockBtn.classList.add('hold');
-      holdT=setTimeout(function(){holdT=0;lockBtn.classList.remove('hold');store.prefs.lock=false;save();applyLock();feedback('ok')},2000);
+      up();lockBtn.classList.add('holding');
+      holdT=setTimeout(function(){holdT=0;lockBtn.classList.remove('holding');store.prefs.lock=false;save();applyLock();feedback('ok')},2000);
     });
     ['pointerup','pointercancel','pointerleave','blur'].forEach(function(ev){lockBtn.addEventListener(ev,up)});
   })();
