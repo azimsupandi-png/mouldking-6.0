@@ -296,6 +296,49 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="build"] .seg{flex-wrap:wrap}
 :root[data-skin="build"] .seg .btn{flex:1 1 auto;min-width:0}
 @media (max-width:420px){:root[data-skin="build"] .exc-ico{display:none}:root[data-skin="build"] .card{padding:18px 14px}:root[data-skin="build"] .btn{padding:0 8px}}
+/* ---- Studs theme: dark studded base, grooved sliders, big round yellow knobs ---- */
+:root[data-skin="studs"]{
+  --bg:#101216; --panel:#1b1e23; --well:#07080b; --line:#343a43;
+  --fg:#F3F1EA; --muted:#A3A8AE; --fwd:#FFC400; --rev:#4DA3E0; --danger:#E03E3E; --ok:#51CF66; --hz:#F5B800;
+  color-scheme:dark;
+}
+:root[data-skin="studs"] body{background-color:#16191d;background-attachment:fixed;
+  background-image:radial-gradient(ellipse at 50% 40%,transparent 50%,rgba(0,0,0,.7) 100%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.4' cy='.35' r='.8'%3E%3Cstop offset='0' stop-color='%23323740'/%3E%3Cstop offset='.7' stop-color='%231e2126'/%3E%3Cstop offset='1' stop-color='%2315171b'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='56' height='56' fill='%2316191d'/%3E%3Ccircle cx='28' cy='31' r='15' fill='%23000' opacity='.55'/%3E%3Ccircle cx='28' cy='28' r='14' fill='url(%23g)'/%3E%3Cellipse cx='23' cy='22' rx='6' ry='3.5' fill='%23fff' opacity='.07'/%3E%3C/svg%3E")}
+:root[data-skin="studs"] .bar{box-shadow:0 6px 18px rgba(0,0,0,.6);border-bottom:3px solid var(--hz)}
+:root[data-skin="studs"] .card{border-radius:22px;border:3px solid #2b2f36;background:linear-gradient(180deg,rgba(30,33,39,.94),rgba(18,20,24,.96));box-shadow:0 8px 20px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06)}
+:root[data-skin="studs"] h2{border-left:6px solid var(--hz);padding-left:10px;letter-spacing:.1em}
+:root[data-skin="studs"] .tag{background:var(--hz);color:#111;border-left:0;border-radius:50%;min-width:30px;height:30px;font-weight:700}
+:root[data-skin="studs"] .btn,:root[data-skin="studs"] .txt,:root[data-skin="studs"] select{border-radius:18px;border-width:2px}
+:root[data-skin="studs"] .btn[aria-pressed="true"]{background:var(--hz);color:#111;border-color:var(--hz)}
+:root[data-skin="studs"] .estop{border:3px solid var(--hz);box-shadow:0 5px 0 #000}
+:root[data-skin="studs"] .track{height:48px;border-radius:24px;border:3px solid #2b2f36;background:linear-gradient(180deg,#030405,#14171c 50%,#030405);box-shadow:inset 0 5px 10px #000,0 2px 0 #3a3f48}
+:root[data-skin="studs"] .track::before{background:linear-gradient(#000,#000) center/calc(100% - 44px) 5px no-repeat,repeating-linear-gradient(90deg,#2d323a 0 2px,transparent 2px 12.5%) center/calc(100% - 44px) 18px no-repeat}
+:root[data-skin="studs"] .fill{top:19px;bottom:19px;border-radius:5px;box-shadow:0 0 10px var(--fwd)}
+:root[data-skin="studs"] .pwr{height:48px}
+:root[data-skin="studs"] .pwr::-webkit-slider-runnable-track{height:42px}
+:root[data-skin="studs"] .pwr::-webkit-slider-thumb{width:40px;height:40px;margin-top:1px;border-radius:50%;border:2px solid rgba(110,70,0,.7);
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.8) 0,transparent 30%),radial-gradient(circle,var(--acc) 0 38%,rgba(0,0,0,.45) 100%);
+  box-shadow:0 5px 8px rgba(0,0,0,.7),inset 0 -4px 6px rgba(90,50,0,.55),inset 0 0 0 7px rgba(120,80,0,.18)}
+:root[data-skin="studs"] .pwr::-moz-range-thumb{width:34px;height:34px;border-radius:50%;border:2px solid rgba(110,70,0,.7);background:var(--acc)}
+:root[data-skin="studs"] .hold{border-radius:28px;border:3px solid #2b2f36;background:linear-gradient(180deg,#030405,#14171c 50%,#030405);box-shadow:inset 0 4px 8px #000}
+:root[data-skin="studs"] .hold.on.fwd,:root[data-skin="studs"] .hold.on.rev{background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.5),transparent 40%),var(--acc);border-color:rgba(110,70,0,.8);color:#111}
+:root[data-skin="studs"] .pad{border:5px solid #2b2f36;box-shadow:0 8px 18px rgba(0,0,0,.7),inset 0 10px 28px #000,0 2px 0 4px #3a3f48;
+  background:linear-gradient(#22262c,#22262c) center/2px 70% no-repeat,linear-gradient(#22262c,#22262c) center/70% 2px no-repeat,radial-gradient(circle,#0c0d10 55%,#14161a 100%)}
+:root[data-skin="studs"] .pad::after{inset:14%;border:2px dashed #3a3f48}
+:root[data-skin="studs"] .knob{width:84px;height:84px;left:calc(50% - 42px);top:calc(50% - 42px);border:3px solid rgba(110,70,0,.75);
+  background:radial-gradient(circle at 34% 26%,rgba(255,255,255,.75) 0,transparent 26%),radial-gradient(circle,var(--acc) 0 40%,rgba(0,0,0,.4) 100%);
+  box-shadow:0 12px 18px rgba(0,0,0,.75),inset 0 -10px 14px rgba(90,50,0,.55),inset 0 0 0 12px rgba(120,80,0,.16),0 0 calc(var(--m)*26px) var(--acc)}
+:root[data-skin="studs"] .cols.dual .knob,:root[data-skin="studs"] .bdw .knob{width:64px;height:64px;left:calc(50% - 32px);top:calc(50% - 32px)}
+:root[data-skin="studs"] .bdw{border:3px solid #2b2f36;border-radius:20px;background:rgba(5,6,9,.78)}
+:root[data-skin="studs"] .bdw input[type=range]{-webkit-appearance:none;appearance:none;height:58px;margin:0;border-radius:29px;border:3px solid #2b2f36;touch-action:pan-y;
+  background:linear-gradient(#000,#000) center/calc(100% - 44px) 5px no-repeat,linear-gradient(180deg,#030405,#14171c 50%,#030405);box-shadow:inset 0 5px 10px #000}
+:root[data-skin="studs"] .bdw input[type=range]::-webkit-slider-runnable-track{height:52px;background:transparent}
+:root[data-skin="studs"] .bdw input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:48px;height:48px;margin-top:2px;border-radius:50%;border:2px solid rgba(110,70,0,.7);
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.8) 0,transparent 30%),radial-gradient(circle,var(--acc) 0 38%,rgba(0,0,0,.45) 100%);
+  box-shadow:0 5px 8px rgba(0,0,0,.7),inset 0 -4px 6px rgba(90,50,0,.55),inset 0 0 0 8px rgba(120,80,0,.18)}
+:root[data-skin="studs"] .bdw input[type=range]::-moz-range-thumb{width:42px;height:42px;border-radius:50%;border:2px solid rgba(110,70,0,.7);background:var(--acc)}
+:root[data-skin="studs"] .qbtn{border-radius:30px;border:3px solid rgba(110,70,0,.7);background:radial-gradient(circle at 35% 22%,rgba(255,255,255,.45),transparent 45%),var(--hz);color:#111;font-weight:700;box-shadow:0 5px 0 #7a5c00}
+:root[data-skin="studs"] .qbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #7a5c00}
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
 
 /* Player mode, settings lock, calibration, battery */
@@ -412,7 +455,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       <label>Model name<input class="txt" id="profName" type="text" maxlength="24" autocomplete="off"></label>
     </div>
     <div class="swatches" id="swatches" role="group" aria-label="Model colour"><span>Colour</span></div>
-    <div class="seg" role="group" aria-label="Theme"><button class="btn" id="thStd" type="button" aria-pressed="true">Classic</button><button class="btn" id="thBuild" type="button" aria-pressed="false">Construction</button></div>
+    <div class="seg" role="group" aria-label="Theme"><button class="btn" id="thStd" type="button" aria-pressed="true">Classic</button><button class="btn" id="thBuild" type="button" aria-pressed="false">Construction</button><button class="btn" id="thStuds" type="button" aria-pressed="false">Studs</button></div>
     <div class="seg" id="spdSeg" role="group" aria-label="Speed">
       <button class="btn" id="spdSlow" type="button" aria-pressed="false">Slow</button>
       <button class="btn" id="spdNorm" type="button" aria-pressed="false">Normal</button>
@@ -770,7 +813,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.accent=Math.round(num(c.accent,0,5,0));
     if(c.accentV!==2) d.accent=({4:1,5:2})[d.accent]||0; else d.accent=Math.min(2,d.accent);
     d.accentV=2;
-    d.theme=c.theme==='build'?'build':'std';
+    d.theme=(c.theme==='build'||c.theme==='studs')?c.theme:'std';
     var pd=(c.pad&&typeof c.pad==='object')?c.pad:{};
     d.pad={on:pd.on!==false,dead:Math.round(num(pd.dead,5,40,12)),trig:Math.round(num(pd.trig,-1,NMAX-1,-1)),map:{}};
     var msrc=(pd.map&&typeof pd.map==='object')?pd.map:{};
@@ -1212,17 +1255,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   function paintSkin(){
     var de=document.documentElement;
-    if(de&&de.setAttribute){if(C.theme==='build') de.setAttribute('data-skin','build'); else de.removeAttribute('data-skin')}
-    var a=$('#thStd'),b=$('#thBuild');
-    a.setAttribute('aria-pressed',String(C.theme!=='build'));b.setAttribute('aria-pressed',String(C.theme==='build'));
+    if(de&&de.setAttribute){if(C.theme==='build'||C.theme==='studs') de.setAttribute('data-skin',C.theme); else de.removeAttribute('data-skin')}
+    var a=$('#thStd'),b=$('#thBuild'),c3=$('#thStuds');
+    a.setAttribute('aria-pressed',String(C.theme!=='build'&&C.theme!=='studs'));b.setAttribute('aria-pressed',String(C.theme==='build'));c3.setAttribute('aria-pressed',String(C.theme==='studs'));
   }
   function setTheme(t){
     C.theme=t;
-    if(t==='build'&&C.accent===0) C.accent=2;
+    if((t==='build'||t==='studs')&&C.accent===0) C.accent=2;
     paintAccent();paintSkin();save();
   }
   $('#thStd').addEventListener('click',function(){setTheme('std')});
   $('#thBuild').addEventListener('click',function(){setTheme('build')});
+  $('#thStuds').addEventListener('click',function(){setTheme('studs')});
   function paintLamps(){
     var g=$('#lampG'),r=$('#lampR');
     if(g&&g.classList) g.classList.toggle('on',!!S.connected);
@@ -2325,7 +2369,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'E-Stop is on. Every channel is locked at 0. Tap Release E-Stop to continue.':'E-Stop aktif. Semua saluran dikunci pada 0. Tekan Lepas untuk sambung semula.',
     'E-Stop is on: every channel is locked at 0':'E-Stop aktif: semua saluran dikunci pada 0','E-Stop released':'E-Stop dilepaskan',
     'Bluetooth is off':'Bluetooth dimatikan','Permission denied':'Kebenaran ditolak','BLE advertising not supported':'Siaran BLE tidak disokong','Bluetooth error':'Ralat Bluetooth','Error':'Ralat',
-    'Model':'Model','Model name':'Nama model','Colour':'Warna','Classic':'Klasik','Construction':'Pembinaan','Standard':'Standard','Dual stick':'Dua stick',
+    'Model':'Model','Model name':'Nama model','Colour':'Warna','Classic':'Klasik','Construction':'Pembinaan','Studs':'Bintik','Standard':'Standard','Dual stick':'Dua stick',
     'New model':'Model baharu','Delete':'Padam','Confirm delete':'Sahkan padam','Confirm':'Sahkan','Model colour':'Warna model','Theme':'Tema','Layout':'Susun atur',
     'Model list is full.':'Senarai model penuh.','New model created from the current settings':'Model baharu dicipta daripada tetapan semasa',
     'Quick actions':'Tindakan pantas',
