@@ -39,6 +39,8 @@
 *{box-sizing:border-box}
 html{overflow-x:hidden;-webkit-tap-highlight-color:transparent}
 input[type=range],.track,.pad,.hold{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input:not([type=range]):not([type=checkbox]),textarea,.txt{-webkit-user-select:text;user-select:text}
 input[type=range]:focus,input[type=range]:focus-visible{outline:none}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.4}
 [hidden]{display:none!important}
@@ -728,6 +730,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var NMAX=18, PER=6, L='ABCDEF';
   var MAX_REC_MS=90000, MAX_PTS=1800, MAX_RECS=10, MAX_MODELS=30;
   var NB=window.MK6Bridge||null;
+  if(typeof document.addEventListener==='function') document.addEventListener('contextmenu',function(e){var t=e.target&&e.target.tagName;if(t==='INPUT'&&e.target.type!=='range'&&e.target.type!=='checkbox')return;if(t==='TEXTAREA')return;e.preventDefault()});
   var S={connected:!NB,estop:false,rec:null,play:null,loop:false};
   var $=function(s,r){return (r||document).querySelector(s)};
   var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
