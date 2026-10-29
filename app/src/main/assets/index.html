@@ -427,6 +427,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <div class="set-row"><label for="ramp"><span class="set-top"><span>Acceleration smoothing</span><output id="rampOut">60</output></span></label>
             <input id="ramp" type="range" min="0" max="100" step="5" value="60"></div>
           <label class="check" for="spring"><input id="spring" type="checkbox" checked>Sliders return to 0 when released</label>
+          <label class="check" for="stickHold"><input id="stickHold" type="checkbox" checked>Sticks return to 0 when released</label>
           <label>Auto-stop when idle<select id="sfIdle"><option value="0">Off</option><option value="10">10 s</option><option value="30">30 s</option><option value="60">60 s</option><option value="120">2 min</option></select></label>
           <label>Warn after long full power<select id="sfWarn"><option value="0">Off</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <div class="set-row"><span class="set-top"><span>Hubs (module number of each)</span></span>
@@ -493,7 +494,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider'});
-    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,spring:true,stickHold:false,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -584,6 +585,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.limit=num(c.limit,10,100,100);
     d.ramp=num(c.ramp,0,100,60);
     if(typeof c.spring==='boolean') d.spring=c.spring;
+    if(typeof c.stickHold==='boolean') d.stickHold=c.stickHold;
     var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
     d.s1={mode:s1.mode==='tank'?'tank':'axis',a:idxOf(s1.a,0,false),b:idxOf(s1.b,1,false)};
     d.s2={mode:s2.mode==='tank'?'tank':'axis',a:idxOf(s2.a,2,true),b:idxOf(s2.b,3,true)};
@@ -822,7 +824,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     st.pad.addEventListener('pointermove',function(e){if(e.pointerId===st.id)move(e)});
     function end(e){
       if(e.pointerId!==st.id)return;
-      st.id=null;st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0);
+      st.id=null;if(C.stickHold)return;st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0);
     }
     st.pad.addEventListener('pointerup',end);
     st.pad.addEventListener('pointercancel',end);
@@ -880,7 +882,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var limit=$('#limit'), ramp=$('#ramp'), spring=$('#spring'), loopBox=$('#loop');
   var gpOn=$('#gpOn'), gpDead=$('#gpDead'), gpTrig=$('#gpTrig'), gpStat=$('#gpStat');
   function syncSettings(){
-    limit.value=C.limit;ramp.value=C.ramp;spring.checked=C.spring;loopBox.checked=S.loop;
+    limit.value=C.limit;ramp.value=C.ramp;spring.checked=C.spring;if($('#stickHold'))$('#stickHold').checked=!C.stickHold;loopBox.checked=S.loop;
     $('#limitOut').textContent=C.limit+'%';$('#rampOut').textContent=C.ramp;
     gpOn.checked=C.pad.on;gpDead.value=C.pad.dead;$('#gpDeadOut').textContent=C.pad.dead+'%';
     gpTrig.innerHTML='';
@@ -894,6 +896,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   ramp.addEventListener('input',function(){C.ramp=+ramp.value;$('#rampOut').textContent=C.ramp});
   limit.addEventListener('change',save);ramp.addEventListener('change',save);
   spring.addEventListener('change',function(){C.spring=spring.checked;save()});
+  $('#stickHold').addEventListener('change',function(){
+    C.stickHold=!$('#stickHold').checked;save();
+    if(!C.stickHold) sticks.forEach(function(st,k){ if(st.id===null){st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0)} });
+  });
   gpOn.addEventListener('change',function(){C.pad.on=gpOn.checked;if(!C.pad.on) releasePad();save()});
   gpDead.addEventListener('input',function(){C.pad.dead=+gpDead.value;$('#gpDeadOut').textContent=C.pad.dead+'%'});
   gpDead.addEventListener('change',save);
@@ -1604,7 +1610,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Connected but switched off':'Disambung tetapi dimatikan','Button mapping':'Pemetaan butang','Nothing':'Tiada','Stop all channels':'Henti semua saluran',
     'D-pad up':'D-pad atas','D-pad down':'D-pad bawah','D-pad left':'D-pad kiri','D-pad right':'D-pad kanan',
     'Limits & hubs':'Had & hab','Power limit (all channels)':'Had kuasa (semua saluran)','Acceleration smoothing':'Pelicinan pecutan',
-    'Sliders return to 0 when released':'Gelangsar kembali ke 0 bila dilepas','Auto-stop when idle':'Henti automatik bila tiada input','Warn after long full power':'Amaran selepas kuasa penuh lama',
+    'Sliders return to 0 when released':'Gelangsar kembali ke 0 bila dilepas','Sticks return to 0 when released':'Stick kembali ke 0 bila dilepas','Auto-stop when idle':'Henti automatik bila tiada input','Warn after long full power':'Amaran selepas kuasa penuh lama',
     'Off':'Mati','Hubs (module number of each)':'Hab (nombor modul setiap satu)',
     'Frames sent':'Bingkai dihantar','Frame log':'Log bingkai',
     'Each frame is six values from -100 to +100, one per channel, for every active hub. This page is running in simulation: no Bluetooth is used, frames are only logged.':'Setiap bingkai ialah enam nilai dari -100 hingga +100, satu setiap saluran, untuk setiap hab aktif. Halaman ini berjalan dalam simulasi: Bluetooth tidak digunakan, bingkai hanya dicatat.',
