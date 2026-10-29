@@ -315,8 +315,21 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdw:not(.w2) .hold{min-height:56px}
 .bdw .pad{width:min(100%,260px);margin:0 auto}
 .bdw .qbtn{width:100%}
-.bdw-ed{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.bdw-ed .btn{min-height:36px;padding:0}
+.bdw-ed{display:flex;gap:4px;flex:none}
+.bdw-ed .btn{min-height:30px;min-width:30px;padding:0 6px;font-size:13px}
+.bdw.editing{border-style:dashed;border-color:var(--acc)}
+.bdw-h{align-items:center}
+.bdw.editing .bdw-h{flex-direction:column;align-items:stretch;gap:6px}
+.bdw-ed{width:100%}
+.bdw-ed .btn{flex:1 1 0}
+.bd-pads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.bd-pads .pad{width:100%;margin:0 auto}
+.bd-panel{display:grid;gap:12px;margin-top:12px;padding:12px;border:1px dashed var(--line);border-radius:10px;background:var(--well)}
+.bd-types{display:flex;flex-wrap:wrap;gap:6px}
+.bd-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.bd-fields label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.bd-fields label[hidden]{display:none}
+.bd-panel .rec-row{align-items:center}
 .tilt-opt{display:grid;gap:8px;margin-top:8px}
 :root[data-lock] .tilt-row,:root[data-lock] #bdEdit,:root[data-lock] #bdEditor,:root[data-lock] .bdw-ed{display:none}
 
@@ -417,14 +430,25 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       <div class="bdgrid" id="boardGrid"></div>
       <p class="rec-stat" id="bdNote"></p>
       <div class="rec-row"><button class="btn" id="bdEdit" type="button" aria-pressed="false">Edit board</button></div>
-      <div id="bdEditor" hidden>
+      <div id="bdEditor" class="bd-panel" hidden>
+        <div class="seg bd-types" role="group" aria-label="Control type">
+          <button class="btn" id="bdTS" type="button" aria-pressed="true">Slider</button>
+          <button class="btn" id="bdTH" type="button" aria-pressed="false">Hold</button>
+          <button class="btn" id="bdTJ" type="button" aria-pressed="false">Joystick</button>
+          <button class="btn" id="bdTD" type="button" aria-pressed="false">Double joystick</button>
+          <button class="btn" id="bdTQ" type="button" aria-pressed="false">Sequence</button>
+        </div>
+        <div class="bd-fields">
+          <label id="bdF1"><span id="bdL1">Channel</span><select id="bdTarget"></select></label>
+          <label id="bdF2" hidden><span id="bdL2"></span><select id="bdTarget2"></select></label>
+          <label id="bdF3" hidden><span id="bdL3"></span><select id="bdTarget3"></select></label>
+          <label id="bdF4" hidden><span id="bdL4"></span><select id="bdTarget4"></select></label>
+          <label id="bdFM" hidden><span>Mode</span><select id="bdMode"><option value="axis">Axis (drive + steer)</option><option value="tank">Tank (left + right)</option></select></label>
+        </div>
         <div class="rec-row">
-          <select id="bdKind" aria-label="Control type"><option value="s">Slider</option><option value="h">Hold buttons</option><option value="j">Joystick</option><option value="q">Sequence</option></select>
-          <select id="bdTarget" aria-label="Drive or left motor"></select>
-          <select id="bdTarget2" aria-label="Steer or right motor" hidden></select>
-          <select id="bdMode" aria-label="Joystick mode" hidden><option value="axis">Axis (drive + steer)</option><option value="tank">Tank (left + right)</option></select>
-          <select id="bdWide" aria-label="Control width"><option value="1">Normal</option><option value="2">Wide</option></select>
-          <button class="btn" id="bdAdd" type="button">Add</button>
+          <label class="check" for="bdWideChk"><input id="bdWideChk" type="checkbox">Wide</label>
+          <span class="spacer"></span>
+          <button class="btn" id="bdAdd" type="button">Add to board</button>
         </div>
       </div>
     </section>
@@ -513,7 +537,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
             <input id="limit" type="range" min="10" max="100" step="5" value="100"></div>
           <div class="set-row"><label for="ramp"><span class="set-top"><span>Acceleration smoothing</span><output id="rampOut">60</output></span></label>
             <input id="ramp" type="range" min="0" max="100" step="5" value="60"></div>
-          <label class="check" for="spring"><input id="spring" type="checkbox" checked>Sliders return to 0 when released</label>
           <label>Auto-stop when idle<select id="sfIdle"><option value="0">Off</option><option value="10">10 s</option><option value="30">30 s</option><option value="60">60 s</option><option value="120">2 min</option></select></label>
           <label>Stop a channel after running this long<select id="sfRun"><option value="0">Off</option><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <label>Warn after long full power<select id="sfWarn"><option value="0">Off</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
@@ -676,6 +699,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       }else if(x.k==='j'){
         var ja=Math.round(+x.c), jb=Math.round(+x.d);
         if(ja>=0&&ja<NMAX&&jb>=-1&&jb<NMAX) out.push({k:'j',c:ja,d:jb,m:x.m==='tank'?'tank':'axis',w:w});
+      }else if(x.k==='d'){
+        var da=Math.round(+x.c), db=Math.round(+x.d), dc=Math.round(+x.e), dd=Math.round(+x.f);
+        if(da>=0&&da<NMAX&&dc>=0&&dc<NMAX&&db>=-1&&db<NMAX&&dd>=-1&&dd<NMAX) out.push({k:'d',c:da,d:db,e:dc,f:dd,m:x.m==='tank'?'tank':'axis',w:2});
       }else if(x.k==='q'&&typeof x.c==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(x.c)){
         out.push({k:'q',c:x.c,w:w});
       }
@@ -698,7 +724,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     d.limit=num(c.limit,10,100,100);
     d.ramp=num(c.ramp,0,100,60);
-    if(typeof c.spring==='boolean') d.spring=c.spring;
+    d.spring=true;
     var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
     var gh=c.stickHold===true;
     d.s1={mode:s1.mode==='tank'?'tank':'axis',a:idxOf(s1.a,0,false),b:idxOf(s1.b,1,false),hold:typeof s1.hold==='boolean'?s1.hold:gh};
@@ -1077,10 +1103,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
 
   /* ---------- Settings & hubs ---------- */
-  var limit=$('#limit'), ramp=$('#ramp'), spring=$('#spring'), loopBox=$('#loop');
+  var limit=$('#limit'), ramp=$('#ramp'), loopBox=$('#loop');
   var gpOn=$('#gpOn'), gpDead=$('#gpDead'), gpTrig=$('#gpTrig'), gpStat=$('#gpStat');
   function syncSettings(){
-    limit.value=C.limit;ramp.value=C.ramp;spring.checked=C.spring;loopBox.checked=S.loop;
+    limit.value=C.limit;ramp.value=C.ramp;loopBox.checked=S.loop;
     $('#limitOut').textContent=C.limit+'%';$('#rampOut').textContent=C.ramp;
     gpOn.checked=C.pad.on;gpDead.value=C.pad.dead;$('#gpDeadOut').textContent=C.pad.dead+'%';
     gpTrig.innerHTML='';
@@ -1093,7 +1119,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   limit.addEventListener('input',function(){C.limit=+limit.value;$('#limitOut').textContent=C.limit+'%'});
   ramp.addEventListener('input',function(){C.ramp=+ramp.value;$('#rampOut').textContent=C.ramp});
   limit.addEventListener('change',save);ramp.addEventListener('change',save);
-  spring.addEventListener('change',function(){C.spring=spring.checked;save()});
   gpOn.addEventListener('change',function(){C.pad.on=gpOn.checked;if(!C.pad.on) releasePad();save()});
   gpDead.addEventListener('input',function(){C.pad.dead=+gpDead.value;$('#gpDeadOut').textContent=C.pad.dead+'%'});
   gpDead.addEventListener('change',save);
@@ -1890,24 +1915,47 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   bkPaint();
 
   // ---- Board layout ----
-  var bdGrid=$('#boardGrid'), bdEditor=$('#bdEditor'), bdEditBtn=$('#bdEdit'), bdKind=$('#bdKind'), bdTarget=$('#bdTarget'), bdTarget2=$('#bdTarget2'), bdMode=$('#bdMode'), bdWide=$('#bdWide'), bdNote=$('#bdNote'), bdEditing=false, bdW=[];
+  var bdGrid=$('#boardGrid'), bdEditor=$('#bdEditor'), bdEditBtn=$('#bdEdit'), bdNote=$('#bdNote');
+  var bdSel=[$('#bdTarget'),$('#bdTarget2'),$('#bdTarget3'),$('#bdTarget4')];
+  var bdFields=[$('#bdF1'),$('#bdF2'),$('#bdF3'),$('#bdF4')], bdLbl=[$('#bdL1'),$('#bdL2'),$('#bdL3'),$('#bdL4')];
+  var bdModeF=$('#bdFM'), bdMode=$('#bdMode'), bdWideChk=$('#bdWideChk');
+  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['q',$('#bdTQ')]];
+  var bdK='s', bdEditing=false, bdW=[];
   function prefillBoard(){
     var n=0;
     activeIdx().forEach(function(i){if(n<4){C.board.push({k:C.ch[i].kind==='hold'?'h':'s',c:i,w:C.ch[i].kind==='hold'?2:1});n++}});
     C.seq.slice(0,4).forEach(function(sq){C.board.push({k:'q',c:sq.id,w:1})});
   }
+  function bdOpt(sel,v,t){var o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}
   function bdFill(){
-    var k=bdKind.value;bdTarget.innerHTML='';bdTarget2.innerHTML='';
-    function opt(sel,v,t){var o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}
-    if(k==='q') C.seq.forEach(function(sq){opt(bdTarget,sq.id,sq.name||'(unnamed)')});
-    else activeIdx().forEach(function(i){opt(bdTarget,String(i),tagOf(i)+' · '+C.ch[i].name)});
-    var j=k==='j';
-    bdTarget2.hidden=!j;bdMode.hidden=!j;
-    if(j){
-      opt(bdTarget2,'-1','None');
-      activeIdx().forEach(function(i){opt(bdTarget2,String(i),tagOf(i)+' · '+C.ch[i].name)});
-      if(bdTarget2.options.length>2) bdTarget2.selectedIndex=2;
-    }
+    if(!bdSel[0]) return;
+    var chans=activeIdx(), tank=bdMode.value==='tank';
+    var n=bdK==='j'?2:(bdK==='d'?4:1);
+    var L=bdK==='q'?['Sequence']:((bdK==='s'||bdK==='h')?['Channel']:
+      (bdK==='j'?(tank?['Left motor','Right motor']:['Drive','Steer']):
+      (tank?['Left stick: Left motor','Left stick: Right motor','Right stick: Left motor','Right stick: Right motor']:
+            ['Left stick: Drive','Left stick: Steer','Right stick: Drive','Right stick: Steer'])));
+    bdSel.forEach(function(sel,q){
+      var show=bdK==='q'?q===0:q<n;
+      bdFields[q].hidden=!show;
+      sel.innerHTML='';
+      if(!show) return;
+      bdLbl[q].textContent=L[q]||'';
+      if(bdK==='q'){C.seq.forEach(function(sq){bdOpt(sel,sq.id,sq.name||'(unnamed)')});return}
+      var none=(bdK==='j'||bdK==='d')&&(q===1||q===3);
+      if(none) bdOpt(sel,'-1','None');
+      chans.forEach(function(i){bdOpt(sel,String(i),tagOf(i)+' · '+C.ch[i].name)});
+      if(chans.length>q) sel.value=String(chans[q]);
+    });
+    bdModeF.hidden=!(bdK==='j'||bdK==='d');
+  }
+  function bdSetKind(k){
+    bdK=k;
+    bdTypes.forEach(function(t){t[1].setAttribute('aria-pressed',String(t[0]===k))});
+    bdWideChk.checked=(k==='h'||k==='j'||k==='d');
+    bdWideChk.disabled=(k==='d');
+    if(k==='d') bdWideChk.checked=true;
+    bdFill();
   }
   function applyJoy(it,x,y){
     var va,vb;
@@ -1915,54 +1963,87 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     setT(it.c,va*100,false);
     if(it.d>=0) setT(it.d,vb*100,false);
   }
+  function bdPad(a,b,m){
+    var it={c:a,d:b,m:m};
+    var jp=document.createElement('div');jp.className='pad';
+    var kn=document.createElement('div');kn.className='knob rest';jp.appendChild(kn);
+    var pid=null;
+    var jmove=function(e){
+      var r=jp.getBoundingClientRect(), R=r.width*0.4;
+      var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), d=Math.hypot(dx,dy);
+      if(d>R){dx*=R/d;dy*=R/d}
+      kn.style.transform='translate('+dx+'px,'+dy+'px)';
+      jp.style.setProperty('--m',Math.min(1,Math.hypot(dx,dy)/R).toFixed(2));
+      noteInput();applyJoy(it,dx/R,-dy/R);
+    };
+    jp.addEventListener('pointerdown',function(e){pid=e.pointerId;try{jp.setPointerCapture(e.pointerId)}catch(_){}kn.classList.remove('rest');jmove(e)});
+    jp.addEventListener('pointermove',function(e){if(e.pointerId===pid) jmove(e)});
+    var jend=function(e){
+      if(e.pointerId!==pid) return;
+      pid=null;kn.classList.add('rest');kn.style.transform='translate(0,0)';jp.style.setProperty('--m','0');applyJoy(it,0,0);
+    };
+    jp.addEventListener('pointerup',jend);jp.addEventListener('pointercancel',jend);
+    return jp;
+  }
   function bdMove(it,d){
     var n=C.board.indexOf(it), m=n+d;if(n<0||m<0||m>=C.board.length) return;
     var t=C.board[n];C.board[n]=C.board[m];C.board[m]=t;save();syncBoard();
   }
+  function bdToolbar(it){
+    var ed=document.createElement('div');ed.className='bdw-ed';
+    var defs=[['◀','Move earlier',function(){bdMove(it,-1)}],['▶','Move later',function(){bdMove(it,1)}]];
+    if(it.k!=='d') defs.push(['↔','Wide or normal',function(){it.w=it.w===2?1:2;save();syncBoard()}]);
+    defs.push(['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0)C.board.splice(q,1);save();syncBoard()}]);
+    defs.forEach(function(d){
+      var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=d[0];b.setAttribute('aria-label',d[1]);
+      b.addEventListener('click',d[2]);ed.appendChild(b);
+    });
+    return ed;
+  }
+  function bdHead(el,text,it,withOut){
+    if(!text&&!bdEditing&&!withOut) return null;
+    var head=document.createElement('div');head.className='bdw-h';
+    var nm=document.createElement('span');nm.textContent=text||'';head.appendChild(nm);
+    var out=null;
+    if(bdEditing) head.appendChild(bdToolbar(it));
+    else if(withOut){out=document.createElement('output');out.textContent='0';head.appendChild(out)}
+    el.appendChild(head);
+    return out;
+  }
+  function chName(c){return tagOf(c)+(c>=0?'':'')}
   function syncBoard(){
     if(!bdGrid||!C.board) return;
     bdFill();
     bdGrid.innerHTML='';bdW=[];
-    bdEditor.hidden=!bdEditing;bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
-    C.board.forEach(function(it,n){
-      var el=document.createElement('div');el.className='bdw'+(it.w===2?' w2':'');
+    bdEditor.hidden=!bdEditing;
+    bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
+    bdEditBtn.textContent=bdEditing?'Done editing':'Edit board';
+    C.board.forEach(function(it){
+      var el=document.createElement('div');
+      el.className='bdw'+((it.w===2||it.k==='d')?' w2':'')+(bdEditing?' editing':'');
       var w={it:it,drag:false,out:null,rng:null,btn:null,sq:null};
       if(it.k==='q'){
         var sq=C.seq.filter(function(x){return x.id===it.c})[0];
         if(!sq) return;
+        bdHead(el,bdEditing?'Sequence':'',it,false);
         var qb=document.createElement('button');qb.type='button';qb.className='qbtn';
         qb.addEventListener('click',function(){noteInput();runSeq(sq.id)});
         el.appendChild(qb);w.btn=qb;w.sq=sq;
       }else if(it.k==='j'){
         if(!isActive(it.c)||(it.d>=0&&!isActive(it.d))) return;
-        var jh=document.createElement('div');jh.className='bdw-h';
-        var jn=document.createElement('span');jn.textContent=(it.m==='tank'?'Tank':'Stick')+' · '+tagOf(it.c)+(it.d>=0?'+'+tagOf(it.d):'');
-        jh.appendChild(jn);el.appendChild(jh);
-        var jp=document.createElement('div');jp.className='pad';
-        var kn=document.createElement('div');kn.className='knob rest';jp.appendChild(kn);el.appendChild(jp);
-        var pid=null;
-        var jmove=function(e){
-          var r=jp.getBoundingClientRect(), R=r.width*0.4;
-          var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), m=Math.hypot(dx,dy);
-          if(m>R){dx*=R/m;dy*=R/m}
-          kn.style.transform='translate('+dx+'px,'+dy+'px)';
-          jp.style.setProperty('--m',Math.min(1,Math.hypot(dx,dy)/R).toFixed(2));
-          noteInput();applyJoy(it,dx/R,-dy/R);
-        };
-        jp.addEventListener('pointerdown',function(e){pid=e.pointerId;try{jp.setPointerCapture(e.pointerId)}catch(_){}kn.classList.remove('rest');jmove(e)});
-        jp.addEventListener('pointermove',function(e){if(e.pointerId===pid) jmove(e)});
-        var jend=function(e){
-          if(e.pointerId!==pid) return;
-          pid=null;kn.classList.add('rest');kn.style.transform='translate(0,0)';jp.style.setProperty('--m','0');applyJoy(it,0,0);
-        };
-        jp.addEventListener('pointerup',jend);jp.addEventListener('pointercancel',jend);
+        bdHead(el,(it.m==='tank'?'Tank':'Stick')+' · '+tagOf(it.c)+(it.d>=0?'+'+tagOf(it.d):''),it,false);
+        el.appendChild(bdPad(it.c,it.d,it.m));
+      }else if(it.k==='d'){
+        var all=[it.c,it.d,it.e,it.f];
+        for(var q=0;q<4;q++) if(all[q]>=0&&!isActive(all[q])) return;
+        bdHead(el,'Double stick',it,false);
+        var pr=document.createElement('div');pr.className='bd-pads';
+        pr.appendChild(bdPad(it.c,it.d,it.m));pr.appendChild(bdPad(it.e,it.f,it.m));
+        el.appendChild(pr);
       }else{
         var c=it.c;
         if(!isActive(c)) return;
-        var head=document.createElement('div');head.className='bdw-h';
-        var nm=document.createElement('span');nm.textContent=tagOf(c)+' · '+C.ch[c].name;
-        var ou=document.createElement('output');ou.textContent='0';
-        head.appendChild(nm);head.appendChild(ou);el.appendChild(head);w.out=ou;
+        w.out=bdHead(el,tagOf(c)+' · '+C.ch[c].name,it,true);
         if(it.k==='s'){
           var r=document.createElement('input');r.type='range';r.min='-100';r.max='100';r.step='1';r.value='0';
           r.setAttribute('aria-label','Power of channel '+tagOf(c));
@@ -1979,7 +2060,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           [['Reverse',-1],['Forward',1]].forEach(function(d){
             var b=document.createElement('button');b.type='button';b.className='hold '+(d[1]<0?'rev':'fwd');
             var ar=document.createElement('span'),tx=document.createElement('span');
-            ar.textContent=d[1]<0?'\u25C0':'\u25B6';tx.textContent=d[0];ar.setAttribute('aria-hidden','true');
+            ar.textContent=d[1]<0?'◀':'▶';tx.textContent=d[0];ar.setAttribute('aria-hidden','true');
             if(d[1]<0){b.appendChild(ar);b.appendChild(tx)}else{b.appendChild(tx);b.appendChild(ar)}
             var down=false;
             function press(){if(down)return;down=true;b.classList.add('on');noteInput();setT(c,d[1]*100,false)}
@@ -1991,16 +2072,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           });
           el.appendChild(hb);
         }
-      }
-      if(bdEditing){
-        var ed=document.createElement('div');ed.className='bdw-ed';
-        [['◀','Move earlier',function(){bdMove(it,-1)}],['▶','Move later',function(){bdMove(it,1)}],
-         ['↔','Wide or normal',function(){it.w=it.w===2?1:2;save();syncBoard()}],
-         ['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0)C.board.splice(q,1);save();syncBoard()}]].forEach(function(d){
-          var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=d[0];b.setAttribute('aria-label',d[1]);
-          b.addEventListener('click',d[2]);ed.appendChild(b);
-        });
-        el.appendChild(ed);
       }
       bdGrid.appendChild(el);bdW.push(w);
     });
@@ -2015,7 +2086,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         w.btn.classList.toggle('on',mine);
         w.btn.textContent=(mine?'■ ':'▶ ')+w.sq.name;
         w.btn.disabled=!mine&&(!!S.rec||!!S.play||S.estop||!w.sq.steps.length);
-      }else{
+      }else if(w.it.k==='s'||w.it.k==='h'){
         var v=rt.t[w.it.c];
         if(w.out) w.out.textContent=fmt(v);
         if(w.rng&&!w.drag&&+w.rng.value!==v) w.rng.value=String(v);
@@ -2023,16 +2094,24 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
   }
   bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;syncBoard()});
-  bdKind.addEventListener('change',function(){bdFill();bdWide.value=(bdKind.value==='s'||bdKind.value==='q')?'1':'2'});
+  bdTypes.forEach(function(t){t[1].addEventListener('click',function(){bdSetKind(t[0])})});
+  bdMode.addEventListener('change',bdFill);
   $('#bdAdd').addEventListener('click',function(){
     if(C.board.length>=12){bdNote.textContent='The board is full (12 controls).';return}
-    var k=bdKind.value, v=bdTarget.value;
-    if(!v){bdNote.textContent='Nothing to add. Make a sequence first.';return}
-    var ww=+bdWide.value===2?2:1;
-    if(k==='j') C.board.push({k:'j',c:Math.round(+v),d:Math.round(+bdTarget2.value),m:bdMode.value==='tank'?'tank':'axis',w:ww});
-    else C.board.push({k:k,c:k==='q'?v:Math.round(+v),w:ww});
-    save();syncBoard();
+    var v=bdSel.map(function(s){return s.value});
+    if(!v[0]){bdNote.textContent='Nothing to add. Make a sequence first.';return}
+    var ww=bdWideChk.checked?2:1, m=bdMode.value==='tank'?'tank':'axis', n=v.map(function(x){return Math.round(+x)});
+    if(bdK==='q') C.board.push({k:'q',c:v[0],w:ww});
+    else if(bdK==='s'||bdK==='h') C.board.push({k:bdK,c:n[0],w:ww});
+    else{
+      var used=(bdK==='j'?n.slice(0,2):n).filter(function(x){return x>=0});
+      if(used.some(function(x,i){return used.indexOf(x)!==i})){bdNote.textContent='Pick different channels for each motor.';return}
+      if(bdK==='j') C.board.push({k:'j',c:n[0],d:n[1],m:m,w:ww});
+      else C.board.push({k:'d',c:n[0],d:n[1],e:n[2],f:n[3],m:m,w:2});
+    }
+    bdNote.textContent='';save();syncBoard();
   });
+  bdSetKind('s');
   var sfIdle=$('#sfIdle'), sfWarn=$('#sfWarn');
   function syncSafety(){if(!sfIdle) return;sfIdle.value=String(C.safety.idle);sfWarn.value=String(C.safety.warn);if(sfRun)sfRun.value=String(C.safety.run)}
   sfIdle.addEventListener('change',function(){C.safety.idle=pickOf(sfIdle.value,[0,10,30,60,120],60);save()});
@@ -2195,7 +2274,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Player mode shows only big sequence buttons and E-Stop. Lock settings hides everything that changes the model. Hold the button for 2 seconds to unlock or leave.':'Mod pemain hanya menunjukkan butang jujukan besar dan E-Stop. Kunci tetapan menyembunyikan semua yang mengubah model. Tahan butang selama 2 saat untuk buka kunci atau keluar.',
     'No sequences yet. Leave player mode and make one first.':'Belum ada jujukan. Keluar dari mod pemain dan buat satu dahulu.',
     'Settings locked. Hold the button in the App card for 2 seconds to unlock.':'Tetapan dikunci. Tahan butang dalam kad App selama 2 saat untuk buka kunci.',
-    'Slow':'Perlahan','Axis (drive + steer)':'Paksi (pandu + pusing)','Tank (left + right)':'Tangki (kiri + kanan)','Hold buttons':'Butang tahan','Slider':'Gelangsar','Sequence':'Jujukan','Wide':'Lebar','Add':'Tambah','Edit board':'Sunting papan',
+    'Slow':'Perlahan','Hold':'Tahan','Double joystick':'Joystik berkembar','Double stick':'Stik berkembar','Mode':'Mod','Add to board':'Tambah ke papan','Done editing':'Siap sunting','Channel':'Saluran','Drive':'Pandu','Steer':'Pusing','Left motor':'Motor kiri','Right motor':'Motor kanan','None':'Tiada',
+    'Pick different channels for each motor.':'Pilih saluran berbeza untuk setiap motor.','Axis (drive + steer)':'Paksi (pandu + pusing)','Tank (left + right)':'Tangki (kiri + kanan)','Hold buttons':'Butang tahan','Slider':'Gelangsar','Sequence':'Jujukan','Wide':'Lebar','Add':'Tambah','Edit board':'Sunting papan',
     'The board is empty. Tap Edit board to add controls.':'Papan kosong. Tekan Sunting papan untuk tambah kawalan.','The board is full (12 controls).':'Papan penuh (12 kawalan).','Nothing to add. Make a sequence first.':'Tiada untuk ditambah. Buat jujukan dahulu.',
     'Steer by tilting the phone (experimental)':'Pusing dengan condongkan telefon (eksperimen)','Tilt for full steering':'Condong untuk pusing penuh','Low sensitivity (60\u00b0)':'Kepekaan rendah (60\u00b0)','Medium (45\u00b0)':'Sederhana (45\u00b0)','High sensitivity (30\u00b0)':'Kepekaan tinggi (30\u00b0)','Reverse tilt direction':'Terbalikkan arah condong','No tilt sensor found on this phone.':'Tiada sensor condong pada telefon ini.','Normal':'Biasa','Fast':'Laju','Board':'Papan',
     'Stop a channel after running this long':'Henti saluran selepas berjalan selama ini','Player mode power limit':'Had kuasa mod pemain',
@@ -2239,6 +2319,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     [/^Hub (M?\d)$/,function(m){return 'Hab '+m[1]}],
     [/^Last backup: (.*)\. File: Downloads\/MK6-Console-backup\.json$/,function(m){return 'Sandaran terakhir: '+m[1]+'. Fail: Downloads/MK6-Console-backup.json'}],
     [/^Channel (\S+) stopped after (\d+) s of running\. Move it back to 0, then start again\.$/,function(m){return 'Saluran '+m[1]+' dihentikan selepas '+m[2]+' s berjalan. Gerakkan kembali ke 0, kemudian mula semula.'}],
+    [/^(Left|Right) stick: (Drive|Steer|Left motor|Right motor)$/,function(m){var t={'Drive':'Pandu','Steer':'Pusing','Left motor':'Motor kiri','Right motor':'Motor kanan'};return (m[1]==='Left'?'Stik kiri: ':'Stik kanan: ')+t[m[2]]}],
     [/^Phone (\d+)%$/,function(m){return 'Telefon '+m[1]+'%'}],
     [/^Phone battery is low \((\d+)%\)\. Charge it before driving\.$/,function(m){return 'Bateri telefon rendah ('+m[1]+'%). Cas sebelum memandu.'}],
     [/^Testing channel (\S+) \((.*)\) forward at (\d+)%$/,function(m){return 'Menguji saluran '+m[1]+' ('+m[2]+') ke depan pada '+m[3]+'%'}],
