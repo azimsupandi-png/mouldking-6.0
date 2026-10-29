@@ -189,6 +189,23 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    private boolean fullScreen = true;
+
+    private void applyFull() {
+        int f = fullScreen
+            ? (android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
+                | android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+            : android.view.View.SYSTEM_UI_FLAG_VISIBLE;
+        try { getWindow().getDecorView().setSystemUiVisibility(f); } catch (RuntimeException ignored) { }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) applyFull();
+    }
+
     private SensorManager sm;
     private boolean tiltOn;
     private long lastTilt;
@@ -373,6 +390,11 @@ public class MainActivity extends Activity {
 
     /** Methods the page can call; they run on a WebView thread, so hop to the UI thread. */
     private final class Bridge {
+        @JavascriptInterface
+        public void immersive(final boolean on) {
+            runOnUiThread(() -> { fullScreen = on; applyFull(); });
+        }
+
         @JavascriptInterface
         public void tilt(final boolean on) {
             runOnUiThread(() -> setTilt(on));
