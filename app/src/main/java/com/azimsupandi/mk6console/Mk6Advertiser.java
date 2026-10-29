@@ -16,8 +16,10 @@ import android.os.SystemClock;
  *
  * Telegram layout (10 bytes): 0x61+module, 0x7B, 0xA7, six channel bytes
  * (0x80 = stop, above = forward, below = reverse), 0x9E-module.
- * With one hub the telegram is updated whenever the values change. With several
- * hubs the telegrams are broadcast in turn, one every ROTATE_MS.
+ * Every hub gets its own advertising set, so all hubs are updated at the same time
+ * (about 100 ms, the Android minimum). Telegrams are updated whenever the values change.
+ * If the phone cannot run that many advertising sets, it falls back to one set that
+ * broadcasts the telegrams in turn, one every ROTATE_MS.
  * Protocol credit: J0EK3R (MIT). See NOTICE.
  *
  * All methods must be called on the main thread.
@@ -49,6 +51,12 @@ final class Mk6Advertiser {
 
     private BluetoothLeAdvertiser advertiser;
     private AdvertisingSet set;
+    private final AdvertisingSet[] extra = new AdvertisingSet[MAX_HUBS];
+    private final SetCb[] extraCb = new SetCb[MAX_HUBS];
+    private final int[] sent = new int[MAX_HUBS * CHANNELS];
+    private boolean parallel;
+    private int extrasPending;
+    private boolean extrasFailed;
     private boolean starting;
     private boolean running;
     private boolean connecting;
@@ -94,7 +102,7 @@ final class Mk6Advertiser {
                 if (failCount > 40) {
                     stopNow();
                     listener.onState("error");
-                } else if (modules.length == 1) {
+                } else if (modules.length == 1 || parallel) {
                     schedulePush();
                 }
             });
@@ -110,17 +118,124 @@ final class Mk6Advertiser {
         }
     };
 
+    private final class SetCb extends AdvertisingSetCallback {
+        final int idx;
+        SetCb(int idx) { this.idx = idx; }
+
+        @Override
+        public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {
+            handler.post(() -> onExtraStarted(idx, advertisingSet, status));
+        }
+
+        @Override
+        public void onAdvertisingDataSet(AdvertisingSet advertisingSet, int status) {
+            handler.post(() -> {
+                if (status == AdvertisingSetCallback.ADVERTISE_SUCCESS) return;
+                if (parallel && running && !connecting && !stopping) schedulePush();
+            });
+        }
+
+        @Override
+        public void onAdvertisingSetStopped(AdvertisingSet advertisingSet) {
+            handler.post(() -> { if (extra[idx] == advertisingSet) extra[idx] = null; });
+        }
+    }
+
+    private void onExtraStarted(int idx, AdvertisingSet as, int status) {
+        extrasPending--;
+        boolean ok = status == AdvertisingSetCallback.ADVERTISE_SUCCESS;
+        if (ok) {
+            extra[idx] = as;
+            if (!running || stopping) {
+                try { if (extraCb[idx] != null) advertiser.stopAdvertisingSet(extraCb[idx]); } catch (RuntimeException ignored) { }
+                extra[idx] = null;
+            }
+        } else {
+            extrasFailed = true;
+        }
+        if (extrasPending > 0) return;
+        if (!running || stopping) return;
+        if (extrasFailed) {
+            // The phone cannot run this many sets: use one set and rotate the telegrams.
+            stopExtras();
+            parallel = false;
+            handler.removeCallbacks(rotateTask);
+            handler.post(rotateTask);
+        } else {
+            parallel = true;
+            pushDirty(true);
+        }
+    }
+
+    private void stopExtras() {
+        for (int k = 1; k < MAX_HUBS; k++) {
+            if (extraCb[k] != null) {
+                try { advertiser.stopAdvertisingSet(extraCb[k]); } catch (RuntimeException ignored) { }
+            }
+            extra[k] = null;
+        }
+    }
+
+    private void startExtras() {
+        extrasPending = 0;
+        extrasFailed = false;
+        AdvertisingSetParameters params = new AdvertisingSetParameters.Builder()
+            .setLegacyMode(true)
+            .setConnectable(true)
+            .setScannable(true)
+            .setInterval(AdvertisingSetParameters.INTERVAL_LOW)
+            .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_HIGH)
+            .build();
+        for (int k = 1; k < modules.length; k++) {
+            extraCb[k] = new SetCb(k);
+            extrasPending++;
+            try {
+                advertiser.startAdvertisingSet(
+                    params, dataFor(telegram(modules[k], latest[k])), null, null, null, extraCb[k]);
+            } catch (RuntimeException e) {
+                extrasPending--;
+                extrasFailed = true;
+            }
+        }
+        if (extrasPending == 0 && extrasFailed) {
+            stopExtras();
+            parallel = false;
+            handler.removeCallbacks(rotateTask);
+            handler.post(rotateTask);
+        }
+    }
+
+    /** Send the telegrams of the hubs whose values changed (all of them when force is set). */
+    private void pushDirty(boolean force) {
+        if (!running || set == null || connecting) return;
+        try {
+            for (int k = 0; k < modules.length; k++) {
+                boolean dirty = force;
+                for (int j = 0; j < CHANNELS && !dirty; j++) {
+                    if (sent[k * CHANNELS + j] != latest[k][j]) dirty = true;
+                }
+                if (!dirty) continue;
+                AdvertisingSet target = k == 0 ? set : extra[k];
+                if (target == null) continue;
+                target.setAdvertisingData(dataFor(telegram(modules[k], latest[k])));
+                for (int j = 0; j < CHANNELS; j++) sent[k * CHANNELS + j] = latest[k][j];
+            }
+            lastPushAt = SystemClock.uptimeMillis();
+        } catch (RuntimeException e) {
+            stopNow();
+            listener.onState("error");
+        }
+    }
+
     private final Runnable finishConnect = new Runnable() {
         @Override
         public void run() {
             if (!running) return;
             connecting = false;
             if (modules.length > 1) {
-                handler.removeCallbacks(rotateTask);
-                handler.post(rotateTask);
-            } else {
-                pushModule(0);
+                startExtras();
             }
+            pushDirty(true);
             listener.onState("ready");
         }
     };
@@ -140,7 +255,7 @@ final class Mk6Advertiser {
         @Override
         public void run() {
             pushScheduled = false;
-            pushModule(0);
+            if (parallel || modules.length == 1) pushDirty(false);
         }
     };
 
@@ -195,6 +310,10 @@ final class Mk6Advertiser {
         modules = mods.clone();
         latest = new int[modules.length][CHANNELS];
         rotateIdx = 0;
+        parallel = false;
+        extrasPending = 0;
+        extrasFailed = false;
+        java.util.Arrays.fill(sent, Integer.MIN_VALUE);
         failCount = 0;
         stopping = false;
         starting = true;
@@ -227,7 +346,7 @@ final class Mk6Advertiser {
                 latest[k][j] = idx < pct.length ? pct[idx] : 0;
             }
         }
-        if (running && !connecting && set != null && modules.length == 1) schedulePush();
+        if (running && !connecting && set != null && (parallel || modules.length == 1)) schedulePush();
     }
 
     /** Broadcast neutral values, then stop advertising shortly after. */
@@ -243,13 +362,13 @@ final class Mk6Advertiser {
             }
             connecting = false;
             long wait;
-            if (modules.length > 1) {
+            if (parallel || modules.length == 1) {
+                pushDirty(true);
+                wait = NEUTRAL_BEFORE_STOP_MS;
+            } else {
                 handler.removeCallbacks(rotateTask);
                 handler.post(rotateTask);
                 wait = modules.length * ROTATE_MS * 2 + 150;
-            } else {
-                pushModule(0);
-                wait = NEUTRAL_BEFORE_STOP_MS;
             }
             handler.postDelayed(stopTask, wait);
         } else if (!starting) {
@@ -269,6 +388,8 @@ final class Mk6Advertiser {
         handler.removeCallbacks(rotateTask);
         pushScheduled = false;
         connecting = false;
+        parallel = false;
+        stopExtras();
         try {
             if (advertiser != null && (running || starting)) {
                 advertiser.stopAdvertisingSet(callback);
