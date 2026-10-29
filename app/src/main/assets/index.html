@@ -405,9 +405,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdv,.bdv input[type=range],:root .bdv input[type=range],:root[data-skin="studs"] .bdv input[type=range]{touch-action:none}
 :root[data-skin="studs"] .bdv input[type=range],:root .bdv input[type=range]{position:absolute;left:50%;top:50%;width:210px;margin:-23px 0 0 -105px;transform:rotate(-90deg)}
 .tl-wheel{width:96px;height:96px;margin:6px auto;color:#8a909a;opacity:.45;transition:opacity .15s}
-.tl-wheel svg,.tl-hud svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.7))}
+.tl-wheel svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.7))}
 .tl-wheel.on{opacity:1;color:#e8e6df}
-.tl-hud{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:64px;height:64px;margin-left:-32px;color:#e8e6df;pointer-events:none;z-index:30;opacity:.92}
+.prof-wrap{display:flex;gap:8px;align-items:center}
+.prof-wrap select,.prof-wrap input{flex:1;min-width:0}
+.prof-wrap .btn{flex:none;min-width:44px;padding:0 10px}
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
 
 /* Player mode, settings lock, calibration, battery */
@@ -520,7 +522,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 <main>
   <section class="card model" aria-label="Model">
     <div class="model-row">
-      <label>Model<select id="prof"></select></label>
+      <label>Model<span class="prof-wrap"><select id="prof"></select><input class="txt" id="profLabel" type="text" maxlength="24" autocomplete="off" hidden><button class="btn" id="profRen" type="button" aria-label="Rename model in the list">✎</button></span></label>
       <label>Model name<input class="txt" id="profName" type="text" maxlength="24" autocomplete="off"></label>
     </div>
     <div class="swatches" id="swatches" role="group" aria-label="Model colour"><span>Colour</span></div>
@@ -733,7 +735,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       </section>
     </div>
   </div>
-<div class="tl-hud" id="tlHud" aria-hidden="true" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="10"/><circle cx="50" cy="50" r="9" fill="currentColor"/><path d="M50 50L12 62M50 50L88 62M50 50V86" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><rect x="44" y="4" width="12" height="18" rx="4" fill="#ffc400"/></svg></div>
 </main>
 
 <script>
@@ -922,7 +923,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       var sp=JSON.parse(raw);
       if(sp&&Array.isArray(sp.profiles)){
         sp.profiles.forEach(function(p){
-          if(p&&typeof p.id==='string'&&typeof p.name==='string') store.profiles.push({id:p.id,name:tr(p.name.slice(0,24)),cfg:sanitizeCfg(p.cfg)});
+          if(p&&typeof p.id==='string'&&typeof p.name==='string') store.profiles.push({id:p.id,name:tr(p.name.slice(0,24)),label:(typeof p.label==='string'?p.label.slice(0,24):''),cfg:sanitizeCfg(p.cfg)});
         });
         store.active=sp.active;
         store.prefs=cleanPrefs(sp.prefs);
@@ -1147,7 +1148,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(!el) return;
     var on=!!(C.tilt&&C.tilt.on), deg=TILT.touch?Math.max(-120,Math.min(120,TILT.deg)):0, tr='rotate('+deg.toFixed(1)+'deg)';
     if(tlWheel&&tlWheel.style){tlWheel.hidden=!on;tlWheel.style.transform=tr;tlWheel.classList.toggle('on',on&&!!TILT.touch)}
-    if(tlHud&&tlHud.style){tlHud.hidden=!(on&&TILT.touch);tlHud.style.transform='';var sv=tlHud.firstChild;if(sv&&sv.style)sv.style.transform=tr}
     var t='';
     if(C.tilt&&C.tilt.on){
       if(!TILT.has) t='Tilt sensor: no data yet';
@@ -1307,9 +1307,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
   /* ---------- Model bar ---------- */
   var prof=$('#prof'), profName=$('#profName'), profDel=$('#profDel'), delArmed=0;
+  function profLbl(p){return p.label||p.name||'(unnamed)'}
   function syncProfiles(){
     prof.innerHTML='';
-    store.profiles.forEach(function(p){var o=document.createElement('option');o.value=p.id;o.textContent=p.name||'(unnamed)';prof.appendChild(o)});
+    store.profiles.forEach(function(p){var o=document.createElement('option');o.value=p.id;o.textContent=profLbl(p);prof.appendChild(o)});
     prof.value=store.active;
     profName.value=activeProfile().name;
     profDel.disabled=store.profiles.length<=1;
@@ -1352,6 +1353,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var p=store.profiles.filter(function(x){return x.id===id})[0];
     if(!p)return;
     S.rec=null;stopPlay(false);
+    if(typeof labelEdit==='function'&&profLabel&&!profLabel.hidden){profLabel.hidden=true;prof.hidden=false;profRen.textContent='\u270e'}
     store.active=id;C=p.cfg;recSel=null;recNote='';
     zeroAll();last=null;
     syncAll();paintRec();save();
@@ -1359,8 +1361,22 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   prof.addEventListener('change',function(){switchProfile(prof.value)});
   profName.addEventListener('input',function(){
     activeProfile().name=profName.value.slice(0,24);
-    var o=prof.options[prof.selectedIndex];if(o)o.textContent=activeProfile().name||'(unnamed)';
+    var o=prof.options[prof.selectedIndex];if(o)o.textContent=profLbl(activeProfile());
+    save();
   });
+  var profLabel=$('#profLabel'), profRen=$('#profRen');
+  function labelEdit(on){
+    if(on){profLabel.value=activeProfile().label||activeProfile().name;profLabel.hidden=false;prof.hidden=true;profRen.textContent='\u2713';profRen.setAttribute('aria-label','Done renaming');try{profLabel.focus();profLabel.select()}catch(e){}}
+    else{profLabel.hidden=true;prof.hidden=false;profRen.textContent='\u270e';profRen.setAttribute('aria-label','Rename model in the list');save()}
+  }
+  profRen.addEventListener('click',function(){labelEdit(profLabel.hidden)});
+  profLabel.addEventListener('input',function(){
+    var ap=activeProfile();ap.label=profLabel.value.slice(0,24).trim()===ap.name?'':profLabel.value.slice(0,24);
+    var o=prof.options[prof.selectedIndex];if(o)o.textContent=profLbl(ap);
+    save();
+  });
+  profLabel.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();labelEdit(false)}});
+  profLabel.addEventListener('change',function(){if(!profLabel.hidden)labelEdit(false)});
   profName.addEventListener('change',save);
   $('#profNew').addEventListener('click',function(){
     if(store.profiles.length>=MAX_MODELS){live.textContent='Model list is full.';return}
@@ -1504,7 +1520,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   /* ---------- Backup ---------- */
   var ioText=$('#ioText'), ioApply=$('#ioApply'), ioMsg=$('#ioMsg');
   function exportJson(){
-    return JSON.stringify({app:'mk6console',version:3,profiles:store.profiles.map(function(p){return {name:p.name,cfg:p.cfg}})});
+    return JSON.stringify({app:'mk6console',version:3,profiles:store.profiles.map(function(p){return {name:p.name,label:p.label||'',cfg:p.cfg}})});
   }
   function uniqueName(n){
     var base=n||'Imported model', name=base, k=2;
@@ -1521,7 +1537,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var added=0;
     list.slice(0,10).forEach(function(p){
       if(!p||typeof p!=='object'||store.profiles.length>=MAX_MODELS) return;
-      store.profiles.push({id:uid(),name:uniqueName(tr(String(p.name||'Imported model').slice(0,24))),cfg:sanitizeCfg(p.cfg)});
+      store.profiles.push({id:uid(),name:uniqueName(tr(String(p.name||'Imported model').slice(0,24))),label:(typeof p.label==='string'?p.label.slice(0,24):''),cfg:sanitizeCfg(p.cfg)});
       added++;
     });
     if(added){save();syncProfiles()}
@@ -2079,7 +2095,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   bkPaint();
 
   // ---- Tilt settings ----
-  var tlOn=$('#tlOn'), tlOpt=$('#tlOpt'), tlSens=$('#tlSens'), tlInv=$('#tlInv'), tlAll=$('#tlAll'), tlSt=$('#tlSt'), tlWheel=$('#tlWheel'), tlHud=$('#tlHud');
+  var tlOn=$('#tlOn'), tlOpt=$('#tlOpt'), tlSens=$('#tlSens'), tlInv=$('#tlInv'), tlAll=$('#tlAll'), tlSt=$('#tlSt'), tlWheel=$('#tlWheel');
   tlOn.addEventListener('change',function(){
     C.tilt.on=tlOn.checked;tlOpt.hidden=!C.tilt.on;TILT.zero=null;save();tiltNative();
     if(C.tilt.on) setTimeout(function(){if(!TILT.has) toast('No tilt sensor data yet. Check that the phone has an accelerometer.',5000)},1500);
@@ -2481,7 +2497,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Player mode shows only big sequence buttons and E-Stop. Lock settings hides everything that changes the model. Hold the button for 2 seconds to unlock or leave.':'Mod pemain hanya menunjukkan butang jujukan besar dan E-Stop. Kunci tetapan menyembunyikan semua yang mengubah model. Tahan butang selama 2 saat untuk buka kunci atau keluar.',
     'No sequences yet. Leave player mode and make one first.':'Belum ada jujukan. Keluar dari mod pemain dan buat satu dahulu.',
     'Settings locked. Hold the button in the App card for 2 seconds to unlock.':'Tetapan dikunci. Tahan butang dalam kad App selama 2 saat untuk buka kunci.',
-    'Slow':'Perlahan','Vertical or horizontal':'Menegak atau mengufuk','Tilt on every Board joystick and slider':'Condong pada setiap joystik dan slider Board','Full screen (hide system bars)':'Skrin penuh (sembunyi bar sistem)','Touch and hold a joystick or slider, then tilt the phone.':'Sentuh dan tahan joystik atau slider, kemudian condongkan telefon.','Tilt steering':'Pusing dengan condong','This phone has no tilt sensor.':'Telefon ini tiada sensor condong.',
+    'Slow':'Perlahan','Rename model in the list':'Namakan semula model dalam senarai','Done renaming':'Selesai menamakan semula','Vertical or horizontal':'Menegak atau mengufuk','Tilt on every Board joystick and slider':'Condong pada setiap joystik dan slider Board','Full screen (hide system bars)':'Skrin penuh (sembunyi bar sistem)','Touch and hold a joystick or slider, then tilt the phone.':'Sentuh dan tahan joystik atau slider, kemudian condongkan telefon.','Tilt steering':'Pusing dengan condong','This phone has no tilt sensor.':'Telefon ini tiada sensor condong.',
     'Tilt sensor: no data yet':'Sensor condong: belum ada data','Tilt sensor is ready. Touch and hold a joystick or slider, then tilt the phone.':'Sensor condong sedia. Sentuh dan tahan joystik atau slider, kemudian condongkan telefon.',
     'No tilt sensor data yet. Check that the phone has an accelerometer.':'Belum ada data sensor condong. Pastikan telefon ada sensor pecutan.',
     'Touch and hold the joystick with one thumb. Up and down drives. Tilt the phone left or right like a steering wheel to steer. It works with the left joystick, or the first joystick on the Board. Hold the phone upright or sideways, not flat.':'Sentuh dan tahan joystik dengan satu ibu jari. Atas dan bawah untuk memandu. Condongkan telefon ke kiri atau kanan seperti stereng untuk memusing. Ia berfungsi dengan joystik kiri, atau joystik pertama pada Board. Pegang telefon tegak atau mengiring, bukan mendatar.','Hold':'Tahan','Double joystick':'Joystik berkembar','Double stick':'Stik berkembar','Mode':'Mod','Add to board':'Tambah ke papan','Done editing':'Siap sunting','Channel':'Saluran','Drive':'Pandu','Steer':'Pusing','Left motor':'Motor kiri','Right motor':'Motor kanan','None':'Tiada',
