@@ -4,7 +4,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
@@ -48,6 +51,19 @@ public class MainActivity extends Activity {
     private String pendingModel;
     private boolean pageReady;
     private Vibrator vibrator;
+    private final BroadcastReceiver btReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) return;
+            int st = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+            if (st == BluetoothAdapter.STATE_TURNING_OFF || st == BluetoothAdapter.STATE_OFF) {
+                boolean wasActive = mk6.isActive();
+                mk6.destroy();
+                if (wasActive) notifyApp("btoff");
+            }
+        }
+    };
+    private boolean btReceiverOn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +73,12 @@ public class MainActivity extends Activity {
         BluetoothManager manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter adapter = manager != null ? manager.getAdapter() : null;
         mk6 = new Mk6Advertiser(adapter, this::notifyPage);
+        try {
+            registerReceiver(btReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+            btReceiverOn = true;
+        } catch (RuntimeException ignored) {
+            btReceiverOn = false;
+        }
 
         web = new WebView(this);
         setContentView(web);
@@ -147,6 +169,10 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (btReceiverOn) {
+            try { unregisterReceiver(btReceiver); } catch (RuntimeException ignored) { }
+            btReceiverOn = false;
+        }
         mk6.destroy();
         super.onDestroy();
     }
@@ -281,6 +307,20 @@ public class MainActivity extends Activity {
                     requestStart(parsed);
                 }
             });
+        }
+
+        @JavascriptInterface
+        public int battery() {
+            try {
+                Intent b = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                if (b == null) return -1;
+                int level = b.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = b.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                if (level < 0 || scale <= 0) return -1;
+                return Math.round(level * 100f / scale);
+            } catch (RuntimeException e) {
+                return -1;
+            }
         }
 
         @JavascriptInterface

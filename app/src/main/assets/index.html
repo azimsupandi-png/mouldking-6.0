@@ -297,6 +297,23 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="build"] .seg .btn{flex:1 1 auto;min-width:0}
 @media (max-width:420px){:root[data-skin="build"] .exc-ico{display:none}:root[data-skin="build"] .card{padding:18px 14px}:root[data-skin="build"] .btn{padding:0 8px}}
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
+
+/* Player mode, settings lock, calibration, battery */
+#lockBtn.hold{background:var(--acc);color:#fff}
+.bat{margin-left:6px;font-family:var(--f-mono)}.bat::before{content:"\00b7 ";}.bat.low{color:var(--danger);font-weight:700}
+.spr-row{margin-top:8px}
+.ch-foot .lock{min-width:64px}
+.player{position:fixed;inset:0;z-index:60;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;gap:12px;padding:14px;padding-top:calc(14px + env(safe-area-inset-top,0px));overflow:auto}
+.player[hidden]{display:none}
+.pl-top{display:flex;align-items:center;gap:10px}
+.pl-top b{flex:1;font-family:var(--f-display);font-size:22px;letter-spacing:.06em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start;flex:1}
+.pl-grid .qbtn{min-height:110px;font-size:24px;white-space:normal}
+.pl-note{color:var(--muted);font-size:14px}
+.pl-stop{min-height:88px;border:0;border-radius:10px;background:var(--danger);color:#fff;font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.pl-exit.hold{background:var(--acc);color:#fff}
+:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #ioCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
+:root[data-lock] #profName,:root[data-lock] .ch .name{pointer-events:none}
 </style>
 </head>
 <body>
@@ -305,7 +322,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   <div class="bar-in">
     <div class="brand">
       <h1><b>MK6</b> <span class="bw">Console</span></h1>
-      <div class="cap">Mould King 6.0 · up to 3 hubs</div>
+      <div class="cap">Mould King 6.0 · up to 3 hubs<span class="bat" id="bat" hidden></span></div>
     </div>
     <svg class="exc-ico" viewBox="0 0 64 36" aria-hidden="true"><path d="M2 30h36a3 3 0 0 1 0 6H5a3 3 0 0 1-3-3z" fill="currentColor"/><path d="M8 27h26v-8h-6l-3-5H12l-4 5z" fill="currentColor"/><path d="M26 17 40 4l6 3-9 11z M40 4l8 14h4l-8-16z" fill="currentColor"/><path d="M46 17l10 3-3 9-9-4z" fill="currentColor"/></svg>
     <span class="lamps" aria-hidden="true"><i class="lg" id="lampG"></i><i class="lr" id="lampR"></i></span>
@@ -317,6 +334,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 </header>
 <div class="live" id="live" role="status" aria-live="polite"></div>
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="player" id="player" role="dialog" aria-modal="true" aria-label="Player mode" hidden>
+  <div class="pl-top"><b id="plTitle"></b><button class="btn pl-exit" id="plExit" type="button">Hold to exit</button></div>
+  <div class="pl-grid" id="plGrid"></div>
+  <button class="pl-stop" id="plStop" type="button">E-Stop</button>
+</div>
 <div class="guide" id="guide" role="dialog" aria-modal="true" aria-labelledby="gTitle" hidden>
   <div class="guide-box">
     <div class="guide-dots" id="gDots" aria-hidden="true"></div>
@@ -404,6 +426,19 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         <p class="note">Left stick = stick 1, right stick = stick 2 (Dual stick layout). Back = E-Stop, Start = release. The sticks use the channels chosen in the stick cards.</p>
       </section>
 
+      <section class="card" id="calCard">
+        <h2>Calibration</h2>
+        <p class="note" style="margin-top:0">Runs each channel forward at low power for 1.5 seconds. Lift the model off the ground first. Say whether it moved the right way and the app fixes the direction for you.</p>
+        <p class="rec-stat" id="calStat">Connect the hub first, then press Start.</p>
+        <div class="rec-row">
+          <button class="btn" id="calStart" type="button">Start</button>
+          <button class="btn" id="calOk" type="button" hidden>Correct</button>
+          <button class="btn" id="calRev" type="button" hidden>Reversed</button>
+          <button class="btn" id="calAgain" type="button" hidden>Repeat</button>
+          <button class="btn" id="calCancel" type="button" hidden>Cancel</button>
+        </div>
+      </section>
+
       <section class="card" id="recCard">
         <h2>Record &amp; replay</h2>
         <div class="rec-row">
@@ -427,7 +462,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <div class="set-row"><label for="ramp"><span class="set-top"><span>Acceleration smoothing</span><output id="rampOut">60</output></span></label>
             <input id="ramp" type="range" min="0" max="100" step="5" value="60"></div>
           <label class="check" for="spring"><input id="spring" type="checkbox" checked>Sliders return to 0 when released</label>
-          <label class="check" for="stickHold"><input id="stickHold" type="checkbox" checked>Sticks return to 0 when released</label>
           <label>Auto-stop when idle<select id="sfIdle"><option value="0">Off</option><option value="10">10 s</option><option value="30">30 s</option><option value="60">60 s</option><option value="120">2 min</option></select></label>
           <label>Warn after long full power<select id="sfWarn"><option value="0">Off</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <div class="set-row"><span class="set-top"><span>Hubs (module number of each)</span></span>
@@ -467,6 +501,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <button class="btn" id="guideBtn" type="button">Show guide</button>
           <button class="btn" id="pinBtn" type="button" hidden>Add model to home screen</button>
         </div>
+        <div class="rec-row" style="margin-top:12px">
+          <button class="btn" id="playerBtn" type="button">Player mode</button>
+          <button class="btn" id="lockBtn" type="button">Lock settings</button>
+        </div>
+        <p class="note" id="lockNote">Player mode shows only big sequence buttons and E-Stop. Lock settings hides everything that changes the model. Hold the button for 2 seconds to unlock or leave.</p>
       </section>
     </div>
   </div>
@@ -494,7 +533,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider'});
-    return {ch:ch,limit:100,ramp:60,spring:true,stickHold:false,s1:{mode:'axis',a:0,b:1},s2:{mode:'axis',a:2,b:3},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',accent:0,accentV:2,theme:'std',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -585,10 +624,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.limit=num(c.limit,10,100,100);
     d.ramp=num(c.ramp,0,100,60);
     if(typeof c.spring==='boolean') d.spring=c.spring;
-    if(typeof c.stickHold==='boolean') d.stickHold=c.stickHold;
     var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
-    d.s1={mode:s1.mode==='tank'?'tank':'axis',a:idxOf(s1.a,0,false),b:idxOf(s1.b,1,false)};
-    d.s2={mode:s2.mode==='tank'?'tank':'axis',a:idxOf(s2.a,2,true),b:idxOf(s2.b,3,true)};
+    var gh=c.stickHold===true;
+    d.s1={mode:s1.mode==='tank'?'tank':'axis',a:idxOf(s1.a,0,false),b:idxOf(s1.b,1,false),hold:typeof s1.hold==='boolean'?s1.hold:gh};
+    d.s2={mode:s2.mode==='tank'?'tank':'axis',a:idxOf(s2.a,2,true),b:idxOf(s2.b,3,true),hold:typeof s2.hold==='boolean'?s2.hold:gh};
     d.hubs=cleanHubs(Array.isArray(c.hubs)?c.hubs:[num(c.mod,0,2,0),-1,-1]);
     d.layout=(c.layout==='joy'||c.layout==='dual')?c.layout:'std';
     // Colour choices are now orange(0), red(1), yellow(2). Older saves used six: pink maps to red, yellow to yellow, the rest to orange.
@@ -624,7 +663,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       {id:uid(),name:'Excavator (example)',cfg:exc}
     ];
   }
-  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true}}
+  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true}}
   var store={active:null,profiles:[],prefs:cleanPrefs()};
   try{
     var raw=localStorage.getItem('mk6v2');
@@ -696,7 +735,12 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(!fromUI||S.estop) refs[i].rng.value=rt.t[i];
     refs[i].val.textContent=fmt(rt.t[i]);
   }
+  function unlockCh(i){
+    var r=refs[i];
+    if(r&&r.locked){r.locked=false;r.lock.setAttribute('aria-pressed','false');r.lock.textContent='Lock'}
+  }
   function zeroAll(){
+    for(var u=0;u<NMAX;u++) unlockCh(u);
     for(var i=0;i<NMAX;i++){rt.t[i]=0;rt.o[i]=0;refs[i].rng.value=0;refs[i].val.textContent='0'}
   }
   function buildChannel(i){
@@ -704,7 +748,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     el.innerHTML='<div class="ch-head"><span class="tag"></span><input class="name" maxlength="16" aria-label="Channel name"><button class="btn inv" type="button" aria-pressed="false">Reverse</button></div>'+
       '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"></div>'+
       '<div class="holds" hidden><button class="hold rev" type="button">Reverse</button><button class="hold fwd" type="button">Forward</button></div>'+
-      '<div class="ch-foot"><span class="meter-wrap" aria-hidden="true"><span class="meter"></span><span class="ar"></span></span><output class="val">0</output><span class="sent">out 0</span><button class="btn stop" type="button">Stop</button></div>'+
+      '<div class="ch-foot"><span class="meter-wrap" aria-hidden="true"><span class="meter"></span><span class="ar"></span></span><output class="val">0</output><span class="sent">out 0</span><button class="btn lock" type="button" aria-pressed="false">Lock</button><button class="btn stop" type="button">Stop</button></div>'+
       '<details class="adv"><summary>Channel settings</summary><div class="adv-grid">'+
         '<label><span class="set-top"><span>Maximum power</span><output class="maxOut"></output></span><input class="max" type="range" min="10" max="100" step="5"></label>'+
         '<label><span class="set-top"><span>Start power</span><output class="offOut"></output></span><input class="off" type="range" min="0" max="50" step="5"></label>'+
@@ -715,16 +759,24 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     wrap.appendChild(el);
     var r={el:el,tag:$('.tag',el),name:$('.name',el),inv:$('.inv',el),track:$('.track',el),fill:$('.fill',el),rng:$('.pwr',el),
       holds:$('.holds',el),hRev:$('.hold.rev',el),hFwd:$('.hold.fwd',el),val:$('.val',el),mw:$('.meter-wrap',el),meter:$('.meter',el),sent:$('.sent',el),
-      max:$('.max',el),maxOut:$('.maxOut',el),off:$('.off',el),offOut:$('.offOut',el),expo:$('.expo',el),expOut:$('.expOut',el),
+      lock:$('.lock',el),max:$('.max',el),maxOut:$('.maxOut',el),off:$('.off',el),offOut:$('.offOut',el),expo:$('.expo',el),expOut:$('.expOut',el),
       cv:$('.cv',el),kS:$('.kS',el),kH:$('.kH',el)};
     refs.push(r);
 
     r.rng.addEventListener('input',function(){setT(i,+r.rng.value,true)});
-    var rel=function(){ if(C.spring&&!S.play){r.rng.value=0;setT(i,0,true)} };
+    var rel=function(){ if(C.spring&&!S.play&&!r.locked){r.rng.value=0;setT(i,0,true)} };
     r.rng.addEventListener('pointerup',rel);
     r.rng.addEventListener('pointercancel',rel);
+    r.lock.addEventListener('click',function(){
+      if(S.estop||S.play) return;
+      r.locked=!r.locked;
+      r.lock.setAttribute('aria-pressed',String(r.locked));
+      r.lock.textContent=r.locked?'Locked':'Lock';
+      if(!r.locked&&C.spring){r.rng.value=0;setT(i,0,true)}
+    });
     $('.stop',el).addEventListener('click',function(){
       if(S.play) return;
+      unlockCh(i);
       r.rng.value=0;setT(i,0,true);rt.o[i]=0;last=null;
     });
 
@@ -782,6 +834,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     r.track.hidden=hold;r.holds.hidden=!hold;
     r.kS.setAttribute('aria-pressed',String(!hold));
     r.kH.setAttribute('aria-pressed',String(hold));
+    r.lock.hidden=hold;
     drawCurve(i);
   }
 
@@ -799,11 +852,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     box.innerHTML='<h3 class="pb-title"></h3>'+
       '<div class="seg" role="group" aria-label="Stick mode"><button class="btn mA" type="button" aria-pressed="true">Axis</button><button class="btn mT" type="button" aria-pressed="false">Tank</button></div>'+
       '<div class="pad"><div class="knob rest"></div></div>'+
-      '<div class="maprow"><label><span class="la"></span><select class="selA"></select></label><label><span class="lb"></span><select class="selB"></select></label></div>';
+      '<div class="maprow"><label><span class="la"></span><select class="selA"></select></label><label><span class="lb"></span><select class="selB"></select></label></div>'+
+      '<label class="check spr-row"><input class="spr" type="checkbox" checked><span>Return to 0 when released</span></label>';
     $('#pads').appendChild(box);
     var st={box:box,title:$('.pb-title',box),mA:$('.mA',box),mT:$('.mT',box),pad:$('.pad',box),knob:$('.knob',box),
-      la:$('.la',box),lb:$('.lb',box),selA:$('.selA',box),selB:$('.selB',box),id:null};
+      spr:$('.spr',box),la:$('.la',box),lb:$('.lb',box),selA:$('.selA',box),selB:$('.selB',box),id:null};
     sticks.push(st);
+    st.spr.addEventListener('change',function(){
+      cfgOf(k).hold=!st.spr.checked;save();
+      if(!cfgOf(k).hold&&st.id===null){st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0)}
+    });
     st.mA.addEventListener('click',function(){cfgOf(k).mode='axis';syncSticks();save()});
     st.mT.addEventListener('click',function(){cfgOf(k).mode='tank';syncSticks();save()});
     st.selA.addEventListener('change',function(){cfgOf(k).a=+st.selA.value;syncLayout();save()});
@@ -824,7 +882,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     st.pad.addEventListener('pointermove',function(e){if(e.pointerId===st.id)move(e)});
     function end(e){
       if(e.pointerId!==st.id)return;
-      st.id=null;if(C.stickHold)return;st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0);
+      st.id=null;if(cfgOf(k).hold)return;st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0);
     }
     st.pad.addEventListener('pointerup',end);
     st.pad.addEventListener('pointercancel',end);
@@ -835,6 +893,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var idxs=activeIdx();
     sticks.forEach(function(st,k){
       var cf=cfgOf(k);
+      st.spr.checked=!cf.hold;
       st.mA.setAttribute('aria-pressed',String(cf.mode==='axis'));
       st.mT.setAttribute('aria-pressed',String(cf.mode==='tank'));
       st.la.textContent=cf.mode==='axis'?'Drive (up/down)':'Left motor';
@@ -882,7 +941,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var limit=$('#limit'), ramp=$('#ramp'), spring=$('#spring'), loopBox=$('#loop');
   var gpOn=$('#gpOn'), gpDead=$('#gpDead'), gpTrig=$('#gpTrig'), gpStat=$('#gpStat');
   function syncSettings(){
-    limit.value=C.limit;ramp.value=C.ramp;spring.checked=C.spring;if($('#stickHold'))$('#stickHold').checked=!C.stickHold;loopBox.checked=S.loop;
+    limit.value=C.limit;ramp.value=C.ramp;spring.checked=C.spring;loopBox.checked=S.loop;
     $('#limitOut').textContent=C.limit+'%';$('#rampOut').textContent=C.ramp;
     gpOn.checked=C.pad.on;gpDead.value=C.pad.dead;$('#gpDeadOut').textContent=C.pad.dead+'%';
     gpTrig.innerHTML='';
@@ -896,10 +955,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   ramp.addEventListener('input',function(){C.ramp=+ramp.value;$('#rampOut').textContent=C.ramp});
   limit.addEventListener('change',save);ramp.addEventListener('change',save);
   spring.addEventListener('change',function(){C.spring=spring.checked;save()});
-  $('#stickHold').addEventListener('change',function(){
-    C.stickHold=!$('#stickHold').checked;save();
-    if(!C.stickHold) sticks.forEach(function(st,k){ if(st.id===null){st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0)} });
-  });
   gpOn.addEventListener('change',function(){C.pad.on=gpOn.checked;if(!C.pad.on) releasePad();save()});
   gpDead.addEventListener('input',function(){C.pad.dead=+gpDead.value;$('#gpDeadOut').textContent=C.pad.dead+'%'});
   gpDead.addEventListener('change',save);
@@ -1168,7 +1223,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   /* ---------- Link, E-STOP, frames ---------- */
   var link=$('#link'), live=$('#live'), last=null, lastSend=0, sent=0, t0=performance.now(), lines=[];
   var hubMsg='';
-  var HUB_TEXT={off:'Bluetooth is off',denied:'Permission denied',unsupported:'BLE advertising not supported',error:'Bluetooth error'};
+  var HUB_TEXT={off:'Bluetooth is off',btoff:'Bluetooth was switched off',denied:'Permission denied',unsupported:'BLE advertising not supported',error:'Bluetooth error'};
   function paintLink(){
     link.setAttribute('aria-pressed',String(S.connected));
     paintLamps();
@@ -1193,7 +1248,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(s==='connecting'){S.connected=true;hubMsg='Pairing…'}
     else if(s==='ready'){S.connected=true;hubMsg='';feedback('ok')}
     else if(s==='stopped'){S.connected=false;hubMsg='';stopPlay(true)}
-    else{S.connected=false;hubMsg=HUB_TEXT[s]||'Error';live.textContent=hubMsg;stopPlay(true);feedback('lost')}
+    else{
+      var was=S.connected&&(s==='error');
+      S.connected=false;hubMsg=HUB_TEXT[s]||'Error';live.textContent=hubMsg;stopPlay(true);feedback('lost');
+      if(was) toast('Hub link lost. Motors stopped.',6000);
+    }
     paintLink();
   };
   var es=$('#estop'), banner=$('#esBanner');
@@ -1202,7 +1261,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     es.textContent=S.estop?'Release':'E-Stop';
     banner.hidden=!S.estop;
     paintLamps();
-    syncLock();paintRec();
+    syncLock();paintRec();paintPlayer();
   }
   function setEstop(on){
     if(S.estop===on) return;
@@ -1323,7 +1382,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       b.addEventListener('click',function(){runSeq(sq.id)});
       quickEl.appendChild(b);quickBtns.push({b:b,sq:sq});
     });
-    paintQuick();
+    renderPlayer();paintQuick();
   }
   function paintQuick(){
     if(!quickBtns) return;
@@ -1336,6 +1395,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var cur=seqCur();
     seqRun.textContent=(S.play&&cur&&S.play.seq===cur.id)?'Stop':'Run';
     seqRun.disabled=!cur||!cur.steps.length||(!S.play&&(S.estop||!!S.rec))||(!!S.play&&S.play.seq!==cur.id);
+    paintPlayer();
   }
   function runSeq(id){
     var sq=C.seq.filter(function(x){return x.id===id})[0];
@@ -1454,11 +1514,139 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   window.onAppEvent=function(ev){
     if(ev==='nopin') toast('This launcher cannot add a shortcut.');
+    if(ev==='btoff'){
+      var wasOn=S.connected;
+      S.connected=false;hubMsg=HUB_TEXT.btoff;last=null;stopPlay(true);zeroAll();paintLink();
+      live.textContent=hubMsg;feedback('lost');
+      if(wasOn) toast('Bluetooth was switched off. Motors stopped.',8000);
+    }
   };
   window.openModel=function(id){
     if(!store.profiles.some(function(p){return p.id===id})) return;
     if(id!==store.active) switchProfile(id);
   };
+
+
+  // ---- Calibration, player mode, settings lock, phone battery ----
+  var CAL_PWR=25, CAL_MS=1500, cal=null;
+  var calStatEl=$('#calStat');
+  function calShow(ids){['calStart','calOk','calRev','calAgain','calCancel'].forEach(function(id){$('#'+id).hidden=ids.indexOf(id)<0})}
+  function calIdle(msg){
+    if(cal){
+      if(cal.timer) clearTimeout(cal.timer);
+      var ci=cal.list[cal.n];if(ci!==undefined) setT(ci,0,false);
+    }
+    cal=null;calStatEl.textContent=msg;calShow(['calStart']);
+  }
+  function calRun(){
+    var i=cal.list[cal.n];
+    if(!S.connected||S.estop||S.play||S.rec){calIdle('Stopped. Connect the hub, release E-Stop and try again.');return}
+    cal.phase='run';calShow(['calCancel']);
+    calStatEl.textContent='Testing channel '+tagOf(i)+' ('+C.ch[i].name+') forward at '+CAL_PWR+'%';
+    noteInput();setT(i,CAL_PWR,false);
+    cal.timer=setTimeout(function(){
+      if(!cal) return;
+      setT(i,0,false);cal.phase='ask';
+      calShow(['calOk','calRev','calAgain','calCancel']);
+      calStatEl.textContent='Channel '+tagOf(i)+': did it move the right way?';
+    },CAL_MS);
+  }
+  function calNext(){
+    cal.n++;
+    if(cal.n>=cal.list.length){calIdle('Done. Every channel is checked.');return}
+    calRun();
+  }
+  $('#calStart').addEventListener('click',function(){
+    if(cal) return;
+    if(!S.connected){calStatEl.textContent='Connect the hub first (top right), then press Start.';return}
+    if(S.estop||S.play||S.rec){calStatEl.textContent='Release E-Stop and stop any sequence or recording first.';return}
+    cal={list:activeIdx(),n:0,phase:'run',timer:0};
+    calRun();
+  });
+  $('#calOk').addEventListener('click',function(){if(cal&&cal.phase==='ask') calNext()});
+  $('#calRev').addEventListener('click',function(){
+    if(!cal||cal.phase!=='ask') return;
+    var i=cal.list[cal.n];
+    C.ch[i].inv=!C.ch[i].inv;syncChannel(i);save();calRun();
+  });
+  $('#calAgain').addEventListener('click',function(){if(cal&&cal.phase==='ask') calRun()});
+  $('#calCancel').addEventListener('click',function(){if(cal) calIdle('Cancelled.')});
+
+  var player=$('#player'), plGrid=$('#plGrid'), plStop=$('#plStop'), plExit=$('#plExit'), plTitle=$('#plTitle'), plBtns=[];
+  function renderPlayer(){
+    if(!plGrid) return;
+    plGrid.innerHTML='';plBtns=[];
+    C.seq.forEach(function(sq){
+      var b=document.createElement('button');b.type='button';b.className='qbtn';
+      b.addEventListener('click',function(){noteInput();runSeq(sq.id)});
+      plGrid.appendChild(b);plBtns.push({b:b,sq:sq});
+    });
+    if(!C.seq.length){var n=document.createElement('p');n.className='pl-note';n.textContent='No sequences yet. Leave player mode and make one first.';plGrid.appendChild(n)}
+    paintPlayer();
+  }
+  function paintPlayer(){
+    if(!plGrid||!plBtns) return;
+    var prof=store.profiles.filter(function(x){return x.id===store.active})[0];
+    plTitle.textContent=prof?prof.name:'';
+    plBtns.forEach(function(q){
+      var mine=!!(S.play&&S.play.seq===q.sq.id);
+      q.b.classList.toggle('on',mine);
+      q.b.textContent=(mine?'■ ':'▶ ')+q.sq.name;
+      q.b.disabled=!mine&&(!!S.rec||!!S.play||S.estop||!q.sq.steps.length);
+    });
+    plStop.textContent=S.estop?'Release':'E-Stop';
+  }
+  var holdT=0;
+  function holdBtn(btn,ms,fn){
+    function up(){if(holdT){clearTimeout(holdT);holdT=0}btn.classList.remove('hold')}
+    btn.addEventListener('pointerdown',function(e){
+      if(btn.dataset.tap==='1') return;
+      up();btn.classList.add('hold');
+      holdT=setTimeout(function(){holdT=0;btn.classList.remove('hold');fn()},ms);
+    });
+    ['pointerup','pointercancel','pointerleave','blur'].forEach(function(ev){btn.addEventListener(ev,up)});
+    btn.addEventListener('contextmenu',function(e){e.preventDefault()});
+    btn.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}});
+  }
+  function openPlayer(){renderPlayer();player.hidden=false;feedback('ok')}
+  function closePlayer(){player.hidden=true}
+  $('#playerBtn').addEventListener('click',openPlayer);
+  plStop.addEventListener('click',function(){setEstop(!S.estop)});
+  holdBtn(plExit,1000,closePlayer);
+
+  var lockBtn=$('#lockBtn');
+  function applyLock(){
+    if(!lockBtn) return;
+    var on=!!store.prefs.lock, de=document.documentElement;
+    if(de&&de.setAttribute){ if(on) de.setAttribute('data-lock','1'); else de.removeAttribute('data-lock') }
+    lockBtn.textContent=on?'Hold to unlock':'Lock settings';
+  }
+  lockBtn.addEventListener('click',function(){
+    if(store.prefs.lock) return;
+    store.prefs.lock=true;save();applyLock();feedback('ok');
+    toast('Settings locked. Hold the button in the App card for 2 seconds to unlock.',5000);
+  });
+  (function(){
+    function up(){if(holdT){clearTimeout(holdT);holdT=0}lockBtn.classList.remove('hold')}
+    lockBtn.addEventListener('pointerdown',function(){
+      if(!store.prefs.lock) return;
+      up();lockBtn.classList.add('hold');
+      holdT=setTimeout(function(){holdT=0;lockBtn.classList.remove('hold');store.prefs.lock=false;save();applyLock();feedback('ok')},2000);
+    });
+    ['pointerup','pointercancel','pointerleave','blur'].forEach(function(ev){lockBtn.addEventListener(ev,up)});
+  })();
+  applyLock();
+
+  var batEl=$('#bat'), batWarned=false;
+  function pollBattery(){
+    if(!batEl||!NB||!NB.battery) return;
+    var p=-1;try{p=+NB.battery()}catch(e){}
+    if(!(p>=0&&p<=100)){batEl.hidden=true;return}
+    batEl.hidden=false;batEl.textContent='Phone '+p+'%';batEl.classList.toggle('low',p<=15);
+    if(p<=15&&!batWarned){batWarned=true;toast('Phone battery is low ('+p+'%). Charge it before driving.',6000);feedback('warn')}
+    if(p>20) batWarned=false;
+  }
+  setInterval(pollBattery,30000);pollBattery();
 
   var sfIdle=$('#sfIdle'), sfWarn=$('#sfWarn');
   function syncSafety(){if(!sfIdle) return;sfIdle.value=String(C.safety.idle);sfWarn.value=String(C.safety.warn)}
@@ -1471,6 +1659,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     optSound.checked=store.prefs.sound;optHaptic.checked=store.prefs.haptic;
     $('#lang').value=store.prefs.lang;
     pinBtn.hidden=!(NB&&NB.pinModel);
+    applyLock();
   }
   optSound.addEventListener('change',function(){store.prefs.sound=optSound.checked;save();if(optSound.checked) beep([700,900],0.09)});
   optHaptic.addEventListener('change',function(){store.prefs.haptic=optHaptic.checked;save();if(optHaptic.checked) feedback('ok')});
@@ -1610,7 +1799,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Connected but switched off':'Disambung tetapi dimatikan','Button mapping':'Pemetaan butang','Nothing':'Tiada','Stop all channels':'Henti semua saluran',
     'D-pad up':'D-pad atas','D-pad down':'D-pad bawah','D-pad left':'D-pad kiri','D-pad right':'D-pad kanan',
     'Limits & hubs':'Had & hab','Power limit (all channels)':'Had kuasa (semua saluran)','Acceleration smoothing':'Pelicinan pecutan',
-    'Sliders return to 0 when released':'Gelangsar kembali ke 0 bila dilepas','Sticks return to 0 when released':'Stick kembali ke 0 bila dilepas','Auto-stop when idle':'Henti automatik bila tiada input','Warn after long full power':'Amaran selepas kuasa penuh lama',
+    'Sliders return to 0 when released':'Gelangsar kembali ke 0 bila dilepas','Return to 0 when released':'Kembali ke 0 bila dilepas','Lock':'Kunci','Locked':'Dikunci','Calibration':'Kalibrasi','Start':'Mula','Correct':'Betul','Reversed':'Terbalik','Repeat':'Ulang','Cancel':'Batal','Player mode':'Mod pemain','Lock settings':'Kunci tetapan','Hold to unlock':'Tahan untuk buka kunci','Hold to exit':'Tahan untuk keluar','Release':'Lepas','Cancelled.':'Dibatalkan.',
+    'Runs each channel forward at low power for 1.5 seconds. Lift the model off the ground first. Say whether it moved the right way and the app fixes the direction for you.':'Setiap saluran dijalankan ke depan pada kuasa rendah selama 1.5 saat. Angkat model dari tanah dahulu. Beritahu sama ada ia bergerak ke arah yang betul dan app akan betulkan arah untuk anda.',
+    'Connect the hub first, then press Start.':'Sambung hab dahulu, kemudian tekan Mula.',
+    'Connect the hub first (top right), then press Start.':'Sambung hab dahulu (kanan atas), kemudian tekan Mula.',
+    'Release E-Stop and stop any sequence or recording first.':'Lepaskan E-Stop dan hentikan sebarang jujukan atau rakaman dahulu.',
+    'Stopped. Connect the hub, release E-Stop and try again.':'Dihentikan. Sambung hab, lepaskan E-Stop dan cuba lagi.',
+    'Done. Every channel is checked.':'Siap. Semua saluran telah diperiksa.',
+    'Player mode shows only big sequence buttons and E-Stop. Lock settings hides everything that changes the model. Hold the button for 2 seconds to unlock or leave.':'Mod pemain hanya menunjukkan butang jujukan besar dan E-Stop. Kunci tetapan menyembunyikan semua yang mengubah model. Tahan butang selama 2 saat untuk buka kunci atau keluar.',
+    'No sequences yet. Leave player mode and make one first.':'Belum ada jujukan. Keluar dari mod pemain dan buat satu dahulu.',
+    'Settings locked. Hold the button in the App card for 2 seconds to unlock.':'Tetapan dikunci. Tahan butang dalam kad App selama 2 saat untuk buka kunci.',
+    'Hub link lost. Motors stopped.':'Sambungan hab terputus. Motor dihentikan.',
+    'Bluetooth was switched off. Motors stopped.':'Bluetooth dimatikan. Motor dihentikan.','Bluetooth was switched off':'Bluetooth dimatikan','Sticks return to 0 when released':'Stick kembali ke 0 bila dilepas','Auto-stop when idle':'Henti automatik bila tiada input','Warn after long full power':'Amaran selepas kuasa penuh lama',
     'Off':'Mati','Hubs (module number of each)':'Hab (nombor modul setiap satu)',
     'Frames sent':'Bingkai dihantar','Frame log':'Log bingkai',
     'Each frame is six values from -100 to +100, one per channel, for every active hub. This page is running in simulation: no Bluetooth is used, frames are only logged.':'Setiap bingkai ialah enam nilai dari -100 hingga +100, satu setiap saluran, untuk setiap hab aktif. Halaman ini berjalan dalam simulasi: Bluetooth tidak digunakan, bingkai hanya dicatat.',
@@ -1641,6 +1841,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     [/^Name of channel (\S+)$/,function(m){return 'Nama saluran '+m[1]}],
     [/^Power of channel (\S+)$/,function(m){return 'Kuasa saluran '+m[1]}],
     [/^Hub (M?\d)$/,function(m){return 'Hab '+m[1]}],
+    [/^Phone (\d+)%$/,function(m){return 'Telefon '+m[1]+'%'}],
+    [/^Phone battery is low \((\d+)%\)\. Charge it before driving\.$/,function(m){return 'Bateri telefon rendah ('+m[1]+'%). Cas sebelum memandu.'}],
+    [/^Testing channel (\S+) \((.*)\) forward at (\d+)%$/,function(m){return 'Menguji saluran '+m[1]+' ('+m[2]+') ke depan pada '+m[3]+'%'}],
+    [/^Channel (\S+): did it move the right way\?$/,function(m){return 'Saluran '+m[1]+': adakah ia bergerak ke arah yang betul?'}],
     [/^(\d+) frames$/,function(m){return m[1]+' bingkai'}],
     [/^Recording (\d+:\d\d \/ \d+:\d\d)$/,function(m){return 'Merakam '+m[1]}],
     [/^Playing (\d+:\d\d \/ \d+:\d\d)( \(loop\))?$/,function(m){return 'Memainkan '+m[1]+(m[2]?' (ulang)':'')}],
