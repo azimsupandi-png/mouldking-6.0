@@ -309,10 +309,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdw-h output{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .bdw input[type=range]{width:100%;min-height:44px}
 .bdw .holds{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.bdw .hold{min-height:64px}
+.bdw .hold{min-height:72px;font-size:15px;letter-spacing:.04em;padding:0 4px;min-width:0;white-space:nowrap}
+.bdw .hold.rev::before{content:'\25C0\00a0\00a0'}
+.bdw .hold.fwd::after{content:'\00a0\00a0\25B6'}
+.bdw .pad{width:min(100%,260px);margin:0 auto}
 .bdw .qbtn{width:100%}
-.bdw-ed{display:flex;gap:6px;flex-wrap:wrap}
-.bdw-ed .btn{min-height:36px;padding:0 10px}
+.bdw-ed{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.bdw-ed .btn{min-height:36px;padding:0}
 .tilt-opt{display:grid;gap:8px;margin-top:8px}
 :root[data-lock] .tilt-row,:root[data-lock] #bdEdit,:root[data-lock] #bdEditor,:root[data-lock] .bdw-ed{display:none}
 
@@ -415,8 +418,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       <div class="rec-row"><button class="btn" id="bdEdit" type="button" aria-pressed="false">Edit board</button></div>
       <div id="bdEditor" hidden>
         <div class="rec-row">
-          <select id="bdKind" aria-label="Control type"><option value="s">Slider</option><option value="h">Hold buttons</option><option value="q">Sequence</option></select>
-          <select id="bdTarget" aria-label="Control target"></select>
+          <select id="bdKind" aria-label="Control type"><option value="s">Slider</option><option value="h">Hold buttons</option><option value="j">Joystick</option><option value="q">Sequence</option></select>
+          <select id="bdTarget" aria-label="Drive or left motor"></select>
+          <select id="bdTarget2" aria-label="Steer or right motor" hidden></select>
+          <select id="bdMode" aria-label="Joystick mode" hidden><option value="axis">Axis (drive + steer)</option><option value="tank">Tank (left + right)</option></select>
           <select id="bdWide" aria-label="Control width"><option value="1">Normal</option><option value="2">Wide</option></select>
           <button class="btn" id="bdAdd" type="button">Add</button>
         </div>
@@ -667,6 +672,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       if(x.k==='s'||x.k==='h'){
         var c=Math.round(+x.c);
         if(c>=0&&c<NMAX) out.push({k:x.k,c:c,w:w});
+      }else if(x.k==='j'){
+        var ja=Math.round(+x.c), jb=Math.round(+x.d);
+        if(ja>=0&&ja<NMAX&&jb>=-1&&jb<NMAX) out.push({k:'j',c:ja,d:jb,m:x.m==='tank'?'tank':'axis',w:w});
       }else if(x.k==='q'&&typeof x.c==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(x.c)){
         out.push({k:'q',c:x.c,w:w});
       }
@@ -1881,17 +1889,30 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   bkPaint();
 
   // ---- Board layout ----
-  var bdGrid=$('#boardGrid'), bdEditor=$('#bdEditor'), bdEditBtn=$('#bdEdit'), bdKind=$('#bdKind'), bdTarget=$('#bdTarget'), bdWide=$('#bdWide'), bdNote=$('#bdNote'), bdEditing=false, bdW=[];
+  var bdGrid=$('#boardGrid'), bdEditor=$('#bdEditor'), bdEditBtn=$('#bdEdit'), bdKind=$('#bdKind'), bdTarget=$('#bdTarget'), bdTarget2=$('#bdTarget2'), bdMode=$('#bdMode'), bdWide=$('#bdWide'), bdNote=$('#bdNote'), bdEditing=false, bdW=[];
   function prefillBoard(){
     var n=0;
-    activeIdx().forEach(function(i){if(n<4){C.board.push({k:C.ch[i].kind==='hold'?'h':'s',c:i,w:1});n++}});
+    activeIdx().forEach(function(i){if(n<4){C.board.push({k:C.ch[i].kind==='hold'?'h':'s',c:i,w:C.ch[i].kind==='hold'?2:1});n++}});
     C.seq.slice(0,4).forEach(function(sq){C.board.push({k:'q',c:sq.id,w:1})});
   }
   function bdFill(){
-    var k=bdKind.value;bdTarget.innerHTML='';
-    function opt(v,t){var o=document.createElement('option');o.value=v;o.textContent=t;bdTarget.appendChild(o)}
-    if(k==='q') C.seq.forEach(function(sq){opt(sq.id,sq.name||'(unnamed)')});
-    else activeIdx().forEach(function(i){opt(String(i),tagOf(i)+' · '+C.ch[i].name)});
+    var k=bdKind.value;bdTarget.innerHTML='';bdTarget2.innerHTML='';
+    function opt(sel,v,t){var o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}
+    if(k==='q') C.seq.forEach(function(sq){opt(bdTarget,sq.id,sq.name||'(unnamed)')});
+    else activeIdx().forEach(function(i){opt(bdTarget,String(i),tagOf(i)+' · '+C.ch[i].name)});
+    var j=k==='j';
+    bdTarget2.hidden=!j;bdMode.hidden=!j;
+    if(j){
+      opt(bdTarget2,'-1','None');
+      activeIdx().forEach(function(i){opt(bdTarget2,String(i),tagOf(i)+' · '+C.ch[i].name)});
+      if(bdTarget2.options.length>2) bdTarget2.selectedIndex=2;
+    }
+  }
+  function applyJoy(it,x,y){
+    var va,vb;
+    if(it.m==='axis'){va=y;vb=x}else{va=clamp(y+x,-1,1);vb=clamp(y-x,-1,1)}
+    setT(it.c,va*100,false);
+    if(it.d>=0) setT(it.d,vb*100,false);
   }
   function bdMove(it,d){
     var n=C.board.indexOf(it), m=n+d;if(n<0||m<0||m>=C.board.length) return;
@@ -1911,6 +1932,29 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         var qb=document.createElement('button');qb.type='button';qb.className='qbtn';
         qb.addEventListener('click',function(){noteInput();runSeq(sq.id)});
         el.appendChild(qb);w.btn=qb;w.sq=sq;
+      }else if(it.k==='j'){
+        if(!isActive(it.c)||(it.d>=0&&!isActive(it.d))) return;
+        var jh=document.createElement('div');jh.className='bdw-h';
+        var jn=document.createElement('span');jn.textContent=(it.m==='tank'?'Tank':'Stick')+' · '+tagOf(it.c)+(it.d>=0?'+'+tagOf(it.d):'');
+        jh.appendChild(jn);el.appendChild(jh);
+        var jp=document.createElement('div');jp.className='pad';
+        var kn=document.createElement('div');kn.className='knob rest';jp.appendChild(kn);el.appendChild(jp);
+        var pid=null;
+        var jmove=function(e){
+          var r=jp.getBoundingClientRect(), R=r.width*0.4;
+          var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), m=Math.hypot(dx,dy);
+          if(m>R){dx*=R/m;dy*=R/m}
+          kn.style.transform='translate('+dx+'px,'+dy+'px)';
+          jp.style.setProperty('--m',Math.min(1,Math.hypot(dx,dy)/R).toFixed(2));
+          noteInput();applyJoy(it,dx/R,-dy/R);
+        };
+        jp.addEventListener('pointerdown',function(e){pid=e.pointerId;try{jp.setPointerCapture(e.pointerId)}catch(_){}kn.classList.remove('rest');jmove(e)});
+        jp.addEventListener('pointermove',function(e){if(e.pointerId===pid) jmove(e)});
+        var jend=function(e){
+          if(e.pointerId!==pid) return;
+          pid=null;kn.classList.add('rest');kn.style.transform='translate(0,0)';jp.style.setProperty('--m','0');applyJoy(it,0,0);
+        };
+        jp.addEventListener('pointerup',jend);jp.addEventListener('pointercancel',jend);
       }else{
         var c=it.c;
         if(!isActive(c)) return;
@@ -1975,12 +2019,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
   }
   bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;syncBoard()});
-  bdKind.addEventListener('change',bdFill);
+  bdKind.addEventListener('change',function(){bdFill();bdWide.value=(bdKind.value==='s'||bdKind.value==='q')?'1':'2'});
   $('#bdAdd').addEventListener('click',function(){
     if(C.board.length>=12){bdNote.textContent='The board is full (12 controls).';return}
     var k=bdKind.value, v=bdTarget.value;
     if(!v){bdNote.textContent='Nothing to add. Make a sequence first.';return}
-    C.board.push({k:k,c:k==='q'?v:Math.round(+v),w:+bdWide.value===2?2:1});
+    var ww=+bdWide.value===2?2:1;
+    if(k==='j') C.board.push({k:'j',c:Math.round(+v),d:Math.round(+bdTarget2.value),m:bdMode.value==='tank'?'tank':'axis',w:ww});
+    else C.board.push({k:k,c:k==='q'?v:Math.round(+v),w:ww});
     save();syncBoard();
   });
   var sfIdle=$('#sfIdle'), sfWarn=$('#sfWarn');
@@ -2145,7 +2191,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Player mode shows only big sequence buttons and E-Stop. Lock settings hides everything that changes the model. Hold the button for 2 seconds to unlock or leave.':'Mod pemain hanya menunjukkan butang jujukan besar dan E-Stop. Kunci tetapan menyembunyikan semua yang mengubah model. Tahan butang selama 2 saat untuk buka kunci atau keluar.',
     'No sequences yet. Leave player mode and make one first.':'Belum ada jujukan. Keluar dari mod pemain dan buat satu dahulu.',
     'Settings locked. Hold the button in the App card for 2 seconds to unlock.':'Tetapan dikunci. Tahan butang dalam kad App selama 2 saat untuk buka kunci.',
-    'Slow':'Perlahan','Hold buttons':'Butang tahan','Slider':'Gelangsar','Sequence':'Jujukan','Wide':'Lebar','Add':'Tambah','Edit board':'Sunting papan',
+    'Slow':'Perlahan','Axis (drive + steer)':'Paksi (pandu + pusing)','Tank (left + right)':'Tangki (kiri + kanan)','Hold buttons':'Butang tahan','Slider':'Gelangsar','Sequence':'Jujukan','Wide':'Lebar','Add':'Tambah','Edit board':'Sunting papan',
     'The board is empty. Tap Edit board to add controls.':'Papan kosong. Tekan Sunting papan untuk tambah kawalan.','The board is full (12 controls).':'Papan penuh (12 kawalan).','Nothing to add. Make a sequence first.':'Tiada untuk ditambah. Buat jujukan dahulu.',
     'Steer by tilting the phone (experimental)':'Pusing dengan condongkan telefon (eksperimen)','Tilt for full steering':'Condong untuk pusing penuh','Low sensitivity (60\u00b0)':'Kepekaan rendah (60\u00b0)','Medium (45\u00b0)':'Sederhana (45\u00b0)','High sensitivity (30\u00b0)':'Kepekaan tinggi (30\u00b0)','Reverse tilt direction':'Terbalikkan arah condong','No tilt sensor found on this phone.':'Tiada sensor condong pada telefon ini.','Normal':'Biasa','Fast':'Laju','Board':'Papan',
     'Stop a channel after running this long':'Henti saluran selepas berjalan selama ini','Player mode power limit':'Had kuasa mod pemain',
