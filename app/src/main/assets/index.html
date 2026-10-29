@@ -310,8 +310,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdw input[type=range]{width:100%;min-height:44px}
 .bdw .holds{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .bdw .hold{min-height:72px;font-size:15px;letter-spacing:.04em;padding:0 4px;min-width:0;white-space:nowrap}
-.bdw .hold.rev::before{content:'\25C0\00a0\00a0'}
-.bdw .hold.fwd::after{content:'\00a0\00a0\25B6'}
+.bdw .hold{display:flex;align-items:center;justify-content:center;gap:8px;overflow:hidden}
+.bdw:not(.w2) .holds{grid-template-columns:minmax(0,1fr)}
+.bdw:not(.w2) .hold{min-height:56px}
 .bdw .pad{width:min(100%,260px);margin:0 auto}
 .bdw .qbtn{width:100%}
 .bdw-ed{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
@@ -1976,7 +1977,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         }else{
           var hb=document.createElement('div');hb.className='holds';
           [['Reverse',-1],['Forward',1]].forEach(function(d){
-            var b=document.createElement('button');b.type='button';b.className='hold '+(d[1]<0?'rev':'fwd');b.textContent=d[0];
+            var b=document.createElement('button');b.type='button';b.className='hold '+(d[1]<0?'rev':'fwd');
+            var ar=document.createElement('span'),tx=document.createElement('span');
+            ar.textContent=d[1]<0?'\u25C0':'\u25B6';tx.textContent=d[0];ar.setAttribute('aria-hidden','true');
+            if(d[1]<0){b.appendChild(ar);b.appendChild(tx)}else{b.appendChild(tx);b.appendChild(ar)}
             var down=false;
             function press(){if(down)return;down=true;b.classList.add('on');noteInput();setT(c,d[1]*100,false)}
             function lift(){if(!down)return;down=false;b.classList.remove('on');setT(c,0,false)}
