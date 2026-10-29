@@ -366,6 +366,19 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     linear-gradient(#232830,#232830) center/56% 2px no-repeat,
     radial-gradient(circle,#0a0b0e 0 52%,#13161a 78%,#1b1f25 100%)}
 :root[data-skin="studs"] .bd-pads .pad::after,:root[data-skin="studs"] .cols.dual .pad::after,:root[data-skin="studs"] .bdw:not(.w2)>.pad::after{inset:18%}
+:root[data-skin="studs"] .track{height:44px;border-radius:22px}
+:root[data-skin="studs"] .track::before{background-size:10px 14px,10px 14px,calc(100% - 56px) 5px,calc(100% - 56px) 16px}
+:root[data-skin="studs"] .fill{top:15px;bottom:15px}
+:root[data-skin="studs"] .pwr{height:38px}
+:root[data-skin="studs"] .pwr::-webkit-slider-runnable-track{height:38px}
+:root[data-skin="studs"] .pwr::-webkit-slider-thumb{width:34px;height:34px;margin-top:2px}
+:root[data-skin="studs"] .bdw input[type=range]{height:46px;border-radius:23px}
+:root[data-skin="studs"] .bdw input[type=range]::-webkit-slider-runnable-track{height:40px}
+:root[data-skin="studs"] .bdw input[type=range]::-webkit-slider-thumb{width:38px;height:38px;margin-top:1px}
+:root[data-skin="studs"] .pad{max-width:calc(100% - 12px)}
+:root[data-skin="studs"] .pad .knob,:root[data-skin="studs"] .pad>.knob{width:min(46%,150px);left:calc(50% - min(23%,75px));top:calc(50% - min(23%,75px))}
+:root[data-skin="studs"] .pad::after{inset:11%}
+:root[data-skin="studs"] .bd-pads .pad::after,:root[data-skin="studs"] .cols.dual .pad::after,:root[data-skin="studs"] .bdw:not(.w2)>.pad::after{inset:15%}
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
 
 /* Player mode, settings lock, calibration, battery */
