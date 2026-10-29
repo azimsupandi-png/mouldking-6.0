@@ -339,6 +339,31 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .bdw input[type=range]::-moz-range-thumb{width:42px;height:42px;border-radius:50%;border:2px solid rgba(110,70,0,.7);background:var(--acc)}
 :root[data-skin="studs"] .qbtn{border-radius:30px;border:3px solid rgba(110,70,0,.7);background:radial-gradient(circle at 35% 22%,rgba(255,255,255,.45),transparent 45%),var(--hz);color:#111;font-weight:700;box-shadow:0 5px 0 #7a5c00}
 :root[data-skin="studs"] .qbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #7a5c00}
+:root[data-skin="studs"]{--rev:#FFC400}
+:root[data-skin="studs"] .track{height:52px;border-radius:26px;
+  background:linear-gradient(180deg,#010203 0,#0f1217 45%,#1b1f26 100%);
+  box-shadow:inset 0 6px 12px #000,inset 0 -2px 3px rgba(255,255,255,.07),0 2px 0 #444a54,0 5px 8px rgba(0,0,0,.6)}
+:root[data-skin="studs"] .track::before{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14'%3E%3Cpath d='M9 1L1 7l8 6z' fill='%23454b55'/%3E%3C/svg%3E") 14px center/10px 14px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14'%3E%3Cpath d='M1 1l8 6-8 6z' fill='%23454b55'/%3E%3C/svg%3E") calc(100% - 14px) center/10px 14px no-repeat,
+    linear-gradient(#000,#000) center/calc(100% - 64px) 6px no-repeat,
+    repeating-linear-gradient(90deg,#3a4049 0 2px,transparent 2px 12.5%) center/calc(100% - 64px) 20px no-repeat}
+:root[data-skin="studs"] .fill{top:19px;bottom:19px;border-radius:6px;
+  background:linear-gradient(180deg,#fff0a0,#ffc400 45%,#c68a00)!important;
+  box-shadow:0 0 12px 1px rgba(255,196,0,.75),0 0 3px rgba(255,230,120,.9)}
+:root[data-skin="studs"] .track.idle .fill{box-shadow:none}
+:root[data-skin="studs"] .pwr{height:46px}
+:root[data-skin="studs"] .pwr::-webkit-slider-runnable-track{height:46px}
+:root[data-skin="studs"] .pwr::-webkit-slider-thumb{width:46px;height:46px;margin-top:0;border:2px solid #6b4600;
+  background:radial-gradient(circle at 33% 25%,rgba(255,255,255,.9) 0,rgba(255,255,255,0) 22%),
+    radial-gradient(circle,transparent 0 40%,rgba(110,70,0,.65) 41% 44%,transparent 45%),
+    radial-gradient(circle,#fff0a0 0 14%,#ffd21a 15% 38%,#e0a000 60%,#8f5f00 100%);
+  box-shadow:0 7px 10px rgba(0,0,0,.75),inset 0 -5px 7px rgba(90,50,0,.6),inset 0 2px 3px rgba(255,255,255,.55)}
+:root[data-skin="studs"] .meter-wrap .meter{background:conic-gradient(var(--fwd) calc(var(--m)*3.6deg),#14171c 0);box-shadow:0 0 0 3px #2b2f36,inset 0 3px 6px #000}
+:root[data-skin="studs"] .bdw input[type=range]::-webkit-slider-thumb{width:50px;height:50px;margin-top:1px;border:2px solid #6b4600;
+  background:radial-gradient(circle at 33% 25%,rgba(255,255,255,.9) 0,rgba(255,255,255,0) 22%),
+    radial-gradient(circle,transparent 0 40%,rgba(110,70,0,.65) 41% 44%,transparent 45%),
+    radial-gradient(circle,#fff0a0 0 14%,#ffd21a 15% 38%,#e0a000 60%,#8f5f00 100%);
+  box-shadow:0 7px 10px rgba(0,0,0,.75),inset 0 -5px 7px rgba(90,50,0,.6),inset 0 2px 3px rgba(255,255,255,.55)}
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
 
 /* Player mode, settings lock, calibration, battery */
