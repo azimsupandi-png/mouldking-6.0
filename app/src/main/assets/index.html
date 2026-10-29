@@ -399,6 +399,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] main{padding-block:22px 48px}
 :root[data-skin="studs"] main>.card{margin-bottom:26px}
 :root[data-skin="studs"] .card.model{margin-bottom:26px}
+.bdv{position:relative;height:230px;margin:0 auto;width:100%}
+.bdv input[type=range]{position:absolute;left:50%;top:50%;width:210px;margin:-23px 0 0 -105px;transform:rotate(-90deg)}
+.bdw.vert .holds{display:none}
+:root[data-skin="studs"] .bdv input[type=range],:root .bdv input[type=range]{position:absolute;left:50%;top:50%;width:210px;margin:-23px 0 0 -105px;transform:rotate(-90deg)}
+.tl-wheel{width:96px;height:96px;margin:6px auto;color:#8a909a;opacity:.45;transition:opacity .15s}
+.tl-wheel svg,.tl-hud svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.7))}
+.tl-wheel.on{opacity:1;color:#e8e6df}
+.tl-hud{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:64px;height:64px;margin-left:-32px;color:#e8e6df;pointer-events:none;z-index:30;opacity:.92}
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.pill[aria-pressed="true"] .dot,.bar-banner{animation:none}}
 
 /* Player mode, settings lock, calibration, battery */
@@ -588,6 +596,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <label class="check" for="tlInv"><input id="tlInv" type="checkbox">Reverse tilt direction</label>
           <label class="check" for="tlAll"><input id="tlAll" type="checkbox">Tilt on every Board joystick and slider</label>
         </div>
+        <div class="tl-wheel" id="tlWheel" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="10"/><circle cx="50" cy="50" r="9" fill="currentColor"/><path d="M50 50L12 62M50 50L88 62M50 50V86" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><rect x="44" y="4" width="12" height="18" rx="4" fill="#ffc400"/></svg></div>
         <p class="rec-stat" id="tlSt"></p>
         <p class="note">Touch and hold the joystick with one thumb. Up and down drives. Tilt the phone left or right like a steering wheel to steer. It works with the left joystick, or the first joystick on the Board. Hold the phone upright or sideways, not flat.</p>
       </section>
@@ -723,6 +732,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       </section>
     </div>
   </div>
+<div class="tl-hud" id="tlHud" aria-hidden="true" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="10"/><circle cx="50" cy="50" r="9" fill="currentColor"/><path d="M50 50L12 62M50 50L88 62M50 50V86" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><rect x="44" y="4" width="12" height="18" rx="4" fill="#ffc400"/></svg></div>
 </main>
 
 <script>
@@ -830,7 +840,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       var w=x.w===2?2:1;
       if(x.k==='s'||x.k==='h'){
         var c=Math.round(+x.c);
-        if(c>=0&&c<NMAX) out.push({k:x.k,c:c,w:w,hold:x.k==='s'&&x.hold===true});
+        if(c>=0&&c<NMAX) out.push({k:x.k,c:c,w:w,hold:x.k==='s'&&x.hold===true,v:x.k==='s'&&x.v===true});
       }else if(x.k==='j'){
         var ja=Math.round(+x.c), jb=Math.round(+x.d);
         if(ja>=0&&ja<NMAX&&jb>=-1&&jb<NMAX) out.push({k:'j',c:ja,d:jb,m:x.m==='tank'?'tank':'axis',w:w,hold:x.hold===true});
@@ -1134,6 +1144,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function tiltStatus(){
     var el=tlSt;
     if(!el) return;
+    var on=!!(C.tilt&&C.tilt.on), deg=TILT.touch?Math.max(-120,Math.min(120,TILT.deg)):0, tr='rotate('+deg.toFixed(1)+'deg)';
+    if(tlWheel&&tlWheel.style){tlWheel.hidden=!on;tlWheel.style.transform=tr;tlWheel.classList.toggle('on',on&&!!TILT.touch)}
+    if(tlHud&&tlHud.style){tlHud.hidden=!(on&&TILT.touch);tlHud.style.transform='';var sv=tlHud.firstChild;if(sv&&sv.style)sv.style.transform=tr}
     var t='';
     if(C.tilt&&C.tilt.on){
       if(!TILT.has) t='Tilt sensor: no data yet';
@@ -2065,7 +2078,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   bkPaint();
 
   // ---- Tilt settings ----
-  var tlOn=$('#tlOn'), tlOpt=$('#tlOpt'), tlSens=$('#tlSens'), tlInv=$('#tlInv'), tlAll=$('#tlAll'), tlSt=$('#tlSt');
+  var tlOn=$('#tlOn'), tlOpt=$('#tlOpt'), tlSens=$('#tlSens'), tlInv=$('#tlInv'), tlAll=$('#tlAll'), tlSt=$('#tlSt'), tlWheel=$('#tlWheel'), tlHud=$('#tlHud');
   tlOn.addEventListener('change',function(){
     C.tilt.on=tlOn.checked;tlOpt.hidden=!C.tilt.on;TILT.zero=null;save();tiltNative();
     if(C.tilt.on) setTimeout(function(){if(!TILT.has) toast('No tilt sensor data yet. Check that the phone has an accelerometer.',5000)},1500);
@@ -2162,6 +2175,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var ed=document.createElement('div');ed.className='bdw-ed';
     var defs=[['◀','Move earlier',function(){bdMove(it,-1)}],['▶','Move later',function(){bdMove(it,1)}]];
     if(it.k!=='d') defs.push(['↔','Wide or normal',function(){it.w=it.w===2?1:2;save();syncBoard()}]);
+    if(it.k==='s') defs.push(['\u2195','Vertical or horizontal',function(){it.v=!it.v;save();syncBoard()},!!it.v]);
     if(it.k==='s'||it.k==='j'||it.k==='d') defs.push(['0','Return to 0 on release',function(){
       it.hold=!it.hold;
       [it.c,it.d,it.e,it.f].forEach(function(q){if(q!==undefined&&q>=0) setT(q,0,false)});
@@ -2239,7 +2253,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
             if(!it.hold&&!S.play&&!(refs[c]&&refs[c].locked)){r.value='0';setT(c,0,true)}
           };
           r.addEventListener('pointerup',rel);r.addEventListener('pointercancel',rel);
-          el.appendChild(r);w.rng=r;
+          if(it.v){
+            var vw=document.createElement('div');vw.className='bdv';vw.appendChild(r);el.appendChild(vw);el.classList.add('vert');
+          }else el.appendChild(r);
+          w.rng=r;
         }else{
           var hb=document.createElement('div');hb.className='holds';
           [['Reverse',-1],['Forward',1]].forEach(function(d){
@@ -2463,7 +2480,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Player mode shows only big sequence buttons and E-Stop. Lock settings hides everything that changes the model. Hold the button for 2 seconds to unlock or leave.':'Mod pemain hanya menunjukkan butang jujukan besar dan E-Stop. Kunci tetapan menyembunyikan semua yang mengubah model. Tahan butang selama 2 saat untuk buka kunci atau keluar.',
     'No sequences yet. Leave player mode and make one first.':'Belum ada jujukan. Keluar dari mod pemain dan buat satu dahulu.',
     'Settings locked. Hold the button in the App card for 2 seconds to unlock.':'Tetapan dikunci. Tahan butang dalam kad App selama 2 saat untuk buka kunci.',
-    'Slow':'Perlahan','Tilt on every Board joystick and slider':'Condong pada setiap joystik dan slider Board','Full screen (hide system bars)':'Skrin penuh (sembunyi bar sistem)','Touch and hold a joystick or slider, then tilt the phone.':'Sentuh dan tahan joystik atau slider, kemudian condongkan telefon.','Tilt steering':'Pusing dengan condong','This phone has no tilt sensor.':'Telefon ini tiada sensor condong.',
+    'Slow':'Perlahan','Vertical or horizontal':'Menegak atau mengufuk','Tilt on every Board joystick and slider':'Condong pada setiap joystik dan slider Board','Full screen (hide system bars)':'Skrin penuh (sembunyi bar sistem)','Touch and hold a joystick or slider, then tilt the phone.':'Sentuh dan tahan joystik atau slider, kemudian condongkan telefon.','Tilt steering':'Pusing dengan condong','This phone has no tilt sensor.':'Telefon ini tiada sensor condong.',
     'Tilt sensor: no data yet':'Sensor condong: belum ada data','Tilt sensor is ready. Touch and hold a joystick or slider, then tilt the phone.':'Sensor condong sedia. Sentuh dan tahan joystik atau slider, kemudian condongkan telefon.',
     'No tilt sensor data yet. Check that the phone has an accelerometer.':'Belum ada data sensor condong. Pastikan telefon ada sensor pecutan.',
     'Touch and hold the joystick with one thumb. Up and down drives. Tilt the phone left or right like a steering wheel to steer. It works with the left joystick, or the first joystick on the Board. Hold the phone upright or sideways, not flat.':'Sentuh dan tahan joystik dengan satu ibu jari. Atas dan bawah untuk memandu. Condongkan telefon ke kiri atau kanan seperti stereng untuk memusing. Ia berfungsi dengan joystik kiri, atau joystik pertama pada Board. Pegang telefon tegak atau mengiring, bukan mendatar.','Hold':'Tahan','Double joystick':'Joystik berkembar','Double stick':'Stik berkembar','Mode':'Mod','Add to board':'Tambah ke papan','Done editing':'Siap sunting','Channel':'Saluran','Drive':'Pandu','Steer':'Pusing','Left motor':'Motor kiri','Right motor':'Motor kanan','None':'Tiada',
