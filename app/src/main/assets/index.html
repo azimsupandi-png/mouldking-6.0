@@ -743,6 +743,25 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root .model-row:first-of-type{align-items:flex-start}
 :root .model-row label select,:root .model-row label input.txt,:root .model-row label input[type=text]{height:46px;box-sizing:border-box}
 :root #spdSeg{padding-bottom:2px}
+
+/* ---- Landscape: scale controls to the short screen height ---- */
+@media (orientation:landscape) and (max-height:520px){
+  :root .pad,:root .cols.joy .pad{width:min(100%,50vh)}
+  :root .bdw .pad{width:min(100%,46vh)}
+  :root .bd-pads .pad{width:min(100%,46vh)}
+  :root .ch-foot .stop,:root .ch-foot .lock,:root .ch-foot .lt-on{height:38px;width:76px;min-width:0;max-width:none;flex:none;font-size:13px}
+  :root .ch-head .inv{height:34px;width:84px;font-size:13px}
+  :root .bdw .tgl{height:38px;font-size:14px}
+  :root .bdw .tgd{height:40px}
+  :root .bdw .tgl .led{width:18px;height:18px}
+  :root[data-skin="studs"] .bdw .qbtn.lbtn{height:38px;min-height:38px}
+  :root .seg[aria-label="Stick mode"] .btn,:root #spdSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profNew,:root #profDel{height:38px;font-size:13px}
+  :root .prof-wrap #profRen{width:38px;min-width:38px;height:38px}
+  :root .model-row label select,:root .model-row label input.txt,:root .model-row label input[type=text]{height:38px}
+  :root .qbtn{min-height:44px}
+  :root .bdw .hold{min-height:48px}
+  :root .card{padding-top:12px;padding-bottom:12px}
+}
 </style>
 </head>
 <body>
