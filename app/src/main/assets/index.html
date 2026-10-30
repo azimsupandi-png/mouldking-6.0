@@ -498,7 +498,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .pl-note{color:var(--muted);font-size:14px}
 .pl-stop{min-height:88px;border:0;border-radius:10px;background:var(--danger);color:#fff;font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .pl-exit.hold{background:var(--acc);color:#fff}
-:root[data-lock] #spdSeg,:root[data-lock] #recCard,:root[data-lock] #kidRow,:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #ioCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
+:root[data-lock] #spdSeg,:root[data-lock] #recCard,:root[data-lock] #kidRow,:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
 :root[data-lock] #profName,:root[data-lock] .ch .name{pointer-events:none}
 
 /* ---- Header: hub power orb and yellow E-Stop button ---- */
@@ -584,6 +584,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 @keyframes prp2{0%{box-shadow:0 4px 0 #7a0d0d,0 0 0 0 rgba(255,60,30,.8)}100%{box-shadow:0 4px 0 #7a0d0d,0 0 0 16px rgba(255,60,30,0)}}
 .bar .estop:active{box-shadow:0 1px 0 #aeb4bb}
 @media (max-width:420px){.bar .estop,:root[data-skin="studs"] .bar .estop{width:52px;height:52px}.bar-in{gap:8px}}
+
+/* ---- Slider step arrows: yellow, tap = +/-5% ---- */
+:root[data-skin="studs"] .track::before{background:linear-gradient(#000,#000) center/calc(100% - 64px) 6px no-repeat,repeating-linear-gradient(90deg,#3a4049 0 2px,transparent 2px 12.5%) center/calc(100% - 64px) 20px no-repeat}
+.track .stp{position:absolute;top:0;bottom:0;width:48px;padding:0;border:0;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 14'%3E%3Cpath d='M9 1L1 7l8 6z' fill='%23f4b800'/%3E%3C/svg%3E") center/12px 17px no-repeat;cursor:pointer;z-index:4;touch-action:none;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 0 4px rgba(244,184,0,.45))}
+.track .stp.dec{left:0}
+.track .stp.inc{right:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 14'%3E%3Cpath d='M1 1l8 6-8 6z' fill='%23f4b800'/%3E%3C/svg%3E")}
+.track .stp:active{filter:drop-shadow(0 0 8px rgba(244,184,0,.95)) brightness(1.25);transform:scale(.9)}
+.ch.light .track .stp,.track[hidden] .stp{display:none}
 </style>
 </head>
 <body>
@@ -1150,7 +1158,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function buildChannel(i){
     var el=document.createElement('article');el.className='ch';
     el.innerHTML='<div class="ch-head"><span class="tag"></span><input class="name" maxlength="16" aria-label="Channel name"><button class="btn inv" type="button" aria-pressed="false">Reverse</button></div>'+
-      '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"></div>'+
+      '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"><button class="stp dec" type="button" aria-label="Decrease 5%"></button><button class="stp inc" type="button" aria-label="Increase 5%"></button></div>'+
       '<div class="holds" hidden><button class="hold rev" type="button">Reverse</button><button class="hold fwd" type="button">Forward</button></div>'+
       '<div class="lights" hidden>'+
         '<label><span class="set-top"><span>Brightness</span><output class="ltOut">100%</output></span><input class="lt-bright" type="range" min="0" max="100" step="5"></label>'+
@@ -1171,6 +1179,24 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     refs.push(r);
 
     r.rng.addEventListener('input',function(){setT(i,+r.rng.value,true)});
+    (function(){
+      var tm=0,rp=0;
+      function step(d){
+        if(S.estop||S.play||r.locked) return;
+        var v=Math.max(-100,Math.min(100,Math.round((rt.t[i]+d)/5)*5));
+        r.rng.value=v;setT(i,v,true);
+      }
+      function stop(){clearTimeout(tm);clearInterval(rp);tm=0;rp=0}
+      [['.dec',-5],['.inc',5]].forEach(function(q){
+        var b=$(q[0],el);
+        b.addEventListener('pointerdown',function(e){
+          e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}
+          stop();step(q[1]);tm=setTimeout(function(){rp=setInterval(function(){step(q[1])},120)},420);
+        });
+        ['pointerup','pointercancel','lostpointercapture','blur'].forEach(function(ev){b.addEventListener(ev,stop)});
+        b.addEventListener('contextmenu',function(e){e.preventDefault()});
+      });
+    })();
     var rel=function(){ if(C.spring&&!S.play&&!r.locked){r.rng.value=0;setT(i,0,true)} };
     r.rng.addEventListener('pointerup',rel);
     r.rng.addEventListener('pointercancel',rel);
@@ -2159,6 +2185,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function applyLock(){
     if(!lockBtn) return;
     var on=!!store.prefs.lock, de=document.documentElement;
+    ['imBtn','ioApply'].forEach(function(id){var e=$('#'+id);if(e) e.disabled=on});
     if(de&&de.setAttribute){ if(on) de.setAttribute('data-lock','1'); else de.removeAttribute('data-lock') }
     lockBtn.textContent=on?'Hold to unlock':'Lock settings';
   }
