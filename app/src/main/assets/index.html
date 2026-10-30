@@ -779,6 +779,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root .cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   :root .cols.dual{grid-template-columns:minmax(0,1fr)}
 }
+
+/* ---- Landscape: every mode uses one column (like Dual stick) ---- */
+@media (orientation:landscape) and (max-height:520px){
+  :root .cols,:root .cols.dual{grid-template-columns:minmax(0,1fr);gap:12px}
+  :root .cols .stack{display:contents}
+  :root .cols.joy #joyCard,:root .cols.dual #joyCard{order:-1}
+}
 </style>
 </head>
 <body>
