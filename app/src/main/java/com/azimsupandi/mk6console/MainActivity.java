@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -65,6 +66,8 @@ public class MainActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             if (!BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) return;
             int st = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+            if (st == BluetoothAdapter.STATE_ON) notifyApp("bt1");
+            if (st == BluetoothAdapter.STATE_OFF || st == BluetoothAdapter.STATE_TURNING_OFF) notifyApp("bt0");
             if (st == BluetoothAdapter.STATE_TURNING_OFF || st == BluetoothAdapter.STATE_OFF) {
                 boolean wasActive = mk6.isActive();
                 mk6.destroy();
@@ -390,6 +393,27 @@ public class MainActivity extends Activity {
 
     /** Methods the page can call; they run on a WebView thread, so hop to the UI thread. */
     private final class Bridge {
+        @JavascriptInterface
+        public boolean btOn() {
+            try {
+                BluetoothManager bm = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+                BluetoothAdapter ad = bm != null ? bm.getAdapter() : null;
+                return ad != null && ad.isEnabled();
+            } catch (RuntimeException e) {
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public void btSettings() {
+            runOnUiThread(() -> {
+                try {
+                    startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+                } catch (RuntimeException ignored) {
+                }
+            });
+        }
+
         @JavascriptInterface
         public void immersive(final boolean on) {
             runOnUiThread(() -> { fullScreen = on; applyFull(); });
