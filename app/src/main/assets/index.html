@@ -592,6 +592,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .track .stp.inc{right:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 14'%3E%3Cpath d='M1 1l8 6-8 6z' fill='%23f4b800'/%3E%3C/svg%3E")}
 .track .stp:active{filter:drop-shadow(0 0 8px rgba(244,184,0,.95)) brightness(1.25);transform:scale(.9)}
 .ch.light .track .stp,.track[hidden] .stp{display:none}
+
+/* ---- Slider: keep the thumb clear of the step arrows; tidy model seg ---- */
+.track .pwr{width:calc(100% - 68px);margin-left:34px}
+.track .fill{left:calc(54px + (100% - 108px) * var(--lf,.5));width:calc((100% - 108px) * var(--wf,0))}
+:root[data-skin="studs"] .track::before{background:linear-gradient(#000,#000) center/calc(100% - 108px) 6px no-repeat,repeating-linear-gradient(90deg,#3a4049 0 2px,transparent 2px 12.5%) center/calc(100% - 108px) 20px no-repeat}
+.model-row .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex-wrap:nowrap}
+.model-row .seg .btn{min-width:0;padding-left:6px;padding-right:6px}
+@media (max-width:359px){.model-row .seg{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -1844,8 +1852,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       var o=Math.round(rt.o[i]), v=(C.ch[i].inv?-o:o)||0;
       vals[i]=v;
       var r=refs[i];
-      r.fill.style.setProperty('--l',(50+Math.min(0,o)/2)+'%');
-      r.fill.style.setProperty('--w',(Math.abs(o)/2)+'%');
+      r.fill.style.setProperty('--lf',String((50+Math.min(0,o)/2)/100));
+      r.fill.style.setProperty('--wf',String(Math.abs(o)/200));
       r.track.classList.toggle('neg',o<0);
       r.track.classList.toggle('idle',o===0);
       r.meter.style.setProperty('--m',String(Math.abs(o)));
