@@ -596,7 +596,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 /* ---- Slider: keep the thumb clear of the step arrows; tidy model seg ---- */
 .track .pwr{width:calc(100% - 68px);margin-left:34px}
 .track .fill{left:calc(54px + (100% - 108px) * var(--lf,.5));width:calc((100% - 108px) * var(--wf,0))}
-:root[data-skin="studs"] .track::before{background:linear-gradient(#3a4049,#3a4049) right 54px center/2px 20px no-repeat,linear-gradient(#000,#000) center/calc(100% - 108px) 6px no-repeat,repeating-linear-gradient(90deg,#3a4049 0 2px,transparent 2px 12.5%) center/calc(100% - 108px) 20px no-repeat}
+:root[data-skin="studs"] .track::before{background:linear-gradient(#000,#000) center/calc(100% - 108px) 6px no-repeat,repeating-linear-gradient(90deg,#3a4049 0 2px,transparent 2px calc((100% - 2px) / 8)) center/calc(100% - 108px) 20px no-repeat}
 .model-row .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex-wrap:nowrap}
 .model-row .seg .btn{min-width:0;padding-left:6px;padding-right:6px}
 @media (max-width:359px){.model-row .seg{grid-template-columns:1fr 1fr}}
