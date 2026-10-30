@@ -616,27 +616,28 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .wiz label:not(.check){display:grid;gap:4px;font-size:12px;color:var(--muted)}
 .wiz select{width:100%}
 
-/* ---- Board toggles: LED button, latch switch, direction ---- */
-.bdw .tgl{position:relative;width:100%;height:64px;border-radius:32px;border:2px solid #3a4250;background:#262c36;color:#aeb6c2;font-weight:800;font-size:18px;letter-spacing:.06em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 6px 0 #151a21;padding:0;-webkit-tap-highlight-color:transparent;transition:background .15s}
-.bdw .tgl .led{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #101010;background:radial-gradient(circle at 35% 30%,#ff8a8a,#a01212)}
-.bdw .tgl.on{border-color:transparent;color:#111;background:radial-gradient(circle at 35% 22%,rgba(255,255,255,.45),transparent 45%),#f4b800;box-shadow:0 6px 0 #7a5c00}
-.bdw .tgl.on .led{background:radial-gradient(circle at 35% 30%,#7dff9d,#1e9c3d);box-shadow:0 0 12px 3px rgba(60,220,90,.8),inset 0 2px 3px rgba(255,255,255,.5)}
-.bdw .tgl:active{transform:translateY(3px);box-shadow:0 3px 0 #151a21}
-.bdw .tgl.on:active{box-shadow:0 3px 0 #7a5c00}
+/* ---- Board toggles: compact 3D buttons matching the slider thumb and joystick knob ---- */
+.bdw .tgl,.bdw .tgd,.bdw .tgl .k{--mOff:linear-gradient(#444c5c,#2a303b 50%,#1b2028);--mOn:radial-gradient(ellipse 70% 55% at 50% 8%,rgba(255,255,255,.7),rgba(255,255,255,0) 70%),linear-gradient(#ffdc55,#f4b800 48%,#c68700)}
+.bdw .tgl{position:relative;width:100%;height:46px;margin:0;padding:0;border-radius:23px;border:2px solid #0d1015;background:var(--mOff);color:#aeb6c2;font-weight:800;font-size:15px;letter-spacing:.07em;text-shadow:0 1px 0 rgba(0,0,0,.65);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55);-webkit-tap-highlight-color:transparent;transition:transform .08s,box-shadow .08s}
+.bdw .tgl.on{border-color:#6b4600;background:var(--mOn);color:#2a1c00;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+.bdw .tgl:active{transform:translateY(2px);box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55)}
+.bdw .tgl.on:active{box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+.bdw .tgl .led{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid #0d1015;background:radial-gradient(circle at 33% 25%,rgba(255,255,255,.75) 0,rgba(255,255,255,0) 30%),radial-gradient(circle,#ff6a6a,#a01212 75%);box-shadow:0 1px 2px rgba(0,0,0,.6),inset 0 -2px 3px rgba(60,0,0,.5)}
+.bdw .tgl.on .led{border-color:#0b3d17;background:radial-gradient(circle at 33% 25%,rgba(255,255,255,.85) 0,rgba(255,255,255,0) 30%),radial-gradient(circle,#7dff9d,#1e9c3d 75%);box-shadow:0 0 9px 2px rgba(60,230,100,.85),inset 0 -2px 3px rgba(0,60,10,.5)}
 .bdw .tgl:disabled,.bdw .tgd:disabled{opacity:.45;cursor:default}
-.bdw .tgl.latch{border-radius:14px;border:3px solid #2b2f36;background:#14171c;box-shadow:inset 0 5px 10px #000;justify-content:flex-start;padding:5px;color:inherit}
-.bdw .tgl.latch .k{display:block;width:calc(50% - 5px);height:100%;border-radius:10px;background:#2c323c;box-shadow:0 4px 0 #151a21;transition:transform .18s}
-.bdw .tgl.latch.on .k{background:#f4b800;box-shadow:0 4px 0 #7a5c00;transform:translateX(calc(100% + 0px))}
-.bdw .tgl.latch .lbl{position:absolute;top:0;bottom:0;width:calc(50% - 5px);display:flex;align-items:center;justify-content:center;font-size:14px;color:#aeb6c2;left:5px;pointer-events:none}
-.bdw .tgl.latch.on .lbl{color:#111;left:auto;right:5px}
-.bdw .tgl.latch:active{transform:none;box-shadow:inset 0 5px 10px #000}
-.bdw .tgbar{height:8px;border-radius:4px;background:#14171c;overflow:hidden}
-.bdw .tgbar i{display:block;height:100%;width:0;background:#f4b800;transition:width .12s}
+.bdw .tgl.latch{padding:3px;justify-content:flex-start;gap:0;border:2px solid #2b2f36;background:linear-gradient(#0a0c10,#14171c);color:inherit;box-shadow:inset 0 4px 8px #000,0 1px 0 rgba(255,255,255,.1)}
+.bdw .tgl.latch.on{border-color:#2b2f36;background:linear-gradient(#0a0c10,#14171c);box-shadow:inset 0 4px 8px #000,0 1px 0 rgba(255,255,255,.1)}
+.bdw .tgl.latch:active,.bdw .tgl.latch.on:active{transform:none;box-shadow:inset 0 4px 8px #000,0 1px 0 rgba(255,255,255,.1)}
+.bdw .tgl.latch .k{display:flex;align-items:center;justify-content:center;width:50%;height:100%;border-radius:20px;border:2px solid #0d1015;background:var(--mOff);color:#aeb6c2;font-size:13px;box-shadow:0 4px 6px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -3px 5px rgba(0,0,0,.55);transition:transform .18s cubic-bezier(.3,1.4,.5,1)}
+.bdw .tgl.latch.on .k{transform:translateX(100%);border-color:#6b4600;background:var(--mOn);color:#2a1c00;box-shadow:0 4px 6px rgba(0,0,0,.7),inset 0 -4px 6px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+.bdw .tgbar{height:6px;border-radius:3px;background:#0d1015;box-shadow:inset 0 2px 3px #000;overflow:hidden}
+.bdw .tgbar i{display:block;height:100%;width:0;background:linear-gradient(#ffdc55,#e0a000);transition:width .12s}
 .bdw .tgdir{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.bdw .tgd{height:64px;border-radius:16px;border:2px solid #3a4250;background:#262c36;color:#aeb6c2;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;box-shadow:0 5px 0 #151a21;padding:0;min-width:0;overflow:hidden;-webkit-tap-highlight-color:transparent}
-.bdw .tgd i{font-style:normal;font-size:22px;line-height:1}
-.bdw .tgd.on{border-color:transparent;background:#f4b800;color:#111;box-shadow:0 5px 0 #7a5c00}
-.bdw .tgd:active{transform:translateY(3px)}
+.bdw .tgd{height:48px;border-radius:14px;border:2px solid #0d1015;background:var(--mOff);color:#aeb6c2;font-weight:800;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;text-shadow:0 1px 0 rgba(0,0,0,.65);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;padding:0;min-width:0;overflow:hidden;box-shadow:0 5px 8px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55);transition:transform .08s,box-shadow .08s;-webkit-tap-highlight-color:transparent}
+.bdw .tgd i{font-style:normal;font-size:16px;line-height:1}
+.bdw .tgd.on{border-color:#6b4600;background:var(--mOn);color:#2a1c00;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 5px 8px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+.bdw .tgd:active{transform:translateY(2px)}
+.bdw-h span{flex:1;min-width:0}
 @media (prefers-reduced-motion:reduce){.bdw .tgl.latch .k{transition:none}}
 
 /* ---- Header v4: Bluetooth blue/white, hub green/white ---- */
@@ -2620,7 +2621,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           tb.setAttribute('role','switch');
           if(tgs==='latch'){
             var k1=document.createElement('span');k1.className='k';tb.appendChild(k1);
-            var l1=document.createElement('span');l1.className='lbl';tb.appendChild(l1);
+            var l1=document.createElement('span');l1.className='lbl';k1.appendChild(l1);
           }else{
             var l2=document.createElement('span');l2.className='led';tb.appendChild(l2);
             var t2=document.createElement('span');t2.className='tx';tb.appendChild(t2);
