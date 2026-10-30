@@ -600,6 +600,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .model-row .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex-wrap:nowrap}
 .model-row .seg .btn{min-width:0;padding-left:6px;padding-right:6px}
 @media (max-width:359px){.model-row .seg{grid-template-columns:1fr 1fr}}
+
+/* ---- Equal-size Stop / Lock / On buttons; dim step arrows when unusable ---- */
+:root .ch-foot .stop,:root .ch-foot .lock,:root .ch-foot .lt-on{flex:0 1 88px;width:88px;min-width:74px;max-width:88px;height:46px;padding:0 6px;margin-left:0;font-size:14px;text-align:center}
+:root .ch-foot .lt-on{padding:0 8px 0 42px}
+.ch-foot .lt-on::before{width:32px;height:32px;top:4px;left:4px}
+:root .ch-foot .lt-on[aria-checked="true"]{padding:0 42px 0 8px}
+.ch-foot .lt-on[aria-checked="true"]::before{left:calc(100% - 36px)}
+.track.dis .stp{opacity:.25;filter:none;pointer-events:none}
+@media (max-width:399px){:root .ch-foot .stop,:root .ch-foot .lock,:root .ch-foot .lt-on{flex:none;width:80px;min-width:0;max-width:none}}
+@media (max-width:339px){:root .ch-foot .stop,:root .ch-foot .lock,:root .ch-foot .lt-on{width:74px}}
 </style>
 </head>
 <body>
@@ -1171,7 +1181,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       '<div class="lights" hidden>'+
         '<label><span class="set-top"><span>Brightness</span><output class="ltOut">100%</output></span><input class="lt-bright" type="range" min="0" max="100" step="5"></label>'+
         '<label>Blink<select class="lt-blink"><option value="off">Steady</option><option value="slow">Slow blink</option><option value="fast">Fast blink</option><option value="pulse">Pulse</option></select></label></div>'+
-      '<div class="ch-foot"><span class="meter-wrap" aria-hidden="true"><span class="meter"></span><span class="ar"></span></span><output class="val">0</output><span class="sent">out 0</span><button class="btn lock" type="button" aria-pressed="false">Lock</button><button class="btn stop" type="button">Stop</button><button class="lt-on" type="button" role="switch" aria-checked="false" aria-label="Light" hidden>Off</button></div>'+
+      '<div class="ch-foot"><span class="meter-wrap" aria-hidden="true"><span class="meter"></span><span class="ar"></span></span><output class="val">0</output><span class="sent">out 0</span><button class="btn stop" type="button">Stop</button><button class="btn lock" type="button" aria-pressed="false">Lock</button><button class="lt-on" type="button" role="switch" aria-checked="false" aria-label="Light" hidden>Off</button></div>'+
       '<details class="adv"><summary>Channel settings</summary><div class="adv-grid">'+
         '<label><span class="set-top"><span>Maximum power</span><output class="maxOut"></output></span><input class="max" type="range" min="10" max="100" step="5"></label>'+
         '<label><span class="set-top"><span>Start power</span><output class="offOut"></output></span><input class="off" type="range" min="0" max="50" step="5"></label>'+
@@ -1852,6 +1862,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       var o=Math.round(rt.o[i]), v=(C.ch[i].inv?-o:o)||0;
       vals[i]=v;
       var r=refs[i];
+      r.track.classList.toggle('dis',!!(S.estop||S.play||r.locked));
       r.fill.style.setProperty('--lf',String((50+Math.min(0,o)/2)/100));
       r.fill.style.setProperty('--wf',String(Math.abs(o)/200));
       r.track.classList.toggle('neg',o<0);
