@@ -450,9 +450,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .lights label{display:flex;flex-direction:column;gap:8px}
 .lights input[type=range]{width:100%;margin:0;accent-color:#f4b800}
 .ch-foot .lt-on{position:relative;min-width:96px;height:46px;padding:0 16px 0 52px;border-radius:23px;border:2px solid var(--line);background:var(--well);color:var(--mut,#9aa);font-weight:700;font-size:15px;cursor:pointer;text-align:center;transition:background .15s,padding .15s}
-.ch-foot .lt-on::before{content:"";position:absolute;left:4px;top:4px;width:34px;height:34px;border-radius:50%;background:#59606b;box-shadow:inset 0 2px 3px rgba(255,255,255,.25),0 2px 4px rgba(0,0,0,.5);transition:left .15s,background .15s}
+.ch-foot .lt-on::before{content:"";position:absolute;left:3px;top:3px;width:34px;height:34px;border-radius:50%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 3v8'/%3E%3Cpath d='M7 6.5a8 8 0 1 0 10 0'/%3E%3C/svg%3E") center/62% no-repeat,radial-gradient(circle at 35% 25%,rgba(255,255,255,.5),transparent 42%),radial-gradient(circle,#ef4a4a,#b81414);border:2px solid #1a1a1a;box-shadow:0 2px 4px rgba(0,0,0,.55);transition:left .15s}
 .ch-foot .lt-on[aria-checked="true"]{background:linear-gradient(#f9c514,#e0a800);border-color:#8a6a00;color:#1b1500;padding:0 52px 0 16px}
-.ch-foot .lt-on[aria-checked="true"]::before{left:calc(100% - 38px);background:#2a2200;box-shadow:inset 0 2px 3px rgba(255,255,255,.2),0 2px 4px rgba(0,0,0,.4)}
+.ch-foot .lt-on[aria-checked="true"]::before{left:calc(100% - 41px);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 3v8'/%3E%3Cpath d='M7 6.5a8 8 0 1 0 10 0'/%3E%3C/svg%3E") center/62% no-repeat,radial-gradient(circle at 35% 25%,rgba(255,255,255,.55),transparent 42%),radial-gradient(circle,#38d153,#139a2c)}
 .ch-foot .lt-on[hidden]{display:none}
 .bd-mix{display:flex;flex-direction:column;gap:8px;margin:12px 0}
 .bd-mixr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -461,6 +461,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .seq-opts label{display:flex;flex-direction:column;gap:6px;font-size:13px}
 .seq-opts select{width:100%}
 .bdw .qbtn.lbtn{font-size:16px;padding:6px 8px;white-space:nowrap}
+.bdw .qbtn.lbtn{display:flex;align-items:center;justify-content:center;gap:12px}
+.bdw .qbtn.lbtn::before{content:"";flex:none;width:30px;height:30px;border-radius:50%;border:2px solid #1a1a1a;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 3v8'/%3E%3Cpath d='M7 6.5a8 8 0 1 0 10 0'/%3E%3C/svg%3E") center/62% no-repeat,radial-gradient(circle at 35% 25%,rgba(255,255,255,.5),transparent 42%),radial-gradient(circle,#ef4a4a,#b81414);box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.bdw .qbtn.lbtn.on::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 3v8'/%3E%3Cpath d='M7 6.5a8 8 0 1 0 10 0'/%3E%3C/svg%3E") center/62% no-repeat,radial-gradient(circle at 35% 25%,rgba(255,255,255,.55),transparent 42%),radial-gradient(circle,#38d153,#139a2c)}
 :root[data-skin="studs"] .bdw .qbtn.lbtn{background:#262c36;color:#aeb6c2;border-color:#3a4250;box-shadow:0 5px 0 #151a21}
 :root[data-skin="studs"] .bdw .qbtn.lbtn.on{background:radial-gradient(circle at 35% 22%,rgba(255,255,255,.45),transparent 45%),var(--hz);color:#111;border-color:rgba(110,70,0,.7);box-shadow:0 5px 0 #7a5c00}
 .bdw-ed{display:flex;gap:4px;flex:none}
@@ -2421,7 +2424,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       }else if(w.lb){
         var lv=rt.t[w.it.c]>0;
         w.lb.classList.toggle('on',lv);
-        w.lb.textContent=lv?'● ON':'○ OFF';
+        w.lb.textContent=lv?'ON':'OFF';
         w.lb.disabled=S.estop||!!S.play;
         if(w.out) w.out.textContent=lv?C.ch[w.it.c].bright+'%':'0%';
       }else if(w.mix){
