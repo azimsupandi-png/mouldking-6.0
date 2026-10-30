@@ -738,6 +738,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root[data-skin="studs"] .bar::after{height:5px;box-shadow:0 2px 4px rgba(0,0,0,.6)}
   :root .bar{box-shadow:0 1px 0 var(--acc),0 3px 8px rgba(0,0,0,.25)}
 }
+
+/* ---- Model row: labels and fields line up ---- */
+:root .model-row:first-of-type{align-items:flex-start}
+:root .model-row label select,:root .model-row label input.txt,:root .model-row label input[type=text]{height:46px;box-sizing:border-box}
+:root #spdSeg{padding-bottom:2px}
 </style>
 </head>
 <body>
