@@ -663,6 +663,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .bdw .qbtn.lbtn.on:active{box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
 .bdw .qbtn.lbtn::before{width:28px;height:28px;border:2px solid #0d1015;box-shadow:0 1px 2px rgba(0,0,0,.6),inset 0 -2px 3px rgba(60,0,0,.45)}
 .bdw .qbtn.lbtn.on::before{border-color:#0b3d17;box-shadow:0 0 9px 2px rgba(60,230,100,.85),inset 0 -2px 3px rgba(0,60,10,.5)}
+
+/* ---- Channel-card light switch: same 3D material ---- */
+:root .ch-foot .lt-on{border:2px solid #0d1015;background:linear-gradient(#444c5c,#2a303b 50%,#1b2028);color:#aeb6c2;font-weight:800;letter-spacing:.06em;text-shadow:0 1px 0 rgba(0,0,0,.65);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55);transition:transform .08s,box-shadow .08s,padding .15s}
+:root .ch-foot .lt-on[aria-checked="true"]{border-color:#6b4600;background:radial-gradient(ellipse 70% 55% at 50% 8%,rgba(255,255,255,.7),rgba(255,255,255,0) 70%),linear-gradient(#ffdc55,#f4b800 48%,#c68700);color:#2a1c00;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+:root .ch-foot .lt-on:active{transform:translateY(2px);box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55)}
+.ch-foot .lt-on::before{border:2px solid #0d1015;box-shadow:0 1px 2px rgba(0,0,0,.6),inset 0 -2px 3px rgba(60,0,0,.45)}
+.ch-foot .lt-on[aria-checked="true"]::before{border-color:#0b3d17;box-shadow:0 0 9px 2px rgba(60,230,100,.85),inset 0 -2px 3px rgba(0,60,10,.5)}
 </style>
 </head>
 <body>
