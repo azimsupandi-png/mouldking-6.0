@@ -449,7 +449,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .lights{display:flex;flex-direction:column;gap:14px;margin:10px 0}
 .lights label{display:flex;flex-direction:column;gap:8px}
 .lights input[type=range]{width:100%;margin:0;accent-color:#f4b800}
-.lights .lt-on{align-self:flex-start;min-width:110px}
+.ch-foot .lt-on{min-width:72px}
 .bd-mix{display:flex;flex-direction:column;gap:8px;margin:12px 0}
 .bd-mixr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .bd-mixr select{width:100%}
@@ -588,6 +588,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <label id="bdF3" hidden><span id="bdL3"></span><select id="bdTarget3"></select></label>
           <label id="bdF4" hidden><span id="bdL4"></span><select id="bdTarget4"></select></label>
           <label id="bdFM" hidden><span>Mode</span><select id="bdMode"><option value="axis">Axis (drive + steer)</option><option value="tank">Tank (left + right)</option></select></label>
+        </div>
+        <div class="bd-mix" id="bdLightRow" hidden>
+          <span>Light settings</span>
+          <div class="bd-mixr"><select id="bdLBlink" aria-label="Blink"><option value="off">Steady</option><option value="slow">Slow blink</option><option value="fast">Fast blink</option><option value="pulse">Pulse</option></select>
+          <select id="bdLBright" aria-label="Brightness"><option value="100">100%</option><option value="75">75%</option><option value="50">50%</option><option value="25">25%</option></select></div>
         </div>
         <div class="bd-mix" id="bdMixRow" hidden>
           <span>Share of power for each channel (same order as above)</span>
@@ -902,7 +907,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       o.expo=num(x.expo,0,100,0);
       o.kind=(x.kind==='hold'||x.kind==='light')?x.kind:'slider';
       o.blink=['off','slow','fast','pulse'].indexOf(x.blink)>=0?x.blink:'off';
-      o.bright=Math.round(num(x.bright,10,100,100));
+      o.bright=Math.round(num(x.bright,0,100,100));
     });
     d.limit=num(c.limit,10,100,100);
     d.ramp=num(c.ramp,0,100,60);
@@ -1010,14 +1015,17 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     return Math.min(m+c.off,c.max);
   }
   var SPD={slow:0.4,normal:0.7,fast:1};
+  /* The hub only picks up a new broadcast about every 100-200 ms, so blinking is kept slow and
+     pulsing moves in coarse steps. Brightness uses a gamma curve so the LED looks evenly dimmed. */
   function blinkF(mode,now){
-    if(mode==='slow') return (Math.floor(now/500)%2)?0:1;
-    if(mode==='fast') return (Math.floor(now/125)%2)?0:1;
-    if(mode==='pulse') return 0.5+0.5*Math.sin(now/1000*Math.PI);
+    if(mode==='slow') return (Math.floor(now/1000)%2)?0:1;
+    if(mode==='fast') return (Math.floor(now/400)%2)?0:1;
+    if(mode==='pulse') return 0.5+0.5*Math.cos(Math.floor(now/200)*200/3000*2*Math.PI+Math.PI);
     return 1;
   }
+  function ledOut(b){return b<=0?0:Math.max(3,100*Math.pow(Math.min(b,100)/100,2))}
   function goalOf(i){
-    if(C.ch[i].kind==='light'){var lt=rt.t[i];return lt>0?lt*blinkF(C.ch[i].blink,performance.now()):0}
+    if(C.ch[i].kind==='light'){var lt=rt.t[i];return lt>0?Math.round(ledOut(lt*blinkF(C.ch[i].blink,performance.now()))):0}
     var t=rt.t[i], m=powerFor(Math.abs(t),C.ch[i]);
     var f=(SPD[C.speed]||1)*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
     return (t<0?-m:m)*C.limit/100*f;
@@ -1048,10 +1056,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     el.innerHTML='<div class="ch-head"><span class="tag"></span><input class="name" maxlength="16" aria-label="Channel name"><button class="btn inv" type="button" aria-pressed="false">Reverse</button></div>'+
       '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"></div>'+
       '<div class="holds" hidden><button class="hold rev" type="button">Reverse</button><button class="hold fwd" type="button">Forward</button></div>'+
-      '<div class="lights" hidden><button class="btn lt-on" type="button" aria-pressed="false">Off</button>'+
-        '<label><span class="set-top"><span>Brightness</span><output class="ltOut">100%</output></span><input class="lt-bright" type="range" min="10" max="100" step="5"></label>'+
+      '<div class="lights" hidden>'+
+        '<label><span class="set-top"><span>Brightness</span><output class="ltOut">100%</output></span><input class="lt-bright" type="range" min="0" max="100" step="5"></label>'+
         '<label>Blink<select class="lt-blink"><option value="off">Steady</option><option value="slow">Slow blink</option><option value="fast">Fast blink</option><option value="pulse">Pulse</option></select></label></div>'+
-      '<div class="ch-foot"><span class="meter-wrap" aria-hidden="true"><span class="meter"></span><span class="ar"></span></span><output class="val">0</output><span class="sent">out 0</span><button class="btn lock" type="button" aria-pressed="false">Lock</button><button class="btn stop" type="button">Stop</button></div>'+
+      '<div class="ch-foot"><span class="meter-wrap" aria-hidden="true"><span class="meter"></span><span class="ar"></span></span><output class="val">0</output><span class="sent">out 0</span><button class="btn lock" type="button" aria-pressed="false">Lock</button><button class="btn lt-on" type="button" aria-pressed="false" hidden>Off</button><button class="btn stop" type="button">Stop</button></div>'+
       '<details class="adv"><summary>Channel settings</summary><div class="adv-grid">'+
         '<label><span class="set-top"><span>Maximum power</span><output class="maxOut"></output></span><input class="max" type="range" min="10" max="100" step="5"></label>'+
         '<label><span class="set-top"><span>Start power</span><output class="offOut"></output></span><input class="off" type="range" min="0" max="50" step="5"></label>'+
@@ -1113,7 +1121,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     function setKind(k){C.ch[i].kind=k;r.rng.value=0;setT(i,0,true);syncChannel(i);save()}
     r.kS.addEventListener('click',function(){setKind('slider')});
     r.kL.addEventListener('click',function(){setKind('light')});
-    r.ltOn.addEventListener('click',function(){if(S.estop||S.play) return;setT(i,rt.t[i]>0?0:C.ch[i].bright,false)});
+    r.ltOn.addEventListener('click',function(){if(S.estop||S.play) return;setT(i,rt.t[i]>0?0:(C.ch[i].bright||100),false)});
     r.ltB.addEventListener('input',function(){C.ch[i].bright=+r.ltB.value;r.ltOut.textContent=C.ch[i].bright+'%';if(rt.t[i]>0) setT(i,C.ch[i].bright,false)});
     r.ltB.addEventListener('change',save);
     r.ltBl.addEventListener('change',function(){C.ch[i].blink=r.ltBl.value;save()});
@@ -1139,7 +1147,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     r.max.value=c.max;r.maxOut.textContent=c.max+'%';
     r.off.value=c.off;r.offOut.textContent=c.off+'%';
     r.expo.value=c.expo;r.expOut.textContent=c.expo+'%';
-    r.track.hidden=hold||light;r.holds.hidden=!hold;r.lights.hidden=!light;r.lock.hidden=light;r.inv.hidden=light;
+    r.track.hidden=hold||light;r.holds.hidden=!hold;r.lights.hidden=!light;r.lock.hidden=light;r.inv.hidden=light;r.ltOn.hidden=!light;
     r.kS.setAttribute('aria-pressed',String(!hold&&!light));
     r.kH.setAttribute('aria-pressed',String(hold));
     r.kL.setAttribute('aria-pressed',String(light));
@@ -2203,6 +2211,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     bdModeF.hidden=!(bdK==='j'||bdK==='d');
     bdSpringL.hidden=!(bdK==='s'||bdK==='j'||bdK==='d'||bdK==='m');
     bdMixRow.hidden=bdK!=='m';
+    $('#bdLightRow').hidden=bdK!=='l';
     bdRat.forEach(function(sel,q){sel.hidden=q>=n||bdK!=='m'});
   }
   function bdSetKind(k){
@@ -2326,6 +2335,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           setT(lc,rt.t[lc]>0?0:C.ch[lc].bright,false);
         });
         el.appendChild(lb);w.btn=null;w.lb=lb;
+        var bs=document.createElement('select');bs.setAttribute('aria-label','Blink');
+        [['off','Steady'],['slow','Slow blink'],['fast','Fast blink'],['pulse','Pulse']].forEach(function(o){bdOpt(bs,o[0],o[1])});
+        bs.value=C.ch[lc].blink;
+        bs.addEventListener('change',function(){C.ch[lc].blink=bs.value;if(refs[lc]) refs[lc].ltBl.value=bs.value;save()});
+        el.appendChild(bs);
       }else if(it.k==='m'){
         var mt=it.t;
         if(mt.some(function(z){return !isActive(z.c)})) return;
@@ -2425,7 +2439,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var ww=bdWideChk.checked?2:1, m=bdMode.value==='tank'?'tank':'axis', n=v.map(function(x){return Math.round(+x)});
     var hd=!bdSpring.checked;
     if(bdK==='q') C.board.push({k:'q',c:v[0],w:ww});
-    else if(bdK==='l') C.board.push({k:'l',c:n[0],w:ww});
+    else if(bdK==='l'){
+      var lcc=C.ch[n[0]];lcc.kind='light';lcc.blink=$('#bdLBlink').value;lcc.bright=Math.round(+$('#bdLBright').value)||100;
+      syncChannel(n[0]);C.board.push({k:'l',c:n[0],w:ww});
+    }
     else if(bdK==='m'){
       var mt=[];
       n.forEach(function(cv,q){if(cv>=0&&!mt.some(function(z){return z.c===cv})) mt.push({c:cv,r:Math.round(+bdRat[q].value)||100})});
@@ -2586,7 +2603,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
     'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
     'Drive (up/down)':'Pandu (atas/bawah)','Steer (left/right)':'Stereng (kiri/kanan)','Left motor':'Motor kiri','Right motor':'Motor kanan','None':'Tiada',
-    'Repeat':'Ulang kali','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
+    'Repeat':'Ulang kali','Light settings':'Tetapan lampu','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
     'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
     'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
     'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',
