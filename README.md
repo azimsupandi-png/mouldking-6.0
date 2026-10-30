@@ -28,13 +28,15 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 ## Features
 
 - **Models:** every model stores channel names, reverse, limits, stick mapping, layout and recordings. Two examples are included.
-- **Look:** pick one of three colours (orange, red, yellow) per model, power rings on every channel and stick, glowing sliders and a pulsing link light.
-- **Themes:** per model, "Classic" or "Construction" (dark steel, hazard stripes, riveted panels, segmented power bars, yellow accent and status lamps). The look is generic machinery styling, not any brand's.
-- **Layouts:** Standard, Joystick (stick 1 first, its channels hidden from the list) and Dual stick (two sticks side by side, works well in landscape).
+- **Look:** one brick-style theme (dark panels, studs, hazard stripes, yellow accent), power rings on every channel and stick, and a status line under the title.
+- **Header:** a Bluetooth button (green tick / red cross, follows the phone's Bluetooth and opens its settings), a hub button (play to connect, pause to disconnect, pulses while active) and a stop button for **E-Stop**.
+- **Layouts:** Standard, Joystick, Dual stick and a free **Board** (sliders, hold buttons, sticks, double sticks, sequence buttons, lights and mixers; vertical sliders; tilt steering).
+- **Lights:** set a channel to *Light* for on/off, brightness (gamma-corrected so dimming looks even) and slow/fast/pulse blinking. Blinking is slow on purpose because the hub only catches an update every 100 to 200 ms.
+- **Mixer:** one Board slider that drives up to four channels, each with its own ratio and direction.
 - **Per channel:** maximum power, start power, fine control (expo curve with preview) and slider or hold-to-move control.
 - **Record & replay:** record up to 90 seconds of control movements, then replay once or in a loop. Manual input is locked during replay and E-Stop cancels it.
 - **Backup:** export all models to a file and import them again (in the app, through the system file picker).
-- **Sequences & quick actions:** build timed step lists (channel, power, seconds, "together" with the previous step, optional loop). Every sequence gets a big button at the top of the page. A second tap or E-Stop stops it and every channel returns to 0.
+- **Sequences & quick actions:** build timed step lists (channel, power, seconds, "together" with the previous step, optional loop, repeat 1 to 10 times, speed 0.5x to 2x, start delay). Every sequence gets a big button at the top of the page. A second tap or E-Stop stops it and every channel returns to 0.
 - **Gamepad:** pair a Bluetooth controller in Android settings and press a button. Left stick = stick 1, right stick = stick 2 (Dual stick layout), RT/LT drive a trigger channel, Back = E-Stop, Start = release. Dead zone is adjustable, and unplugging the pad stops the motors.
 - **Safety:** auto-stop after a set idle time, a warning after long full-power running, E-Stop on the gamepad (Back/Start), and motors stop when the app leaves the screen.
 - **Gamepad buttons:** map A/B/X/Y, bumpers, sticks' clicks and the D-pad to hold a channel forward or reverse, run a sequence, or stop everything.

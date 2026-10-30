@@ -87,7 +87,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .model{margin-bottom:16px;display:grid;gap:12px}
 .model-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .model-row label{display:grid;gap:4px;flex:1 1 170px;min-width:0;font-size:12px;color:var(--muted)}
-.model-row .seg{margin:0;flex:1 1 260px}
+.model-row .seg{margin:0;flex:1 1 260px;min-width:0;flex-wrap:wrap}
+.model-row .seg .btn{flex:1 1 auto}
 
 .grp{margin-top:6px;padding-top:10px;border-top:2px solid var(--fg);font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .ch{display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--line)}
@@ -1588,6 +1589,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function paintRecStatus(now){
     var t='';
     if(S.rec) t='Recording '+fmtTime(now-S.rec.start)+' / '+fmtTime(MAX_REC_MS);
+    else if(S.play&&now<S.play.start) t='Starts in '+Math.ceil((S.play.start-now)/1000)+' s'
     else if(S.play) t='Playing '+fmtTime(Math.min(now-S.play.start,S.play.rec.dur))+' / '+fmtTime(S.play.rec.dur)+((S.play.loop===undefined?S.loop:S.play.loop)?' (loop)':'');
     else t=recNote||'Ready';
     if(recStat.textContent!==t) recStat.textContent=t;
@@ -2794,6 +2796,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     [/^Testing channel (\S+) \((.*)\) forward at (\d+)%$/,function(m){return 'Menguji saluran '+m[1]+' ('+m[2]+') ke depan pada '+m[3]+'%'}],
     [/^Channel (\S+): did it move the right way\?$/,function(m){return 'Saluran '+m[1]+': adakah ia bergerak ke arah yang betul?'}],
     [/^(\d+) frames$/,function(m){return m[1]+' bingkai'}],
+    [/^Starts in (\d+) s$/,function(m){return 'Bermula dalam '+m[1]+' s'}],
     [/^Recording (\d+:\d\d \/ \d+:\d\d)$/,function(m){return 'Merakam '+m[1]}],
     [/^Playing (\d+:\d\d \/ \d+:\d\d)( \(loop\))?$/,function(m){return 'Memainkan '+m[1]+(m[2]?' (ulang)':'')}],
     [/^(\d+) steps? · ([\d.]+) s( \(too long: only the first 90 s run\))?$/,function(m){return m[1]+' langkah · '+m[2]+' s'+(m[3]?' (terlalu panjang: hanya 90 s pertama dijalankan)':'')}],
