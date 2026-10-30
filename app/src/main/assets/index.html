@@ -2,7 +2,7 @@
 <html lang="en" data-skin="studs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>MK6 Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -722,6 +722,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root .model-row .seg[aria-label="Layout"] .btn{width:auto}
 :root #profWiz{flex:1 1 100%}
 :root #profNew,:root #profDel{flex:1 1 calc(50% - 6px)}
+
+/* ---- Full-screen: draw under the camera cutout, keep the header clear of it ---- */
+:root .bar{top:0;padding-top:env(safe-area-inset-top,0px)}
 </style>
 </head>
 <body>
