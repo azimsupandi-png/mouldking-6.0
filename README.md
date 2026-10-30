@@ -37,7 +37,7 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 - **Power profiles:** Kid, Normal and Full presets (power limit and smoothing) switch with one tap; save the current limit into any of them.
 - **Stick range:** cap how much output a stick can give (25 to 100%).
 - **Hub names:** give each hub a short name, shown in the channel list.
-- **Test hub:** moves every active channel briefly at low power so you can see which motor is which.
+- **Test hub and Calibration:** move each active channel at the **Test power** set in the Calibration card (default 60%, per model). It ignores Limit and Speed, so raise it until the motor just moves.
 - **Per channel:** maximum power, start power, fine control (expo curve with preview) and slider or hold-to-move control.
 - **Record & replay:** record up to 90 seconds of control movements, then replay once or in a loop. Manual input is locked during replay and E-Stop cancels it.
 - **Backup:** export all models to a file and import them again (in the app, through the system file picker).

@@ -914,7 +914,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
       <section class="card" id="calCard">
         <h2>Calibration</h2>
-        <p class="note" style="margin-top:0">Runs each channel forward at low power for 1.5 seconds. Lift the model off the ground first. Say whether it moved the right way and the app fixes the direction for you.</p>
+        <p class="note" style="margin-top:0">Runs each channel forward at the test power for 1.5 seconds. Lift the model off the ground first. Say whether it moved the right way and the app fixes the direction for you.</p>
+        <div class="set-row"><label for="calPwr"><span class="set-top"><span>Test power</span><output id="calPwrOut">60%</output></span></label>
+          <input id="calPwr" type="range" min="10" max="100" step="5" value="60"></div>
+        <p class="note">Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.</p>
         <p class="rec-stat" id="calStat">Connect the hub first, then press Start.</p>
         <div class="rec-row">
           <button class="btn" id="calStart" type="button">Start</button>
@@ -1043,7 +1046,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider',blink:'off',bright:100});
-    return {ch:ch,limit:100,ramp:60,zone:100,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -1174,6 +1177,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.limit=num(c.limit,10,100,100);
     d.ramp=num(c.ramp,0,100,60);
     d.zone=pickOf(c.zone,[25,50,75,100],100);
+    d.testPwr=Math.round(num(c.testPwr,10,100,60));
     d.hubNames=[0,1,2].map(function(q){var v=Array.isArray(c.hubNames)?c.hubNames[q]:'';return typeof v==='string'?v.replace(/[\u0000-\u001f<>]/g,'').slice(0,12):''});
     d.spring=true;
     var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
@@ -1292,7 +1296,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function goalOf(i){
     if(C.ch[i].kind==='light'){var lt=rt.t[i];return lt>0?Math.round(ledOut(lt*blinkF(C.ch[i].blink,performance.now()))):0}
     var t=rt.t[i], m=powerFor(Math.abs(t),C.ch[i]);
-    var tb=!!S.turbo[i];
+    var tb=!!S.turbo[i]||!!cal||testOn();
     var f=(tb?1:(SPD[C.speed]||1))*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
     return (t<0?-m:m)*(tb?100:C.limit)/100*f;
   }
@@ -1625,6 +1629,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       var hn=$('#hubN'+s);hn.disabled=C.hubs[s]<0;hn.value=C.hubs[s]>=0?(C.hubNames[C.hubs[s]]||''):'';
     }
     $('#zoneSel').value=String(C.zone||100);
+    $('#calPwr').value=C.testPwr;$('#calPwrOut').textContent=C.testPwr+'%';
     syncLimSeg();
   }
   function syncLimSeg(){
@@ -1644,6 +1649,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       store.prefs.lim[i]={l:C.limit,r:C.ramp};save();syncLimSeg();toast('Profile saved.');
     });
   });
+  $('#calPwr').addEventListener('input',function(){C.testPwr=+$('#calPwr').value;$('#calPwrOut').textContent=C.testPwr+'%'});
+  $('#calPwr').addEventListener('change',save);
   $('#zoneSel').addEventListener('change',function(){C.zone=pickOf($('#zoneSel').value,[25,50,75,100],100);save()});
   [0,1,2].forEach(function(s){
     var inp=$('#hubN'+s);
@@ -1782,7 +1789,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     activeIdx().forEach(function(i){
       var d;
       if(C.ch[i].kind==='light'){steps.push({ch:i,pwr:100,dur:0.8});d=0.8}
-      else{steps.push({ch:i,pwr:25,dur:0.7});steps.push({ch:i,pwr:-25,dur:0.7});d=1.4}
+      else{steps.push({ch:i,pwr:C.testPwr,dur:0.7});steps.push({ch:i,pwr:-C.testPwr,dur:0.7});d=1.4}
       steps.push({ch:-1,pwr:0,dur:0.3});d+=0.3;
       testPlan.push({i:i,d:d*1000});
     });
@@ -2362,7 +2369,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
 
   // ---- Calibration, player mode, settings lock, phone battery ----
-  var CAL_PWR=25, CAL_MS=1500, cal=null;
+  var CAL_MS=1500, cal=null;
   var calStatEl=$('#calStat');
   function calShow(ids){['calStart','calOk','calRev','calAgain','calCancel'].forEach(function(id){$('#'+id).hidden=ids.indexOf(id)<0})}
   function calIdle(msg){
@@ -2376,8 +2383,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var i=cal.list[cal.n];
     if(!S.connected||S.estop||S.play||S.rec){calIdle('Stopped. Connect the hub, release E-Stop and try again.');return}
     cal.phase='run';calShow(['calCancel']);
-    calStatEl.textContent='Testing channel '+tagOf(i)+' ('+C.ch[i].name+') forward at '+CAL_PWR+'%';
-    noteInput();setT(i,CAL_PWR,false);
+    calStatEl.textContent='Testing channel '+tagOf(i)+' ('+C.ch[i].name+') forward at '+C.testPwr+'%';
+    noteInput();setT(i,C.testPwr,false);
     cal.timer=setTimeout(function(){
       if(!cal) return;
       setT(i,0,false);cal.phase='ask';
@@ -3087,7 +3094,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'New model':'Model baharu','Delete':'Padam','Confirm delete':'Sahkan padam','Confirm':'Sahkan','Model colour':'Warna model','Theme':'Tema','Layout':'Susun atur',
     'Model list is full.':'Senarai model penuh.','New model created from the current settings':'Model baharu dicipta daripada tetapan semasa',
     'Quick actions':'Tindakan pantas',
-    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula',
+    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
     'Fine control (expo)':'Kawalan halus (expo)','Slider':'Gelangsar','Hold':'Tahan','Control type':'Jenis kawalan','Response curve':'Lengkung tindak balas',
     'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
     'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
@@ -3111,7 +3118,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'D-pad up':'D-pad atas','D-pad down':'D-pad bawah','D-pad left':'D-pad kiri','D-pad right':'D-pad kanan',
     'Limits & hubs':'Had & hab','Power limit (all channels)':'Had kuasa (semua saluran)','Acceleration smoothing':'Pelicinan pecutan',
     'Sliders return to 0 when released':'Gelangsar kembali ke 0 bila dilepas','Return to 0 when released':'Kembali ke 0 bila dilepas','Lock':'Kunci','Locked':'Dikunci','Calibration':'Kalibrasi','Start':'Mula','Correct':'Betul','Reversed':'Terbalik','Repeat':'Ulang','Cancel':'Batal','Player mode':'Mod pemain','Lock settings':'Kunci tetapan','Hold to unlock':'Tahan untuk buka kunci','Hold to exit':'Tahan untuk keluar','Release':'Lepas','Cancelled.':'Dibatalkan.',
-    'Runs each channel forward at low power for 1.5 seconds. Lift the model off the ground first. Say whether it moved the right way and the app fixes the direction for you.':'Setiap saluran dijalankan ke depan pada kuasa rendah selama 1.5 saat. Angkat model dari tanah dahulu. Beritahu sama ada ia bergerak ke arah yang betul dan app akan betulkan arah untuk anda.',
+    'Runs each channel forward at the test power for 1.5 seconds. Lift the model off the ground first. Say whether it moved the right way and the app fixes the direction for you.':'Setiap saluran dijalankan ke depan pada kuasa rendah selama 1.5 saat. Angkat model dari tanah dahulu. Beritahu sama ada ia bergerak ke arah yang betul dan app akan betulkan arah untuk anda.',
     'Connect the hub first, then press Start.':'Sambung hab dahulu, kemudian tekan Mula.',
     'Connect the hub first (top right), then press Start.':'Sambung hab dahulu (kanan atas), kemudian tekan Mula.',
     'Release E-Stop and stop any sequence or recording first.':'Lepaskan E-Stop dan hentikan sebarang jujukan atau rakaman dahulu.',
