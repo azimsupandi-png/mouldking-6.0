@@ -499,7 +499,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .pl-stop{min-height:88px;border:0;border-radius:10px;background:var(--danger);color:#fff;font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .pl-exit.hold{background:var(--acc);color:#fff}
 :root[data-lock] #spdSeg,:root[data-lock] #recCard,:root[data-lock] #kidRow,:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
-:root[data-lock] #profWiz,:root[data-lock] #wizPanel{display:none}
+:root[data-lock] #profWiz,:root[data-lock] #profTest,:root[data-lock] #testNote,:root[data-lock] #wizPanel{display:none}
 :root[data-lock] #profName,:root[data-lock] .ch .name{pointer-events:none}
 
 /* ---- Header: hub power orb and yellow E-Stop button ---- */
@@ -709,18 +709,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root #spdSeg,:root .model-row{row-gap:14px}
 :root #spdSeg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-bottom:6px}
 :root .model-row .seg[aria-label="Layout"]{gap:12px 10px;padding-bottom:6px}
-#spdSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profNew,:root #profDel,:root .prof-wrap #profRen{--mOff:linear-gradient(#444c5c,#2a303b 50%,#1b2028);--mOn:radial-gradient(ellipse 70% 55% at 50% 8%,rgba(255,255,255,.7),rgba(255,255,255,0) 70%),linear-gradient(#ffdc55,#f4b800 48%,#c68700);height:46px;min-height:0;padding:0 8px;box-sizing:border-box;border-radius:23px;border:2px solid #0d1015;background:var(--mOff);color:#e6e9ee;font-weight:800;font-size:14px;letter-spacing:.03em;text-shadow:0 1px 0 rgba(0,0,0,.65);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55);transition:transform .08s,box-shadow .08s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;min-width:0;white-space:nowrap}
-#spdSeg .btn[aria-pressed="true"],:root .model-row .seg[aria-label="Layout"] .btn[aria-pressed="true"],:root #profWiz[aria-pressed="true"],:root #profNew[aria-pressed="true"],:root #profDel[aria-pressed="true"],:root .prof-wrap #profRen[aria-pressed="true"]{border-color:#6b4600;background:var(--mOn);color:#2a1c00;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
-#spdSeg .btn:active,:root .model-row .seg[aria-label="Layout"] .btn:active,:root #profWiz:active,:root #profNew:active,:root #profDel:active,:root .prof-wrap #profRen:active{transform:translateY(2px);box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55)}
-#spdSeg .btn[aria-pressed="true"]:active,:root .model-row .seg[aria-label="Layout"] .btn[aria-pressed="true"]:active,:root #profWiz[aria-pressed="true"]:active,:root #profNew[aria-pressed="true"]:active,:root #profDel[aria-pressed="true"]:active,:root .prof-wrap #profRen[aria-pressed="true"]:active{box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+#spdSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profTest,:root #profNew,:root #profDel,:root .prof-wrap #profRen{--mOff:linear-gradient(#444c5c,#2a303b 50%,#1b2028);--mOn:radial-gradient(ellipse 70% 55% at 50% 8%,rgba(255,255,255,.7),rgba(255,255,255,0) 70%),linear-gradient(#ffdc55,#f4b800 48%,#c68700);height:46px;min-height:0;padding:0 8px;box-sizing:border-box;border-radius:23px;border:2px solid #0d1015;background:var(--mOff);color:#e6e9ee;font-weight:800;font-size:14px;letter-spacing:.03em;text-shadow:0 1px 0 rgba(0,0,0,.65);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55);transition:transform .08s,box-shadow .08s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;min-width:0;white-space:nowrap}
+#spdSeg .btn[aria-pressed="true"],:root .model-row .seg[aria-label="Layout"] .btn[aria-pressed="true"],:root #profWiz[aria-pressed="true"],:root #profTest[aria-pressed="true"],:root #profNew[aria-pressed="true"],:root #profDel[aria-pressed="true"],:root .prof-wrap #profRen[aria-pressed="true"]{border-color:#6b4600;background:var(--mOn);color:#2a1c00;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+#spdSeg .btn:active,:root .model-row .seg[aria-label="Layout"] .btn:active,:root #profWiz:active,:root #profTest:active,:root #profNew:active,:root #profDel:active,:root .prof-wrap #profRen:active{transform:translateY(2px);box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55)}
+#spdSeg .btn[aria-pressed="true"]:active,:root .model-row .seg[aria-label="Layout"] .btn[aria-pressed="true"]:active,:root #profWiz[aria-pressed="true"]:active,:root #profTest[aria-pressed="true"]:active,:root #profNew[aria-pressed="true"]:active,:root #profDel[aria-pressed="true"]:active,:root .prof-wrap #profRen[aria-pressed="true"]:active{box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
 :root .model-row .seg[aria-label="Layout"] .btn{flex:none}
-:root #profWiz,:root #profNew,:root #profDel{flex:1 1 0;min-width:0}
+:root #profWiz,:root #profTest,:root #profNew,:root #profDel{flex:1 1 0;min-width:0}
 :root .prof-wrap #profRen{flex:none;width:46px;min-width:46px;padding:0;font-size:18px}
 :root #profDel{color:#ff9a9a}
 
 :root .model-row .seg[aria-label="Layout"]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));flex:1 1 100%;gap:14px 10px}
 :root .model-row .seg[aria-label="Layout"] .btn{width:auto}
-:root #profWiz{flex:1 1 100%}
+:root #profWiz,:root #profTest{flex:1 1 calc(50% - 6px)}
 :root #profNew,:root #profDel{flex:1 1 calc(50% - 6px)}
 
 /* ---- Full-screen: header starts at the very top (no extra gap) ---- */
@@ -755,7 +755,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root .bdw .tgd{height:40px}
   :root .bdw .tgl .led{width:18px;height:18px}
   :root[data-skin="studs"] .bdw .qbtn.lbtn{height:38px;min-height:38px}
-  :root .seg[aria-label="Stick mode"] .btn,:root #spdSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profNew,:root #profDel{height:38px;font-size:13px}
+  :root .seg[aria-label="Stick mode"] .btn,:root #spdSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profTest,:root #profNew,:root #profDel{height:38px;font-size:13px}
   :root .prof-wrap #profRen{width:38px;min-width:38px;height:38px}
   :root .model-row label select,:root .model-row label input.txt,:root .model-row label input[type=text]{height:38px}
   :root .qbtn{min-height:44px}
@@ -786,6 +786,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root .cols .stack{display:contents}
   :root .cols.joy #joyCard,:root .cols.dual #joyCard{order:-1}
 }
+
+.testnote{margin:8px 0 0;font-size:12px;color:var(--acc);font-weight:600}
 </style>
 </head>
 <body>
@@ -849,9 +851,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         <button class="btn" id="lBoard" type="button" aria-pressed="false">Board</button>
       </div>
       <button class="btn" id="profWiz" type="button">Setup wizard</button>
+      <button class="btn" id="profTest" type="button" aria-pressed="false">Test hub</button>
       <button class="btn" id="profNew" type="button">New model</button>
       <button class="btn" id="profDel" type="button">Delete</button>
     </div>
+    <p class="testnote" id="testNote" role="status" hidden></p>
     <div class="wiz" id="wizPanel" hidden>
       <label>Vehicle type
         <select id="wizType">
@@ -1795,6 +1799,47 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function wizSync(){var w=WIZ[wizType.value]||WIZ.tank;$('#wizNote').textContent=w.note}
   wizType.addEventListener('change',wizSync);
   $('#profWiz').addEventListener('click',function(){wizPanel.hidden=!wizPanel.hidden;if(!wizPanel.hidden) wizSync()});
+  // ---- Test hub: move every active channel briefly at low power ----
+  var TEST_ID='__test', testBtn=$('#profTest'), testNote=$('#testNote'), testPlan=[];
+  function testOn(){return !!(S.play&&S.play.seq===TEST_ID)}
+  function buildTest(){
+    var steps=[];testPlan=[];
+    activeIdx().forEach(function(i){
+      var d;
+      if(C.ch[i].kind==='light'){steps.push({ch:i,pwr:100,dur:0.8});d=0.8}
+      else{steps.push({ch:i,pwr:25,dur:0.7});steps.push({ch:i,pwr:-25,dur:0.7});d=1.4}
+      steps.push({ch:-1,pwr:0,dur:0.3});d+=0.3;
+      testPlan.push({i:i,d:d*1000});
+    });
+    return {id:TEST_ID,name:'Test',speed:1,steps:steps};
+  }
+  function testPaint(){
+    if(!testBtn) return;
+    var on=testOn();
+    testBtn.textContent=on?'Stop test':'Test hub';
+    testBtn.setAttribute('aria-pressed',String(on));
+    testBtn.disabled=!on&&(S.estop||!!S.play||!!S.rec);
+    if(on){
+      var el=Math.max(0,performance.now()-S.play.start), n=0, acc=0;
+      for(;n<testPlan.length-1;n++){acc+=testPlan[n].d;if(el<acc) break}
+      testNote.textContent='Testing '+tagOf(testPlan[n].i)+' ('+(n+1)+'/'+testPlan.length+'). Keep the model clear.';
+      testNote.hidden=false;
+    }else if(!testNote.hidden){testNote.hidden=true;testNote.textContent=''}
+  }
+  if(testBtn){
+    testBtn.addEventListener('click',function(){
+      if(testOn()){stopPlay(true);testPaint();return}
+      if(S.estop){toast('Release the E-Stop first.');return}
+      if(NB&&!S.connected){toast('Connect the hub first.');return}
+      if(S.play||S.rec){toast('Stop the current playback first.');return}
+      var sq=buildTest();
+      if(!sq.steps.length) return;
+      noteInput();
+      startPlay(compileSeq(sq),{seq:TEST_ID,loop:false,reps:1});
+      testPaint();
+    });
+    setInterval(testPaint,150);
+  }
   $('#wizCancel').addEventListener('click',function(){wizPanel.hidden=true});
   $('#wizGo').addEventListener('click',function(){
     if(store.profiles.length>=MAX_MODELS){live.textContent='Model list is full.';return}
@@ -3054,7 +3099,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Channel A drives and channel B steers. Use the Joystick layout: up and down drives, left and right steers.':'Saluran A memandu dan saluran B mengemudi. Guna susun atur Joystick: atas dan bawah memandu, kiri dan kanan mengemudi.',
     'Channels A and B drive the tracks, C, D and E move the arm, bucket and swing. Uses the Dual stick layout.':'Saluran A dan B menggerakkan track, C, D dan E menggerakkan lengan, baldi dan putaran. Guna susun atur Dua stick.',
     'Model created. Rename the channels or change the layout any time.':'Model dicipta. Anda boleh namakan semula saluran atau tukar susun atur bila-bila masa.',
-'Light settings':'Tetapan lampu','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
+'Light settings':'Tetapan lampu','Test hub':'Uji hab','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
     'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
     'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
     'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',
@@ -3133,6 +3178,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     [/^Channel (\S+): did it move the right way\?$/,function(m){return 'Saluran '+m[1]+': adakah ia bergerak ke arah yang betul?'}],
     [/^(\d+) frames$/,function(m){return m[1]+' bingkai'}],
     [/^Starts in (\d+) s$/,function(m){return 'Bermula dalam '+m[1]+' s'}],
+    [/^Testing (\S+) \((\d+)\/(\d+)\)\. Keep the model clear\.$/,function(m){return 'Menguji '+m[1]+' ('+m[2]+'/'+m[3]+'). Pastikan model di ruang lapang.'}],
     [/^Recording (\d+:\d\d \/ \d+:\d\d)$/,function(m){return 'Merakam '+m[1]}],
     [/^Playing (\d+:\d\d \/ \d+:\d\d)( \(loop\))?$/,function(m){return 'Memainkan '+m[1]+(m[2]?' (ulang)':'')}],
     [/^(\d+) steps? · ([\d.]+) s( \(too long: only the first 90 s run\))?$/,function(m){return m[1]+' langkah · '+m[2]+' s'+(m[3]?' (terlalu panjang: hanya 90 s pertama dijalankan)':'')}],
