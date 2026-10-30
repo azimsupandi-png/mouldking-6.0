@@ -428,7 +428,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .pl-note{color:var(--muted);font-size:14px}
 .pl-stop{min-height:88px;border:0;border-radius:10px;background:var(--danger);color:#fff;font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .pl-exit.hold{background:var(--acc);color:#fff}
-:root[data-lock] #spdSeg,:root[data-lock] #recCard,:root[data-lock] #kidRow,:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
+:root[data-lock] #spdSeg,:root[data-lock] #spdLbl,:root[data-lock] #limLbl,:root[data-lock] #limSeg,:root[data-lock] #recCard,:root[data-lock] #kidRow,:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
 :root[data-lock] #profWiz,:root[data-lock] #profTest,:root[data-lock] #testNote,:root[data-lock] #wizPanel{display:none}
 :root[data-lock] #profName,:root[data-lock] .ch .name{pointer-events:none}
 
@@ -615,13 +615,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdw .tgd.on[data-d="1"] i,.bdw .tgd.on[data-d="-1"] i{color:#12a02e}
 
 /* ---- Model card buttons: 3D material, consistent sizes ---- */
-:root #spdSeg,:root .model-row{row-gap:14px}
-:root #spdSeg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-bottom:6px}
+:root #spdSeg,:root #limSeg,:root .model-row{row-gap:14px}
+:root #spdSeg,:root #limSeg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-bottom:6px}
 :root .model-row .seg[aria-label="Layout"]{gap:12px 10px;padding-bottom:6px}
-#spdSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profTest,:root #profNew,:root #profDel,:root .prof-wrap #profRen{--mOff:linear-gradient(#444c5c,#2a303b 50%,#1b2028);--mOn:radial-gradient(ellipse 70% 55% at 50% 8%,rgba(255,255,255,.7),rgba(255,255,255,0) 70%),linear-gradient(#ffdc55,#f4b800 48%,#c68700);height:46px;min-height:0;padding:0 8px;box-sizing:border-box;border-radius:23px;border:2px solid #0d1015;background:var(--mOff);color:#e6e9ee;font-weight:800;font-size:14px;letter-spacing:.03em;text-shadow:0 1px 0 rgba(0,0,0,.65);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55);transition:transform .08s,box-shadow .08s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;min-width:0;white-space:nowrap}
-#spdSeg .btn[aria-pressed="true"],:root .model-row .seg[aria-label="Layout"] .btn[aria-pressed="true"],:root #profWiz[aria-pressed="true"],:root #profTest[aria-pressed="true"],:root #profNew[aria-pressed="true"],:root #profDel[aria-pressed="true"],:root .prof-wrap #profRen[aria-pressed="true"]{border-color:#6b4600;background:var(--mOn);color:#2a1c00;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
-#spdSeg .btn:active,:root .model-row .seg[aria-label="Layout"] .btn:active,:root #profWiz:active,:root #profTest:active,:root #profNew:active,:root #profDel:active,:root .prof-wrap #profRen:active{transform:translateY(2px);box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55)}
-#spdSeg .btn[aria-pressed="true"]:active,:root .model-row .seg[aria-label="Layout"] .btn[aria-pressed="true"]:active,:root #profWiz[aria-pressed="true"]:active,:root #profTest[aria-pressed="true"]:active,:root #profNew[aria-pressed="true"]:active,:root #profDel[aria-pressed="true"]:active,:root .prof-wrap #profRen[aria-pressed="true"]:active{box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+#spdSeg .btn,#limSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profTest,:root #profNew,:root #profDel,:root .prof-wrap #profRen{--mOff:linear-gradient(#444c5c,#2a303b 50%,#1b2028);--mOn:radial-gradient(ellipse 70% 55% at 50% 8%,rgba(255,255,255,.7),rgba(255,255,255,0) 70%),linear-gradient(#ffdc55,#f4b800 48%,#c68700);height:46px;min-height:0;padding:0 8px;box-sizing:border-box;border-radius:23px;border:2px solid #0d1015;background:var(--mOff);color:#e6e9ee;font-weight:800;font-size:14px;letter-spacing:.03em;text-shadow:0 1px 0 rgba(0,0,0,.65);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55);transition:transform .08s,box-shadow .08s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;min-width:0;white-space:nowrap}
+#spdSeg .btn[aria-pressed="true"],#limSeg .btn[aria-pressed="true"],:root .model-row .seg[aria-label="Layout"] .btn[aria-pressed="true"],:root #profWiz[aria-pressed="true"],:root #profTest[aria-pressed="true"],:root #profNew[aria-pressed="true"],:root #profDel[aria-pressed="true"],:root .prof-wrap #profRen[aria-pressed="true"]{border-color:#6b4600;background:var(--mOn);color:#2a1c00;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+#spdSeg .btn:active,#limSeg .btn:active,:root .model-row .seg[aria-label="Layout"] .btn:active,:root #profWiz:active,:root #profTest:active,:root #profNew:active,:root #profDel:active,:root .prof-wrap #profRen:active{transform:translateY(2px);box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55)}
+#spdSeg .btn[aria-pressed="true"]:active,#limSeg .btn[aria-pressed="true"]:active,:root .model-row .seg[aria-label="Layout"] .btn[aria-pressed="true"]:active,:root #profWiz[aria-pressed="true"]:active,:root #profTest[aria-pressed="true"]:active,:root #profNew[aria-pressed="true"]:active,:root #profDel[aria-pressed="true"]:active,:root .prof-wrap #profRen[aria-pressed="true"]:active{box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
 :root .model-row .seg[aria-label="Layout"] .btn{flex:none}
 :root .prof-wrap #profRen{flex:none;width:46px;min-width:46px;padding:0;font-size:18px}
 :root #profDel{color:#ff9a9a}
@@ -647,7 +647,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 /* ---- Model row: labels and fields line up ---- */
 :root .model-row:first-of-type{align-items:flex-start}
 :root .model-row label select,:root .model-row label input.txt,:root .model-row label input[type=text]{height:46px;box-sizing:border-box}
-:root #spdSeg{padding-bottom:2px}
+:root #spdSeg,:root #limSeg{padding-bottom:2px}
 
 /* ---- Landscape: scale controls to the short screen height ---- */
 @media (orientation:landscape) and (max-height:520px){
@@ -660,7 +660,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root .bdw .tgd{height:40px}
   :root .bdw .tgl .led{width:18px;height:18px}
   :root[data-skin="studs"] .bdw .qbtn.lbtn{height:38px;min-height:38px}
-  :root .seg[aria-label="Stick mode"] .btn,:root #spdSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profTest,:root #profNew,:root #profDel{height:38px;font-size:13px}
+  :root .seg[aria-label="Stick mode"] .btn,:root #spdSeg .btn,:root #limSeg .btn,:root .model-row .seg[aria-label="Layout"] .btn,:root #profWiz,:root #profTest,:root #profNew,:root #profDel{height:38px;font-size:13px}
   :root .prof-wrap #profRen{width:38px;min-width:38px;height:38px}
   :root .model-row label select,:root .model-row label input.txt,:root .model-row label input[type=text]{height:38px}
   :root .bdw .hold{min-height:48px}
@@ -685,6 +685,21 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 }
 
 .testnote{margin:8px 0 0;font-size:12px;color:var(--acc);font-weight:600}
+
+/* ---- Power profiles, Turbo, hub names ---- */
+:root #limSeg .btn{flex-direction:column;gap:0;line-height:1.1;padding:0 6px}
+:root #limSeg .btn small{font-size:11px;font-weight:700;opacity:.8;letter-spacing:.02em}
+:root #limSeg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-bottom:6px;margin-top:4px}
+:root #limSave{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hubnames{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hubnames input{width:100%;min-width:0;box-sizing:border-box}
+.bdw .qbtn.turbo{--mOff:linear-gradient(#444c5c,#2a303b 50%,#1b2028);--mOn:radial-gradient(ellipse 70% 55% at 50% 8%,rgba(255,255,255,.7),rgba(255,255,255,0) 70%),linear-gradient(#ffdc55,#f4b800 48%,#c68700);position:relative;width:100%;height:46px;min-height:46px;border-radius:23px;border:2px solid #0d1015;background:var(--mOff);color:#ffd84a;font-weight:800;font-size:15px;letter-spacing:.12em;text-shadow:0 1px 0 rgba(0,0,0,.65);box-shadow:0 6px 9px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .08s,box-shadow .08s}
+.bdw .qbtn.turbo::before{content:"";width:18px;height:22px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 22'%3E%3Cpath d='M11 1L2 13h6l-2 8 10-13h-6z' fill='%23ffd84a' stroke='%23111' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.bdw .qbtn.turbo.on{border-color:#6b4600;background:var(--mOn);color:#2a1c00;text-shadow:0 1px 0 rgba(255,255,255,.4);transform:translateY(3px);box-shadow:0 3px 5px rgba(0,0,0,.7),0 0 16px 4px rgba(255,200,40,.7),inset 0 -5px 7px rgba(90,50,0,.55),inset 0 2px 3px rgba(255,255,255,.6)}
+.bdw .qbtn.turbo.on::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 22'%3E%3Cpath d='M11 1L2 13h6l-2 8 10-13h-6z' fill='%23d41414' stroke='%23111' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E")}
+@media (orientation:landscape) and (max-height:520px){:root #limSeg .btn{height:38px}.bdw .qbtn.turbo{height:38px;min-height:38px}}
+
+.seglbl{margin:10px 0 -4px;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -735,10 +750,17 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     </div>
     <div class="swatches" id="swatches" role="group" aria-label="Model colour"><span>Colour</span></div>
     <div class="seg" role="group" aria-label="Theme" hidden><button class="btn" id="thStd" type="button" aria-pressed="true">Classic</button><button class="btn" id="thBuild" type="button" aria-pressed="false">Construction</button><button class="btn" id="thStuds" type="button" aria-pressed="false">Studs</button></div>
+    <div class="seglbl" id="spdLbl">Speed</div>
     <div class="seg" id="spdSeg" role="group" aria-label="Speed">
       <button class="btn" id="spdSlow" type="button" aria-pressed="false">Slow</button>
       <button class="btn" id="spdNorm" type="button" aria-pressed="false">Normal</button>
       <button class="btn" id="spdFast" type="button" aria-pressed="true">Fast</button>
+    </div>
+    <div class="seglbl" id="limLbl">Power profile</div>
+    <div class="seg" id="limSeg" role="group" aria-label="Power profile">
+      <button class="btn" id="limP0" type="button" aria-pressed="false"><span>Kid</span><small id="limV0"></small></button>
+      <button class="btn" id="limP1" type="button" aria-pressed="false"><span>Normal</span><small id="limV1"></small></button>
+      <button class="btn" id="limP2" type="button" aria-pressed="false"><span>Full</span><small id="limV2"></small></button>
     </div>
     <div class="model-row">
       <div class="seg" role="group" aria-label="Layout">
@@ -794,6 +816,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <button class="btn" id="bdTM" type="button" aria-pressed="false">Mix</button>
           <button class="btn" id="bdTL" type="button" aria-pressed="false">Light</button>
           <button class="btn" id="bdTT" type="button" aria-pressed="false">Toggle</button>
+          <button class="btn" id="bdTB" type="button" aria-pressed="false">Turbo</button>
           <button class="btn" id="bdTQ" type="button" aria-pressed="false">Sequence</button>
         </div>
         <div class="bd-fields">
@@ -928,6 +951,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
             <input id="limit" type="range" min="10" max="100" step="5" value="100"></div>
           <div class="set-row"><label for="ramp"><span class="set-top"><span>Acceleration smoothing</span><output id="rampOut">60</output></span></label>
             <input id="ramp" type="range" min="0" max="100" step="5" value="60"></div>
+          <div class="set-row"><span class="set-top"><span>Save current limit as profile</span></span>
+            <div class="seg" id="limSave" role="group" aria-label="Save profile"><button class="btn" id="limS0" type="button" data-i="0">Kid</button><button class="btn" id="limS1" type="button" data-i="1">Normal</button><button class="btn" id="limS2" type="button" data-i="2">Full</button></div></div>
+          <label>Stick range (maximum output)<select id="zoneSel"><option value="100">100%</option><option value="75">75%</option><option value="50">50%</option><option value="25">25%</option></select></label>
           <label>Auto-stop when idle<select id="sfIdle"><option value="0">Off</option><option value="10">10 s</option><option value="30">30 s</option><option value="60">60 s</option><option value="120">2 min</option></select></label>
           <label>Stop a channel after running this long<select id="sfRun"><option value="0">Off</option><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
           <label>Warn after long full power<select id="sfWarn"><option value="0">Off</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
@@ -936,6 +962,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
               <label>Hub 1<select id="hub0"><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
               <label>Hub 2<select id="hub1"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
               <label>Hub 3<select id="hub2"><option value="-1">Off</option><option value="0">M1</option><option value="1">M2</option><option value="2">M3</option></select></label>
+            </div>
+          </div>
+          <div class="set-row"><span class="set-top"><span>Hub names (optional)</span></span>
+            <div class="hubrow hubnames">
+              <input class="txt" id="hubN0" maxlength="12" placeholder="Hub 1" aria-label="Hub 1 name" autocomplete="off">
+              <input class="txt" id="hubN1" maxlength="12" placeholder="Hub 2" aria-label="Hub 2 name" autocomplete="off">
+              <input class="txt" id="hubN2" maxlength="12" placeholder="Hub 3" aria-label="Hub 3 name" autocomplete="off">
             </div>
           </div>
         </div>
@@ -989,7 +1022,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var MAX_REC_MS=90000, MAX_PTS=1800, MAX_RECS=10, MAX_MODELS=30;
   var NB=window.MK6Bridge||null;
   if(typeof document.addEventListener==='function') document.addEventListener('contextmenu',function(e){var t=e.target&&e.target.tagName;if(t==='INPUT'&&e.target.type!=='range'&&e.target.type!=='checkbox')return;if(t==='TEXTAREA')return;e.preventDefault()});
-  var S={connected:!NB,estop:false,rec:null,play:null,loop:false};
+  var S={connected:!NB,estop:false,rec:null,play:null,loop:false,turbo:[]};
   var $=function(s,r){return (r||document).querySelector(s)};
   var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
   var fmt=function(n){return n>0?'+'+n:String(n)};
@@ -1006,7 +1039,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider',blink:'off',bright:100});
-    return {ch:ch,limit:100,ramp:60,spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,zone:100,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -1106,6 +1139,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           if(mc>=0&&mc<NMAX&&mr>=-100&&mr<=100&&mr!==0&&!mt.some(function(z){return z.c===mc})) mt.push({c:mc,r:mr});
         });
         if(mt.length) out.push({k:'m',t:mt,c:mt[0].c,w:w,hold:x.hold===true,v:x.v===true});
+      }else if(x.k==='b'){
+        var bcn=Math.round(+x.c);
+        if(bcn>=0&&bcn<NMAX) out.push({k:'b',c:bcn,w:w});
       }else if(x.k==='t'){
         var tcn=Math.round(+x.c), tp=Math.round(+x.p);
         if(tcn>=0&&tcn<NMAX) out.push({k:'t',c:tcn,w:x.y==='dir'?2:w,y:['led','latch','dir'].indexOf(x.y)>=0?x.y:'led',p:[25,50,75,100].indexOf(tp)>=0?tp:100});
@@ -1133,6 +1169,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     d.limit=num(c.limit,10,100,100);
     d.ramp=num(c.ramp,0,100,60);
+    d.zone=pickOf(c.zone,[25,50,75,100],100);
+    d.hubNames=[0,1,2].map(function(q){var v=Array.isArray(c.hubNames)?c.hubNames[q]:'';return typeof v==='string'?v.replace(/[\u0000-\u001f<>]/g,'').slice(0,12):''});
     d.spring=true;
     var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
     var gh=c.stickHold===true;
@@ -1177,7 +1215,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       {id:uid(),name:'Excavator (example)',cfg:exc}
     ];
   }
-  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),autoBackup:p.autoBackup!==false,full:p.full!==false,lastBackup:Math.max(0,+p.lastBackup||0)}}
+  function cleanLim(a){var D=[[40,80],[70,60],[100,40]];return D.map(function(d,i){var x=(Array.isArray(a)&&a[i]&&typeof a[i]==='object')?a[i]:{};return {l:Math.round(num(x.l,10,100,d[0])),r:Math.round(num(x.r,0,100,d[1]))}})}
+  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),lim:cleanLim(p.lim),autoBackup:p.autoBackup!==false,full:p.full!==false,lastBackup:Math.max(0,+p.lastBackup||0)}}
   var store={active:null,profiles:[],prefs:cleanPrefs()};
   try{
     var raw=localStorage.getItem('mk6v2');
@@ -1249,8 +1288,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function goalOf(i){
     if(C.ch[i].kind==='light'){var lt=rt.t[i];return lt>0?Math.round(ledOut(lt*blinkF(C.ch[i].blink,performance.now()))):0}
     var t=rt.t[i], m=powerFor(Math.abs(t),C.ch[i]);
-    var f=(SPD[C.speed]||1)*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
-    return (t<0?-m:m)*C.limit/100*f;
+    var tb=!!S.turbo[i];
+    var f=(tb?1:(SPD[C.speed]||1))*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
+    return (t<0?-m:m)*(tb?100:C.limit)/100*f;
   }
 
   /* ---------- Channels ---------- */
@@ -1460,6 +1500,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function applyStick(k,x,y){
     var cf=cfgOf(k), va, vb;
     if(cf.mode==='axis'){va=y;vb=x}else{va=clamp(y+x,-1,1);vb=clamp(y-x,-1,1)}
+    va*=(C.zone||100)/100;vb*=(C.zone||100)/100;
     if(cf.a>=0) setT(cf.a,va*100,false);
     if(cf.b>=0) setT(cf.b,vb*100,false);
   }
@@ -1559,7 +1600,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     groups.forEach(function(g,s){
       g.hidden=!(multi&&slotOn(s)&&visible[s]>0);
-      g.textContent='Hub M'+(C.hubs[s]+1);
+      g.textContent='Hub M'+(C.hubs[s]+1)+((C.hubNames&&C.hubNames[C.hubs[s]])?' · '+C.hubNames[C.hubs[s]]:'');
     });
   }
 
@@ -1575,10 +1616,43 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     activeIdx().forEach(function(i){var o=document.createElement('option');o.value=String(i);o.textContent=tagOf(i)+' · '+C.ch[i].name;gpTrig.appendChild(o)});
     if(C.pad.trig>=0&&!isActive(C.pad.trig)) C.pad.trig=-1;
     gpTrig.value=String(C.pad.trig);
-    for(var s=0;s<3;s++) $('#hub'+s).value=String(C.hubs[s]);
+    for(var s=0;s<3;s++){
+      $('#hub'+s).value=String(C.hubs[s]);
+      var hn=$('#hubN'+s);hn.disabled=C.hubs[s]<0;hn.value=C.hubs[s]>=0?(C.hubNames[C.hubs[s]]||''):'';
+    }
+    $('#zoneSel').value=String(C.zone||100);
+    syncLimSeg();
   }
-  limit.addEventListener('input',function(){C.limit=+limit.value;$('#limitOut').textContent=C.limit+'%'});
-  ramp.addEventListener('input',function(){C.ramp=+ramp.value;$('#rampOut').textContent=C.ramp});
+  function syncLimSeg(){
+    var lm=store.prefs.lim;
+    [0,1,2].forEach(function(i){
+      $('#limV'+i).textContent=lm[i].l+'%';
+      $('#limP'+i).setAttribute('aria-pressed',String(C.limit===lm[i].l&&C.ramp===lm[i].r));
+    });
+  }
+  [0,1,2].forEach(function(i){
+    $('#limP'+i).addEventListener('click',function(){
+      var p=store.prefs.lim[i];C.limit=p.l;C.ramp=p.r;save();syncSettings();feedback('ok');
+    });
+  });
+  [0,1,2].forEach(function(i){
+    $('#limS'+i).addEventListener('click',function(){
+      store.prefs.lim[i]={l:C.limit,r:C.ramp};save();syncLimSeg();toast('Profile saved.');
+    });
+  });
+  $('#zoneSel').addEventListener('change',function(){C.zone=pickOf($('#zoneSel').value,[25,50,75,100],100);save()});
+  [0,1,2].forEach(function(s){
+    var inp=$('#hubN'+s);
+    inp.addEventListener('input',function(){
+      if(C.hubs[s]<0) return;
+      C.hubNames[C.hubs[s]]=inp.value.replace(/[\u0000-\u001f<>]/g,'').slice(0,12);
+      syncLayout();
+      save();
+    });
+    inp.addEventListener('change',save);
+  });
+  limit.addEventListener('input',function(){C.limit=+limit.value;$('#limitOut').textContent=C.limit+'%';syncLimSeg()});
+  ramp.addEventListener('input',function(){C.ramp=+ramp.value;$('#rampOut').textContent=C.ramp;syncLimSeg()});
   limit.addEventListener('change',save);ramp.addEventListener('change',save);
   gpOn.addEventListener('change',function(){C.pad.on=gpOn.checked;if(!C.pad.on) releasePad();save()});
   gpDead.addEventListener('input',function(){C.pad.dead=+gpDead.value;$('#gpDeadOut').textContent=C.pad.dead+'%'});
@@ -2508,7 +2582,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var bdSel=[$('#bdTarget'),$('#bdTarget2'),$('#bdTarget3'),$('#bdTarget4')];
   var bdFields=[$('#bdF1'),$('#bdF2'),$('#bdF3'),$('#bdF4')], bdLbl=[$('#bdL1'),$('#bdL2'),$('#bdL3'),$('#bdL4')];
   var bdModeF=$('#bdFM'), bdMode=$('#bdMode'), bdWideChk=$('#bdWideChk'), bdSpring=$('#bdSpring'), bdSpringL=$('#bdSpringL');
-  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['q',$('#bdTQ')]];
+  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['q',$('#bdTQ')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
   var bdK='s', bdEditing=false, bdW=[];
@@ -2522,7 +2596,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(!bdSel[0]) return;
     var chans=activeIdx(), tank=bdMode.value==='tank';
     var n=bdK==='j'?2:(bdK==='d'||bdK==='m'?4:1);
-    var L=bdK==='q'?['Sequence']:(bdK==='l'||bdK==='t')?[bdK==='t'?'Channel':'Light channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s'||bdK==='h')?['Channel']:
+    var L=bdK==='q'?['Sequence']:(bdK==='l'||bdK==='t'||bdK==='b')?[bdK==='l'?'Light channel':'Channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s'||bdK==='h')?['Channel']:
       (bdK==='j'?(tank?['Left motor','Right motor']:['Drive','Steer']):
       (tank?['Left stick: Left motor','Left stick: Right motor','Right stick: Left motor','Right stick: Right motor']:
             ['Left stick: Drive','Left stick: Steer','Right stick: Drive','Right stick: Steer'])));
@@ -2557,6 +2631,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function applyJoy(it,x,y){
     var va,vb;
     if(it.m==='axis'){va=y;vb=x}else{va=clamp(y+x,-1,1);vb=clamp(y-x,-1,1)}
+    va*=(C.zone||100)/100;vb*=(C.zone||100)/100;
     setT(it.c,va*100,false);
     if(it.d>=0) setT(it.d,vb*100,false);
   }
@@ -2672,6 +2747,27 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         bs.value=C.ch[lc].blink;
         bs.addEventListener('change',function(){C.ch[lc].blink=bs.value;if(refs[lc]) refs[lc].ltBl.value=bs.value;save()});
         el.appendChild(bs);
+      }else if(it.k==='b'){
+        var bc=it.c;
+        if(!isActive(bc)) return;
+        bdHead(el,tagOf(bc)+' · '+C.ch[bc].name,it,false);
+        var tbn=document.createElement('button');tbn.type='button';tbn.className='qbtn turbo';
+        var tsp=document.createElement('span');tsp.textContent='TURBO';tbn.appendChild(tsp);
+        var tdown=false, tprev=0;
+        var tpress=function(){
+          if(tdown||S.estop||S.play) return;
+          tdown=true;noteInput();tprev=rt.t[bc];S.turbo[bc]=true;tbn.classList.add('on');
+          setT(bc,tprev<0?-100:100,false);
+        };
+        var tlift=function(){
+          if(!tdown) return;
+          tdown=false;tbn.classList.remove('on');
+          setT(bc,tprev,false);S.turbo[bc]=false;
+        };
+        tbn.addEventListener('pointerdown',function(e){e.preventDefault();try{tbn.setPointerCapture(e.pointerId)}catch(_){}tpress()});
+        ['pointerup','pointercancel','lostpointercapture','blur'].forEach(function(ev){tbn.addEventListener(ev,tlift)});
+        tbn.addEventListener('contextmenu',function(e){e.preventDefault()});
+        el.appendChild(tbn);
       }else if(it.k==='t'){
         var tc=it.c;
         if(!isActive(tc)) return;
@@ -2821,6 +2917,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var ww=bdWideChk.checked?2:1, m=bdMode.value==='tank'?'tank':'axis', n=v.map(function(x){return Math.round(+x)});
     var hd=!bdSpring.checked;
     if(bdK==='q') C.board.push({k:'q',c:v[0],w:ww});
+    else if(bdK==='b') C.board.push({k:'b',c:n[0],w:ww});
     else if(bdK==='t'){
       var tsy=$('#bdTgStyle').value;
       C.board.push({k:'t',c:n[0],w:tsy==='dir'?2:ww,y:tsy,p:Math.round(+$('#bdTgPow').value)||100});
@@ -2996,7 +3093,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Channel A drives and channel B steers. Use the Joystick layout: up and down drives, left and right steers.':'Saluran A memandu dan saluran B mengemudi. Guna susun atur Joystick: atas dan bawah memandu, kiri dan kanan mengemudi.',
     'Channels A and B drive the tracks, C, D and E move the arm, bucket and swing. Uses the Dual stick layout.':'Saluran A dan B menggerakkan track, C, D dan E menggerakkan lengan, baldi dan putaran. Guna susun atur Dua stick.',
     'Model created. Rename the channels or change the layout any time.':'Model dicipta. Anda boleh namakan semula saluran atau tukar susun atur bila-bila masa.',
-'Light settings':'Tetapan lampu','Test hub':'Uji hab','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
+'Light settings':'Tetapan lampu','Test hub':'Uji hab','Kid':'Kanak-kanak','Full':'Penuh','Power profile':'Profil kuasa','Save current limit as profile':'Simpan had semasa sebagai profil','Save profile':'Simpan profil','Profile saved.':'Profil disimpan.','Stick range (maximum output)':'Julat stick (output maksimum)','Hub names (optional)':'Nama hab (pilihan)','Hub 1 name':'Nama hab 1','Hub 2 name':'Nama hab 2','Hub 3 name':'Nama hab 3','Turbo':'Turbo','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
     'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
     'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
     'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',

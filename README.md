@@ -33,6 +33,11 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 - **Layouts:** Standard, Joystick, Dual stick and a free **Board** (sliders, hold buttons, sticks, double sticks, sequence buttons, lights and mixers; vertical sliders; tilt steering).
 - **Lights:** set a channel to *Light* for on/off, brightness (gamma-corrected so dimming looks even) and slow/fast/pulse blinking. Blinking is slow on purpose because the hub only catches an update every 100 to 200 ms.
 - **Mixer:** one Board slider that drives up to four channels, each with its own ratio and direction.
+- **Toggles and Turbo:** Board toggles (LED button, latch switch, forward/stop/reverse) and a hold-to-boost Turbo button that lifts a channel to full power while pressed (it still respects Player mode limits).
+- **Power profiles:** Kid, Normal and Full presets (power limit and smoothing) switch with one tap; save the current limit into any of them.
+- **Stick range:** cap how much output a stick can give (25 to 100%).
+- **Hub names:** give each hub a short name, shown in the channel list.
+- **Test hub:** moves every active channel briefly at low power so you can see which motor is which.
 - **Per channel:** maximum power, start power, fine control (expo curve with preview) and slider or hold-to-move control.
 - **Record & replay:** record up to 90 seconds of control movements, then replay once or in a loop. Manual input is locked during replay and E-Stop cancels it.
 - **Backup:** export all models to a file and import them again (in the app, through the system file picker).
