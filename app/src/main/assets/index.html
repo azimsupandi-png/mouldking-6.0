@@ -2867,7 +2867,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   sfWarn.addEventListener('change',function(){C.safety.warn=pickOf(sfWarn.value,[0,15,30,60],30);save()});
 
   var optFull=$('#optFull');
-  function fullNative(){ if(NB&&NB.immersive){try{NB.immersive(!!store.prefs.full)}catch(e){}} }
+  var landMQ=(typeof window.matchMedia==='function')?window.matchMedia('(orientation:landscape) and (max-height:520px)'):null;
+  function fullNative(){ if(NB&&NB.immersive){try{NB.immersive(!!store.prefs.full||!!(landMQ&&landMQ.matches))}catch(e){}} }
+  if(landMQ){ if(landMQ.addEventListener) landMQ.addEventListener('change',fullNative); else if(landMQ.addListener) landMQ.addListener(fullNative); }
   optFull.addEventListener('change',function(){store.prefs.full=optFull.checked;save();fullNative()});
   var optSound=$('#optSound'), optHaptic=$('#optHaptic'), pinBtn=$('#pinBtn');
   function syncApp(){
