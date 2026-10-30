@@ -446,6 +446,17 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdw:not(.w2) .hold{min-height:56px}
 .bdw .pad{width:min(100%,260px);margin:0 auto}
 .bdw .qbtn{width:100%}
+.lights{display:flex;flex-direction:column;gap:14px;margin:10px 0}
+.lights label{display:flex;flex-direction:column;gap:8px}
+.lights input[type=range]{width:100%;margin:0;accent-color:#f4b800}
+.lights .lt-on{align-self:flex-start;min-width:110px}
+.bd-mix{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.bd-mixr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bd-mixr select{width:100%}
+.seq-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0}
+.seq-opts label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.seq-opts select{width:100%}
+.bdw .qbtn.lbtn{font-size:16px;padding:6px 8px;white-space:nowrap}
 .bdw-ed{display:flex;gap:4px;flex:none}
 .bdw-ed .btn{min-height:30px;min-width:30px;padding:0 6px;font-size:13px}
 .bdw.editing{border-style:dashed;border-color:var(--acc)}
@@ -579,7 +590,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <label id="bdFM" hidden><span>Mode</span><select id="bdMode"><option value="axis">Axis (drive + steer)</option><option value="tank">Tank (left + right)</option></select></label>
         </div>
         <div class="bd-mix" id="bdMixRow" hidden>
-          <span>Share of power for each channel</span>
+          <span>Share of power for each channel (same order as above)</span>
           <div class="bd-mixr"><select class="bdRat" aria-label="Ratio 1"></select><select class="bdRat" aria-label="Ratio 2"></select><select class="bdRat" aria-label="Ratio 3"></select><select class="bdRat" aria-label="Ratio 4"></select></div>
         </div>
         <label class="check" id="bdSpringL" for="bdSpring"><input id="bdSpring" type="checkbox" checked>Return to 0 when released</label>
@@ -2308,7 +2319,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         var lc=it.c;
         if(!isActive(lc)) return;
         w.out=bdHead(el,'Light · '+tagOf(lc)+' · '+C.ch[lc].name,it,true);
-        var lb=document.createElement('button');lb.type='button';lb.className='qbtn';
+        var lb=document.createElement('button');lb.type='button';lb.className='qbtn lbtn';
         lb.addEventListener('click',function(){
           noteInput();if(S.estop||S.play) return;
           if(C.ch[lc].kind!=='light'){C.ch[lc].kind='light';save();syncChannel(lc)}
@@ -2390,7 +2401,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       }else if(w.lb){
         var lv=rt.t[w.it.c]>0;
         w.lb.classList.toggle('on',lv);
-        w.lb.textContent=lv?'● Light on':'○ Light off';
+        w.lb.textContent=lv?'● ON':'○ OFF';
         w.lb.disabled=S.estop||!!S.play;
         if(w.out) w.out.textContent=lv?C.ch[w.it.c].bright+'%':'0%';
       }else if(w.mix){
@@ -2575,7 +2586,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
     'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
     'Drive (up/down)':'Pandu (atas/bawah)','Steer (left/right)':'Stereng (kiri/kanan)','Left motor':'Motor kiri','Right motor':'Motor kanan','None':'Tiada',
-    'Repeat':'Ulang kali','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','Light on':'Lampu hidup','Light off':'Lampu mati',
+    'Repeat':'Ulang kali','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
     'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
     'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
     'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',
