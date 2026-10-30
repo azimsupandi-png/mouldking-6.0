@@ -499,6 +499,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .pl-stop{min-height:88px;border:0;border-radius:10px;background:var(--danger);color:#fff;font-family:var(--f-display);font-size:30px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .pl-exit.hold{background:var(--acc);color:#fff}
 :root[data-lock] #spdSeg,:root[data-lock] #recCard,:root[data-lock] #kidRow,:root[data-lock] #setCard,:root[data-lock] #seqCard,:root[data-lock] #calCard,:root[data-lock] #padCard,:root[data-lock] .model-row,:root[data-lock] details.adv,:root[data-lock] .ch .inv,:root[data-lock] .padbox .seg,:root[data-lock] .padbox .maprow,:root[data-lock] .padbox .spr-row{display:none}
+:root[data-lock] #profWiz,:root[data-lock] #wizPanel{display:none}
 :root[data-lock] #profName,:root[data-lock] .ch .name{pointer-events:none}
 
 /* ---- Header: hub power orb and yellow E-Stop button ---- */
@@ -610,6 +611,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .track.dis .stp{opacity:.25;filter:none;pointer-events:none}
 @media (max-width:399px){:root .ch-foot .stop,:root .ch-foot .lock,:root .ch-foot .lt-on{flex:none;width:80px;min-width:0;max-width:none}}
 @media (max-width:339px){:root .ch-foot .stop,:root .ch-foot .lock,:root .ch-foot .lt-on{width:74px}}
+
+.wiz{display:grid;gap:10px;margin-top:12px;padding:12px;border:3px solid #2b2f36;border-radius:16px;background:#0f1216}
+.wiz label:not(.check){display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.wiz select{width:100%}
 </style>
 </head>
 <body>
@@ -672,8 +677,22 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         <button class="btn" id="lDual" type="button" aria-pressed="false">Dual stick</button>
         <button class="btn" id="lBoard" type="button" aria-pressed="false">Board</button>
       </div>
+      <button class="btn" id="profWiz" type="button">Setup wizard</button>
       <button class="btn" id="profNew" type="button">New model</button>
       <button class="btn" id="profDel" type="button">Delete</button>
+    </div>
+    <div class="wiz" id="wizPanel" hidden>
+      <label>Vehicle type
+        <select id="wizType">
+          <option value="tank">Tracked vehicle (two tracks)</option>
+          <option value="car">Car with steering</option>
+          <option value="digger">Digger or crane (tracks, arm, bucket, swing)</option>
+        </select>
+      </label>
+      <label class="check" for="wizLights"><input id="wizLights" type="checkbox" checked>Add lights</label>
+      <label class="check" for="wizWinch"><input id="wizWinch" type="checkbox">Add a winch</label>
+      <p class="note" id="wizNote"></p>
+      <div class="rec-row"><button class="btn" id="wizGo" type="button">Create model</button><button class="btn" id="wizCancel" type="button">Cancel</button></div>
     </div>
   </section>
 
@@ -1585,6 +1604,35 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     store.profiles.push(p);
     switchProfile(p.id);
     live.textContent='New model created from the current settings';
+  });
+  /* Setup wizard: builds a ready-made model from a vehicle type. */
+  var wizPanel=$('#wizPanel'), wizType=$('#wizType');
+  var WIZ={
+    tank:{name:'Tracked vehicle',ch:['Left track','Right track'],mode:'tank',layout:'joy',note:'Channel A and B drive the tracks. Use the Joystick layout: push forward to drive, sideways to turn.'},
+    car:{name:'Car with steering',ch:['Drive','Steering'],mode:'axis',layout:'joy',note:'Channel A drives and channel B steers. Use the Joystick layout: up and down drives, left and right steers.'},
+    digger:{name:'Digger',ch:['Left track','Right track','Arm','Bucket','Swing'],mode:'tank',layout:'dual',note:'Channels A and B drive the tracks, C, D and E move the arm, bucket and swing. Uses the Dual stick layout.'}
+  };
+  function wizSync(){var w=WIZ[wizType.value]||WIZ.tank;$('#wizNote').textContent=w.note}
+  wizType.addEventListener('change',wizSync);
+  $('#profWiz').addEventListener('click',function(){wizPanel.hidden=!wizPanel.hidden;if(!wizPanel.hidden) wizSync()});
+  $('#wizCancel').addEventListener('click',function(){wizPanel.hidden=true});
+  $('#wizGo').addEventListener('click',function(){
+    if(store.profiles.length>=MAX_MODELS){live.textContent='Model list is full.';return}
+    var w=WIZ[wizType.value]||WIZ.tank, names=w.ch.slice();
+    var lights=$('#wizLights').checked, winch=$('#wizWinch').checked;
+    var all=names.slice();while(all.length<PER) all.push('Channel '+L[all.length]);
+    var cfg=baseCfg(all);
+    cfg.s1.mode=w.mode;cfg.layout=w.layout;cfg.speed='normal';
+    if(w.mode==='axis'){cfg.ch[1].max=70}
+    var n=names.length;
+    if(lights&&n<PER){cfg.ch[n].name='Lights';cfg.ch[n].kind='light';n++}
+    if(winch&&n<PER){cfg.ch[n].name='Winch';cfg.ch[n].kind='hold';n++}
+    var prof={id:uid(),name:w.name,cfg:sanitizeCfg(cfg)};
+    store.profiles.push(prof);
+    wizPanel.hidden=true;
+    switchProfile(prof.id);
+    live.textContent='Model created: '+w.name;
+    toast('Model created. Rename the channels or change the layout any time.',4000);
   });
   profDel.addEventListener('click',function(){
     if(store.profiles.length<=1)return;
@@ -2764,7 +2812,12 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
     'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
     'Drive (up/down)':'Pandu (atas/bawah)','Steer (left/right)':'Stereng (kiri/kanan)','Left motor':'Motor kiri','Right motor':'Motor kanan','None':'Tiada',
-    'Repeat':'Ulang kali','Light settings':'Tetapan lampu','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
+    'Repeat':'Ulang kali','Setup wizard':'Wizard persediaan','Vehicle type':'Jenis kenderaan','Tracked vehicle (two tracks)':'Kenderaan track (dua track)','Car with steering':'Kereta dengan stereng','Digger or crane (tracks, arm, bucket, swing)':'Jentera atau kren (track, lengan, baldi, putar)','Add lights':'Tambah lampu','Add a winch':'Tambah winch','Create model':'Cipta model','Cancel':'Batal',
+    'Channel A and B drive the tracks. Use the Joystick layout: push forward to drive, sideways to turn.':'Saluran A dan B menggerakkan track. Guna susun atur Joystick: tolak ke depan untuk memandu, ke sisi untuk membelok.',
+    'Channel A drives and channel B steers. Use the Joystick layout: up and down drives, left and right steers.':'Saluran A memandu dan saluran B mengemudi. Guna susun atur Joystick: atas dan bawah memandu, kiri dan kanan mengemudi.',
+    'Channels A and B drive the tracks, C, D and E move the arm, bucket and swing. Uses the Dual stick layout.':'Saluran A dan B menggerakkan track, C, D dan E menggerakkan lengan, baldi dan putaran. Guna susun atur Dua stick.',
+    'Model created. Rename the channels or change the layout any time.':'Model dicipta. Anda boleh namakan semula saluran atau tukar susun atur bila-bila masa.',
+'Light settings':'Tetapan lampu','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
     'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
     'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
     'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',
