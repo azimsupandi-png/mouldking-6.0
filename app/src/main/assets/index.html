@@ -772,6 +772,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root .cols.joy #joyCard{order:0}
   :root .cols.dual #joyCard{order:-1}
 }
+
+/* ---- Equal left/right margins (camera cutout on either side) and balanced columns ---- */
+:root .bar-in,:root main{padding-left:max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));padding-right:max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px))}
+@media (orientation:landscape) and (max-height:520px){
+  :root .cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  :root .cols.dual{grid-template-columns:minmax(0,1fr)}
+}
 </style>
 </head>
 <body>
