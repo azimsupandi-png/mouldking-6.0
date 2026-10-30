@@ -725,6 +725,19 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
 /* ---- Full-screen: header starts at the very top (no extra gap) ---- */
 :root .bar{top:0;padding-top:0}
+
+/* ---- Landscape: compact header so it takes far less height ---- */
+@media (orientation:landscape) and (max-height:520px){
+  :root .bar-in{padding-block:4px;gap:8px}
+  :root .brand h1{font-size:20px}
+  :root .hubstat{margin-top:2px;font-size:11px}
+  :root .btb,:root .hubbtn .orb,:root .hubbtn[data-st] .orb,:root .bar .estop,:root[data-skin="studs"] .bar .estop{width:38px!important;height:38px!important;box-shadow-color:inherit}
+  :root .btb{box-shadow:0 3px 0 #0b3f8a}
+  :root .btb[data-bt=off]{box-shadow:0 3px 0 #aeb4bb}
+  :root .btb::after{width:16px;height:16px;right:-4px;top:-4px}
+  :root[data-skin="studs"] .bar::after{height:5px;box-shadow:0 2px 4px rgba(0,0,0,.6)}
+  :root .bar{box-shadow:0 1px 0 var(--acc),0 3px 8px rgba(0,0,0,.25)}
+}
 </style>
 </head>
 <body>
