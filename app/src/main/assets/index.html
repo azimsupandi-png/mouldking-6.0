@@ -670,6 +670,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root .ch-foot .lt-on:active{transform:translateY(2px);box-shadow:0 3px 5px rgba(0,0,0,.7),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -4px 6px rgba(0,0,0,.55)}
 .ch-foot .lt-on::before{border:2px solid #0d1015;box-shadow:0 1px 2px rgba(0,0,0,.6),inset 0 -2px 3px rgba(60,0,0,.45)}
 .ch-foot .lt-on[aria-checked="true"]::before{border-color:#0b3d17;box-shadow:0 0 9px 2px rgba(60,230,100,.85),inset 0 -2px 3px rgba(0,60,10,.5)}
+
+/* ---- Switches: LED stays put, same size on and off; only text, colour and LED colour change ---- */
+:root .ch-foot .lt-on,:root .ch-foot .lt-on[aria-checked="true"]{padding:0 8px 0 42px;transition:transform .08s,box-shadow .08s}
+.ch-foot .lt-on::before,.ch-foot .lt-on[aria-checked="true"]::before{left:4px;top:4px;width:32px;height:32px;transition:none}
+:root[data-skin="studs"] .bdw .qbtn.lbtn{position:relative;padding:0 8px 0 42px;justify-content:center}
+.bdw .qbtn.lbtn::before,.bdw .qbtn.lbtn.on::before{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;box-sizing:border-box}
+.bdw .tgl.led{padding:0 8px 0 42px}
+.bdw .tgl .led{position:absolute;left:12px;top:50%;transform:translateY(-50%);box-sizing:border-box;width:22px;height:22px}
 </style>
 </head>
 <body>
