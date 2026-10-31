@@ -313,7 +313,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     radial-gradient(circle,#fff0a0 0 14%,#ffd21a 15% 38%,#e0a000 62%,#8f5f00 100%);
   box-shadow:0 14px 20px rgba(0,0,0,.78),inset 0 -10px 14px rgba(90,50,0,.6),inset 0 4px 6px rgba(255,255,255,.5),0 0 calc(var(--m)*30px) var(--acc)}
 :root[data-skin="studs"] .pad::before{inset:-7px;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));display:block}
-:root[data-skin="studs"] .bd-pads,:root[data-skin="studs"] .cols.dual .pads{gap:14px}
+:root[data-skin="studs"] .bd-pads,:root[data-skin="studs"] .cols.dual .pads{gap:26px}
 :root[data-skin="studs"] .bd-pads .pad,:root[data-skin="studs"] .cols.dual .pad{margin-bottom:10px}
 :root[data-skin="studs"] #swatches,#swatches{display:none}
 :root[data-skin="studs"] .pad{background:
@@ -730,7 +730,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash .dw>.bdw-h{flex:none;margin:0}
 :root.dash .dw>:not(.bdw-h):not(.dw-rs){margin-top:auto;margin-bottom:auto}
 :root.dash .dw>.pad,:root.dash .dw.padw>.pad{flex:none;align-self:center;margin:auto 0;max-width:none}
-:root.dash .dw .bd-pads{display:flex;gap:8px;justify-content:center;align-items:flex-start;flex:1;min-height:0}
+:root.dash .dw .bd-pads{display:flex;gap:24px;justify-content:center;align-items:flex-start;flex:1;min-height:0}
 :root.dash .dw .bd-pads .pad{flex:none;margin:0;max-width:none}
 :root.dash .dw .pad{box-sizing:border-box}
 :root.dash .dw .bdv{position:relative;flex:none;width:100%}
@@ -759,16 +759,15 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     radial-gradient(circle at 34% 24%,rgba(255,255,255,.95) 0,rgba(255,255,255,0) 24%),
     radial-gradient(circle at 36% 26%,#fff3a8 0,#ffd84d 22%,#f4b800 50%,#b07f00 86%,#7a5600 100%);
   box-shadow:0 3px 0 #7a5600,0 16px 12px -4px rgba(0,0,0,.9),inset 0 -9px 12px rgba(60,30,0,.6),inset 0 4px 6px rgba(255,255,255,.65),0 0 calc(var(--m)*30px) var(--acc)}
-:root[data-skin="studs"] .bdw input[type=range]{--a:50%;--b:50%;border:0;border-radius:0;box-shadow:none;
+:root[data-skin="studs"] .bdw input[type=range]{border:0;border-radius:0;box-shadow:none;
   background:repeating-linear-gradient(90deg,#6a6f7a 0 2px,transparent 2px calc((100% - 44px)/4)) center calc(100% - 3px)/calc(100% - 42px) 5px no-repeat}
 :root[data-skin="studs"] .bdw input[type=range]::-webkit-slider-runnable-track{box-sizing:border-box;height:26px;margin:0;border-radius:13px;border:3px solid #2b2f36;border-top-color:#15171b;border-bottom-color:#555a64;
   background:
-    linear-gradient(90deg,transparent var(--a),#f4b800 var(--a),#f4b800 var(--b),transparent var(--b)) 0 center/100% 8px no-repeat,
     linear-gradient(#010102,#010102) 11px center/calc(100% - 22px) 8px no-repeat,
     radial-gradient(circle,#010102 0 3.6px,transparent 4.2px) 4px center/8px 8px no-repeat,
     radial-gradient(circle,#010102 0 3.6px,transparent 4.2px) calc(100% - 4px) center/8px 8px no-repeat,
     linear-gradient(180deg,#020203,#14161c 60%,#0a0b0e);
-  box-shadow:inset 0 5px 8px #000,0 1px 0 #4a4e57,0 0 10px rgba(244,184,0,.12)}
+  box-shadow:inset 0 5px 8px #000,0 1px 0 #4a4e57}
 :root[data-skin="studs"] .bdw input[type=range]::-webkit-slider-thumb{width:40px;height:40px;margin-top:-10px;border:2px solid #4d3300;
   background:
     radial-gradient(circle at 34% 24%,rgba(255,255,255,.9) 0,rgba(255,255,255,0) 24%),
@@ -784,14 +783,20 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   linear-gradient(#232830,#232830) center/2px 56% no-repeat,
   linear-gradient(#232830,#232830) center/56% 2px no-repeat,
   radial-gradient(circle,#0a0b0e 0 52%,#13161a 78%,#1b1f25 100%) padding-box,
-  conic-gradient(from 200deg,#aab0bc,#4a4e57 12%,#15171b 32%,#2b2e35 50%,#7d838f 70%,#c3c8d2 86%,#aab0bc) border-box;background-clip:padding-box,padding-box,padding-box,padding-box,padding-box,padding-box,padding-box,border-box;background-origin:padding-box,padding-box,padding-box,padding-box,padding-box,padding-box,padding-box,border-box}
+  conic-gradient(from 0deg,#9ba1ad 0deg,#5a5f69 70deg,#1a1c21 130deg,#15171b 160deg,#3a3e46 230deg,#9ba1ad 290deg,#d0d5df 315deg,#9ba1ad 360deg) border-box;background-clip:padding-box,padding-box,padding-box,padding-box,padding-box,padding-box,padding-box,border-box;background-origin:padding-box,padding-box,padding-box,padding-box,padding-box,padding-box,padding-box,border-box}
 :root[data-skin="studs"] .bd-pads .pad,:root[data-skin="studs"] .cols.dual .pad,:root[data-skin="studs"] .bdw:not(.w2)>.pad{border-color:transparent;background:
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 0l10 13H0z' fill='%23ffc400' fill-opacity='.95'/%3E%3C/svg%3E") center 2.5%/13px 9px no-repeat,
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 13L0 0h20z' fill='%23ffc400' fill-opacity='.95'/%3E%3C/svg%3E") center 97.5%/13px 9px no-repeat,
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M0 10L13 0v20z' fill='%23ffc400' fill-opacity='.95'/%3E%3C/svg%3E") 2.5% center/9px 13px no-repeat,
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M13 10L0 0v20z' fill='%23ffc400' fill-opacity='.95'/%3E%3C/svg%3E") 97.5% center/9px 13px no-repeat,
   radial-gradient(circle,#0a0b0e 0 52%,#13161a 78%,#1b1f25 100%) padding-box,
-  conic-gradient(from 200deg,#aab0bc,#4a4e57 12%,#15171b 32%,#2b2e35 50%,#7d838f 70%,#c3c8d2 86%,#aab0bc) border-box;background-clip:padding-box,padding-box,padding-box,padding-box,padding-box,border-box;background-origin:padding-box,padding-box,padding-box,padding-box,padding-box,border-box}
+  conic-gradient(from 0deg,#9ba1ad 0deg,#5a5f69 70deg,#1a1c21 130deg,#15171b 160deg,#3a3e46 230deg,#9ba1ad 290deg,#d0d5df 315deg,#9ba1ad 360deg) border-box;background-clip:padding-box,padding-box,padding-box,padding-box,padding-box,border-box;background-origin:padding-box,padding-box,padding-box,padding-box,padding-box,border-box}
+:root[data-skin="studs"] .bdv input[type=range]::-webkit-slider-thumb{
+  background:
+    radial-gradient(circle at 74% 34%,rgba(255,255,255,.9) 0,rgba(255,255,255,0) 24%),
+    repeating-radial-gradient(circle at 50% 50%,rgba(70,40,0,.5) 0 1px,transparent 1px 4px) center/52% 52% no-repeat,
+    radial-gradient(circle at 74% 36%,#fff3a8 0,#ffd84d 22%,#f4b800 50%,#b07f00 88%,#7a5600 100%);
+  box-shadow:-2px 0 0 #7a5600,-11px 0 8px -3px rgba(0,0,0,.9),inset 6px 0 8px rgba(60,30,0,.6),inset -3px 0 4px rgba(255,255,255,.65)}
 </style>
 </head>
 <body>
@@ -1651,7 +1656,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     st.selA.addEventListener('change',function(){cfgOf(k).a=+st.selA.value;syncLayout();save()});
     st.selB.addEventListener('change',function(){cfgOf(k).b=+st.selB.value;syncLayout();save()});
     function move(e){
-      var r=st.pad.getBoundingClientRect(), R=r.width*0.4;
+      var r=st.pad.getBoundingClientRect(), R=Math.max(8,(r.width-st.knob.getBoundingClientRect().width)/2-7);
       var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), m=Math.hypot(dx,dy);
       if(m>R){dx*=R/m;dy*=R/m}
       st.knob.style.transform='translate('+dx+'px,'+dy+'px)';
@@ -2771,7 +2776,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var kn=document.createElement('div');kn.className='knob rest';jp.appendChild(kn);
     var pid=null;
     var jmove=function(e){
-      var r=jp.getBoundingClientRect(), R=r.width*0.4;
+      var r=jp.getBoundingClientRect(), R=Math.max(8,(r.width-kn.getBoundingClientRect().width)/2-7);
       var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), d=Math.hypot(dx,dy);
       if(d>R){dx*=R/d;dy*=R/d}
       kn.style.transform='translate('+dx+'px,'+dy+'px)';
@@ -2875,9 +2880,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       if(esb){var es0=Math.max(20,Math.floor(Math.min(el.clientWidth,el.clientHeight)-4));esb.style.width=es0+'px';esb.style.height=es0+'px';esb.style.alignSelf='center'}
       var pads=[].slice.call(el.querySelectorAll('.pad'));
       if(pads.length){
-        var sp=Math.max(30,Math.min(pads.length>1?(aw-8)/2:aw,ah));
+        var sp=Math.max(30,Math.min(pads.length>1?(aw-42)/2:aw-18,ah-18));
         sp=Math.floor(sp);
-        pads.forEach(function(q){q.style.width=sp+'px';q.style.height=sp+'px';q.style.marginTop=Math.max(0,Math.floor((ah-sp)/2))+'px'});
+        pads.forEach(function(q){q.style.width=sp+'px';q.style.height=sp+'px';q.style.marginTop=Math.max(0,Math.floor((ah-sp)/2))+'px';q.style.marginLeft=q.style.marginRight='0'});
       }
       var bv=el.querySelector('.bdv');
       if(bv){
@@ -3321,7 +3326,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function padDz(v,d){var a=Math.abs(+v||0);return a<d?0:(v<0?-1:1)*Math.min(1,(a-d)/(1-d))}
   function showKnob(k,x,y){
     var st=sticks[k];if(!st) return;
-    var R=st.pad.getBoundingClientRect().width*0.4;
+    var R=Math.max(8,(st.pad.getBoundingClientRect().width-st.knob.getBoundingClientRect().width)/2-7);
     st.knob.classList.toggle('rest',x===0&&y===0);
     st.knob.style.transform='translate('+(x*R)+'px,'+(-y*R)+'px)';
     st.pad.style.setProperty('--m',Math.min(1,Math.hypot(x,y)).toFixed(2));
@@ -3594,20 +3599,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   if(!store.prefs.seen) guideOpen();
 
   setInterval(tick,50);
-})();
-</script>
-<script>
-(function(){
-  function sync(el){
-    var mn=+el.min,mx=+el.max,v=+el.value;if(!(mx>mn))return;
-    var p=(v-mn)/(mx-mn),z=mn<0?(0-mn)/(mx-mn):0,lo=Math.min(p,z),hi=Math.max(p,z);
-    var k=function(x){return 'calc(17px + (100% - 34px) * '+x.toFixed(4)+')'};
-    var key=lo.toFixed(3)+hi.toFixed(3);if(el._fk===key)return;el._fk=key;
-    el.style.setProperty('--a',k(lo));el.style.setProperty('--b',k(hi));
-  }
-  function all(){var l=document.querySelectorAll('.bdw input[type=range]');for(var i=0;i<l.length;i++)sync(l[i])}
-  document.addEventListener('input',function(e){if(e.target&&e.target.matches&&e.target.matches('.bdw input[type=range]'))sync(e.target)},true);
-  setInterval(all,100);
 })();
 </script>
 </body>
