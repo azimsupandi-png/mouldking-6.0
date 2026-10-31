@@ -38,6 +38,7 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 - **Stick range:** cap how much output a stick can give (25 to 100%).
 - **Hub names:** give each hub a short name, shown in the channel list.
 - **Test hub and Calibration:** move each active channel at the **Test power** set in the Calibration card (default 60%, per model). It ignores Limit and Speed, so raise it until the motor just moves.
+- **Dashboard (landscape):** in Board layout, tick "Dashboard when the phone is sideways". The board becomes a full-screen canvas. Tap Edit to drag and resize widgets (snapped to a 24x12 grid, no overlaps), change each widget colour, and Add widget. An E-Stop widget is always on the canvas and cannot be removed. The layout is saved per model.
 - **Per channel:** maximum power, start power, fine control (expo curve with preview) and slider or hold-to-move control.
 - **Record & replay:** record up to 90 seconds of control movements, then replay once or in a loop. Manual input is locked during replay and E-Stop cancels it.
 - **Backup:** export all models to a file and import them again (in the app, through the system file picker).

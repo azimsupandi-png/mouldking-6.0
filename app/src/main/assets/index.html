@@ -707,6 +707,40 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 /* ---- Safe areas: header starts at the window top; equal left/right margins (camera cutout on either side) ---- */
 :root .bar{top:0}
 :root .bar-in,:root main{padding-left:max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));padding-right:max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px))}
+
+/* Dashboard: full landscape canvas with free widgets */
+:root.dash,:root.dash body{overflow:hidden;overscroll-behavior:none}
+:root.dash main{padding-top:6px;padding-bottom:4px}
+:root.dash .bar-banner{display:none}
+:root.dash main>*:not(.cols),:root.dash .cols>*:not(#boardCard),:root.dash #boardCard>h2,:root.dash #bdNote,:root.dash #boardCard>.rec-row,:root.dash .bd-dashchk{display:none}
+:root.dash .cols{display:block}
+:root.dash #boardCard{padding:0;border:0;background:none;box-shadow:none;margin:0}
+:root.dash #boardGrid{display:block;position:relative;width:100%;margin:0}
+:root:not(.dash) .dashbar{display:none}
+.dashbar{position:relative;z-index:31;display:flex;gap:8px;justify-content:center;align-items:center;height:40px;padding-top:6px}
+.dashbar .btn{height:34px;min-height:34px;padding:0 14px;font-size:13px;flex:0 0 auto}
+:root.dash #boardGrid.editing{background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:calc(100%/24) calc(100%/12)}
+:root.dash #bdEditor{position:fixed;left:0;right:0;bottom:46px;max-height:52vh;overflow:auto;z-index:30;background:var(--panel);border-top:3px solid #f4b800;padding:12px max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px)) 16px;box-shadow:0 -8px 24px rgba(0,0,0,.6)}
+:root.dash .dw{position:absolute;display:flex;flex-direction:column;gap:3px;padding:5px 7px;overflow:hidden;box-sizing:border-box;margin:0;align-content:normal}
+:root.dash .dw>*{min-width:0}
+:root.dash .dw>.bdw-h{flex:none;margin:0}
+:root.dash .dw>:not(.bdw-h):not(.dw-rs){margin-top:auto;margin-bottom:auto}
+:root.dash .dw>.pad,:root.dash .dw.padw>.pad{flex:none;align-self:center;margin:auto 0;max-width:none}
+:root.dash .dw .bd-pads{display:flex;gap:8px;justify-content:center;align-items:center;flex:1;min-height:0}
+:root.dash .dw .bd-pads .pad{flex:none;margin:0;max-width:none}
+:root.dash .dw .bdv{position:relative;flex:none;width:100%}
+:root.dash .dw.dw-ed{cursor:grab;touch-action:none;outline:2px dashed rgba(244,184,0,.85);outline-offset:-3px}
+:root.dash .dw.dw-ed>*:not(.bdw-h):not(.dw-rs){pointer-events:none}
+:root.dash .dw.moving{opacity:.85;z-index:5}
+:root.dash .dw.bad{outline-color:#ff4d4d;background:rgba(255,60,60,.28)}
+.dw-rs{position:absolute;right:0;bottom:0;width:32px;height:32px;touch-action:none;background:linear-gradient(135deg,transparent 52%,#f4b800 52%);z-index:4}
+:root.dash .dw .bdw-ed{position:absolute;right:3px;top:3px;display:flex;gap:3px;z-index:6;margin:0}
+:root.dash .dw .bdw-ed .btn{min-width:34px!important;width:34px!important;flex:0 0 34px!important;height:34px!important;min-height:34px!important;padding:0!important;font-size:15px}
+:root.dash .dw.estopw{border:0;background:none;padding:2px}
+.dw-es{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;border:3px solid #3a0d09;background:radial-gradient(circle at 50% 25%,#ff7a6e,#d4271b 55%,#8a140c);box-shadow:0 8px 12px rgba(0,0,0,.7),inset 0 -6px 10px rgba(0,0,0,.4);color:#fff;font-weight:900;font-size:clamp(11px,3.2vh,20px);letter-spacing:.06em;padding:0;cursor:pointer}
+.dw-es.on{background:radial-gradient(circle at 50% 25%,#ffffff,#d9dde3 55%,#8c929c);color:#7a1810;border-color:#555b66}
+.dw-es:active{transform:translateY(3px);box-shadow:0 3px 5px rgba(0,0,0,.7)}
+.bdw .dw-es{width:96px;height:96px;margin:0 auto}
 </style>
 </head>
 <body>
@@ -813,6 +847,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       <h2>Board</h2>
       <div class="bdgrid" id="boardGrid"></div>
       <p class="rec-stat" id="bdNote"></p>
+      <div class="dashbar" id="dashBar">
+        <button class="btn" id="dbEdit" type="button" aria-pressed="false">Edit</button>
+        <button class="btn" id="dbAdd" type="button" aria-pressed="false" hidden>Add widget</button>
+        <button class="btn" id="dbReset" type="button">Reset layout</button>
+        <button class="btn" id="dbExit" type="button">Exit dashboard</button>
+      </div>
+      <label class="check bd-dashchk" for="bdDash"><input id="bdDash" type="checkbox">Dashboard when the phone is sideways</label>
       <div class="rec-row"><button class="btn" id="bdEdit" type="button" aria-pressed="false">Edit board</button></div>
       <div id="bdEditor" class="bd-panel" hidden>
         <div class="seg bd-types" role="group" aria-label="Control type">
@@ -1049,7 +1090,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider',blink:'off',bright:100});
-    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,dash:false,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -1123,11 +1164,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     return out;
   }
+  var DGX=24, DGY=12, DHUE=[0,-45,-20,75,135,190,235,290];
+  var DMIN={s:[6,3],h:[5,3],j:[5,6],d:[10,6],m:[6,3],l:[3,3],t:[3,3],b:[3,3],q:[3,3],e:[3,3]};
   function cleanBoard(b){
     var out=[];
     if(!Array.isArray(b)) return out;
-    b.slice(0,12).forEach(function(x){
+    b.slice(0,16).forEach(function(x){
       if(!x||typeof x!=='object') return;
+      var n0=out.length;
       var w=x.w===2?2:1;
       if(x.k==='s'||x.k==='h'){
         var c=Math.round(+x.c);
@@ -1157,6 +1201,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         if(tcn>=0&&tcn<NMAX) out.push({k:'t',c:tcn,w:x.y==='dir'?2:w,y:['led','latch','dir'].indexOf(x.y)>=0?x.y:'led',p:[25,50,75,100].indexOf(tp)>=0?tp:100});
       }else if(x.k==='q'&&typeof x.c==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(x.c)){
         out.push({k:'q',c:x.c,w:w});
+      }else if(x.k==='e'){
+        out.push({k:'e',w:1});
+      }
+      if(out.length>n0){
+        var it0=out[out.length-1], g=x.g;
+        if(Array.isArray(g)&&g.length===4){
+          g=g.map(function(q){return Math.round(+q)});
+          var mn=DMIN[it0.k]||[3,3];
+          if(g.every(function(q){return isFinite(q)})&&g[0]>=0&&g[1]>=0&&g[2]>=mn[0]&&g[3]>=mn[1]&&g[0]+g[2]<=DGX&&g[1]+g[3]<=DGY) it0.g=g;
+        }
+        var cl=Math.round(+x.col);
+        if(cl>0&&cl<DHUE.length&&it0.k!=='e') it0.col=cl;
       }
     });
     return out;
@@ -1181,6 +1237,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.ramp=num(c.ramp,0,100,60);
     d.zone=pickOf(c.zone,[25,50,75,100],100);
     d.testPwr=Math.round(num(c.testPwr,10,100,60));
+    d.dash=c.dash===true;
     d.hubNames=[0,1,2].map(function(q){var v=Array.isArray(c.hubNames)?c.hubNames[q]:'';return typeof v==='string'?v.replace(/[\u0000-\u001f<>]/g,'').slice(0,12):''});
     d.spring=true;
     var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
@@ -2599,7 +2656,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['q',$('#bdTQ')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
-  var bdK='s', bdEditing=false, bdW=[];
+  var bdK='s', bdEditing=false, bdW=[], dashAdd=false;
   function prefillBoard(){
     var n=0;
     activeIdx().forEach(function(i){if(n<4){C.board.push({k:C.ch[i].kind==='hold'?'h':'s',c:i,w:C.ch[i].kind==='hold'?2:1});n++}});
@@ -2679,21 +2736,135 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(hold) applyJoy(it,0,0);
     return jp;
   }
+
+  /* ---------- Dashboard: free-position widgets in landscape ---------- */
+  function dashOn(){return !!(C.layout==='board'&&C.dash&&landMQ&&landMQ.matches)}
+  function dashSize(it){
+    var k=it.k, wd=it.w===2;
+    if(k==='j') return [6,8];
+    if(k==='d') return [12,8];
+    if(k==='s'||k==='m') return it.v?[3,8]:(wd?[12,3]:[8,3]);
+    if(k==='h') return wd?[10,3]:[7,3];
+    if(k==='t') return it.y==='dir'?[9,3]:(wd?[6,3]:[4,3]);
+    if(k==='e') return [4,4];
+    return [4,3];
+  }
+  function dashHitsG(a,b){return a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]}
+  function dashHits(it,g){return C.board.some(function(o){return o!==it&&o.g&&dashHitsG(o.g,g)})}
+  function dashEnsure(){
+    if(!C.board.some(function(o){return o.k==='e'})) C.board.push({k:'e',w:1});
+  }
+  function dashAuto(){
+    var changed=false;
+    var list=C.board.filter(function(o){return !o.g});
+    if(!list.length) return;
+    list.sort(function(a,b){return (b.k==='e'?1:0)-(a.k==='e'?1:0)});
+    list.forEach(function(it){
+      var sz=dashSize(it), mn=DMIN[it.k]||[3,3], g=null;
+      if(it.k==='e'&&!dashHits(it,[DGX-sz[0],DGY-sz[1],sz[0],sz[1]])) g=[DGX-sz[0],DGY-sz[1],sz[0],sz[1]];
+      for(var shrink=0;!g&&shrink<3;shrink++){
+        var w=Math.max(mn[0],sz[0]-shrink*2), h=Math.max(mn[1],sz[1]-shrink*2);
+        for(var y=0;!g&&y<=DGY-h;y++) for(var x=0;!g&&x<=DGX-w;x++){
+          var t=[x,y,w,h];
+          if(!dashHits(it,t)) g=t;
+        }
+      }
+      it.g=g||[0,0,mn[0],mn[1]];
+      changed=true;
+    });
+    if(changed) save();
+  }
+  function dashRefit(it){
+    if(!it.g) return;
+    var sz=dashSize(it), mn=DMIN[it.k]||[3,3];
+    var w=Math.max(mn[0],Math.min(sz[0],DGX)), h=Math.max(mn[1],Math.min(sz[1],DGY));
+    var x=Math.min(it.g[0],DGX-w), y=Math.min(it.g[1],DGY-h), g=[x,y,w,h];
+    if(!dashHits(it,g)){it.g=g;return}
+    delete it.g;dashAuto();
+  }
+  function dashStyle(el,g){
+    el.style.left=(g[0]/DGX*100)+'%';el.style.top=(g[1]/DGY*100)+'%';
+    el.style.width=(g[2]/DGX*100)+'%';el.style.height=(g[3]/DGY*100)+'%';
+  }
+  function dashFit(){
+    var on=dashOn();
+    document.documentElement.classList.toggle('dash',on);
+    if(!bdGrid) return;
+    if(!on){bdGrid.style.height='';return}
+    var hd=document.querySelector('header'), top=hd?hd.getBoundingClientRect().bottom:0;
+    bdGrid.style.height=Math.max(150,window.innerHeight-top-46)+'px';
+    if(typeof bdGrid.querySelectorAll!=='function') return;
+    [].slice.call(bdGrid.querySelectorAll('.dw')).forEach(function(el){
+      var hh=0, hd2=el.querySelector('.bdw-h');
+      if(hd2&&!el.classList.contains('dw-ed')) hh=hd2.offsetHeight+3;
+      var aw=el.clientWidth-14, ah=el.clientHeight-10-hh;
+      var pads=[].slice.call(el.querySelectorAll('.pad'));
+      if(pads.length){
+        var sp=Math.max(30,Math.min(pads.length>1?(aw-8)/2:aw,ah));
+        pads.forEach(function(q){q.style.width=sp+'px';q.style.height=sp+'px'});
+      }
+      var bv=el.querySelector('.bdv');
+      if(bv){
+        var inp=bv.firstChild, bh=Math.max(60,ah);
+        bv.style.height=bh+'px';
+        if(inp){inp.style.width=bh+'px';inp.style.marginLeft=(-bh/2)+'px';inp.style.marginTop=(-(inp.offsetHeight||46)/2)+'px'}
+      }
+    });
+  }
+  function dashDrag(el,it){
+    el.addEventListener('pointerdown',function(e){
+      if(e.target.closest&&e.target.closest('.bdw-ed')) return;
+      var mode=e.target.classList.contains('dw-rs')?'rs':'mv';
+      var cv=bdGrid.getBoundingClientRect(), cw=cv.width/DGX, ch=cv.height/DGY;
+      var g0=it.g.slice(), g1=g0.slice(), sx=e.clientX, sy=e.clientY, pid=e.pointerId, mn=DMIN[it.k]||[3,3];
+      try{el.setPointerCapture(pid)}catch(_){}
+      el.classList.add('moving');
+      var mv=function(ev){
+        if(ev.pointerId!==pid) return;
+        var dx=Math.round((ev.clientX-sx)/cw), dy=Math.round((ev.clientY-sy)/ch), n=g0.slice();
+        if(mode==='mv'){n[0]=clamp(g0[0]+dx,0,DGX-g0[2]);n[1]=clamp(g0[1]+dy,0,DGY-g0[3])}
+        else{n[2]=clamp(g0[2]+dx,mn[0],DGX-g0[0]);n[3]=clamp(g0[3]+dy,mn[1],DGY-g0[1])}
+        g1=n;dashStyle(el,n);el.classList.toggle('bad',dashHits(it,n));
+      };
+      var up=function(ev){
+        if(ev.pointerId!==pid) return;
+        el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);
+        el.classList.remove('moving','bad');
+        if(dashHits(it,g1)){dashStyle(el,g0)}else{it.g=g1;save()}
+        dashFit();
+      };
+      el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+      e.preventDefault();
+    });
+  }
+  function dashPlace(el,it){
+    el.classList.add('dw');
+    if(it.k==='e') el.classList.add('estopw');
+    dashStyle(el,it.g);
+    if(it.col>0&&it.k!=='e') el.style.filter='hue-rotate('+DHUE[it.col]+'deg)';
+    if(bdEditing){
+      el.classList.add('dw-ed');
+      var rs=document.createElement('div');rs.className='dw-rs';rs.setAttribute('aria-hidden','true');el.appendChild(rs);
+      dashDrag(el,it);
+    }
+  }
   function bdMove(it,d){
     var n=C.board.indexOf(it), m=n+d;if(n<0||m<0||m>=C.board.length) return;
     var t=C.board[n];C.board[n]=C.board[m];C.board[m]=t;save();syncBoard();
   }
   function bdToolbar(it){
     var ed=document.createElement('div');ed.className='bdw-ed';
-    var defs=[['◀','Move earlier',function(){bdMove(it,-1)}],['▶','Move later',function(){bdMove(it,1)}]];
-    if(it.k!=='d') defs.push(['↔','Wide or normal',function(){it.w=it.w===2?1:2;save();syncBoard()}]);
-    if(it.k==='s'||it.k==='m') defs.push(['\u2195','Vertical or horizontal',function(){it.v=!it.v;save();syncBoard()},!!it.v]);
+    var dash=dashOn();
+    var defs=dash?[]:[['◀','Move earlier',function(){bdMove(it,-1)}],['▶','Move later',function(){bdMove(it,1)}]];
+    if(!dash&&it.k!=='d') defs.push(['↔','Wide or normal',function(){it.w=it.w===2?1:2;save();syncBoard()}]);
+    if(dash&&it.k!=='e') defs.push(['●','Colour',function(){it.col=((it.col||0)+1)%DHUE.length;save();syncBoard()}]);
+    if(it.k==='s'||it.k==='m') defs.push(['\u2195','Vertical or horizontal',function(){it.v=!it.v;if(dashOn()) dashRefit(it);save();syncBoard()},!!it.v]);
     if(it.k==='s'||it.k==='j'||it.k==='d'||it.k==='m') defs.push(['0','Return to 0 on release',function(){
       it.hold=!it.hold;
       (it.t?it.t.map(function(z){return z.c}):[it.c,it.d,it.e,it.f]).forEach(function(q){if(q!==undefined&&q>=0) setT(q,0,false)});
       save();syncBoard();
     },!it.hold]);
-    defs.push(['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0)C.board.splice(q,1);save();syncBoard()}]);
+    if(it.k!=='e') defs.push(['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0)C.board.splice(q,1);save();syncBoard()}]);
     defs.forEach(function(d){
       var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=d[0];b.setAttribute('aria-label',d[1]);
       if(d.length>3) b.setAttribute('aria-pressed',String(d[3]));
@@ -2716,15 +2887,28 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(!bdGrid||!C.board) return;
     bdFill();
     bdGrid.innerHTML='';bdW=[];
-    bdEditor.hidden=!bdEditing;
+    var dash0=dashOn();
+    bdEditor.hidden=dash0?!(bdEditing&&dashAdd):!bdEditing;
+    $('#dbAdd').hidden=!bdEditing;
+    $('#dbAdd').setAttribute('aria-pressed',String(dashAdd&&bdEditing));
     bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
     bdEditBtn.textContent=bdEditing?'Done editing':'Edit board';
+    var dash=dashOn();
+    if(dash){dashEnsure();dashAuto()}
+    bdGrid.classList.toggle('editing',dash&&bdEditing);
+    $('#dbEdit').setAttribute('aria-pressed',String(bdEditing));
+    $('#dbEdit').textContent=bdEditing?'Done':'Edit';
+    $('#bdDash').checked=!!C.dash;
     var tiltTaken=false;
     C.board.forEach(function(it){
       var el=document.createElement('div');
-      el.className='bdw'+((it.w===2||it.k==='d')?' w2':'')+(bdEditing?' editing':'');
+      el.className='bdw'+((it.w===2||it.k==='d')&&!dash?' w2':'')+(bdEditing?' editing':'');
       var w={it:it,drag:false,out:null,rng:null,btn:null,sq:null};
-      if(it.k==='q'){
+      if(it.k==='e'){
+        var eb=document.createElement('button');eb.type='button';eb.className='dw-es';eb.setAttribute('aria-label','Emergency stop');
+        eb.addEventListener('click',function(){setEstop(!S.estop)});
+        el.appendChild(eb);w.es=eb;
+      }else if(it.k==='q'){
         var sq=C.seq.filter(function(x){return x.id===it.c})[0];
         if(!sq) return;
         bdHead(el,bdEditing?'Sequence':'',it,false);
@@ -2875,15 +3059,20 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           el.appendChild(hb);
         }
       }
+      if(dash) dashPlace(el,it);
       bdGrid.appendChild(el);bdW.push(w);
     });
+    dashFit();
     bdNote.textContent=C.board.length?'':'The board is empty. Tap Edit board to add controls.';
     paintBoard();
   }
   function paintBoard(){
     if(!bdW||!bdW.length) return;
     bdW.forEach(function(w){
-      if(w.btn){
+      if(w.es){
+        w.es.classList.toggle('on',!!S.estop);
+        w.es.textContent=S.estop?'RELEASE':'E-STOP';
+      }else if(w.btn){
         var mine=!!(S.play&&S.play.seq===w.sq.id);
         w.btn.classList.toggle('on',mine);
         w.btn.textContent=(mine?'■ ':'▶ ')+w.sq.name;
@@ -2922,10 +3111,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
   }
   bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;syncBoard()});
+  $('#dbEdit').addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing) dashAdd=false;syncBoard()});
+  $('#dbAdd').addEventListener('click',function(){dashAdd=!dashAdd;syncBoard()});
+  $('#dbReset').addEventListener('click',function(){C.board.forEach(function(o){delete o.g});save();syncBoard();toast('Layout reset.')});
+  $('#dbExit').addEventListener('click',function(){C.dash=false;bdEditing=false;dashAdd=false;save();syncLayout()});
+  $('#bdDash').addEventListener('change',function(){C.dash=$('#bdDash').checked;save();syncLayout()});
+  window.addEventListener('resize',function(){if(dashOn()) dashFit()});
   bdTypes.forEach(function(t){t[1].addEventListener('click',function(){bdSetKind(t[0])})});
   bdMode.addEventListener('change',bdFill);
   $('#bdAdd').addEventListener('click',function(){
-    if(C.board.length>=12){bdNote.textContent='The board is full (12 controls).';return}
+    if(C.board.length>=16){bdNote.textContent='The board is full (16 controls).';return}
     var v=bdSel.map(function(s){return s.value});
     if(!v[0]){bdNote.textContent='Nothing to add. Make a sequence first.';return}
     var ww=bdWideChk.checked?2:1, m=bdMode.value==='tank'?'tank':'axis', n=v.map(function(x){return Math.round(+x)});
@@ -2954,6 +3149,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       if(bdK==='j') C.board.push({k:'j',c:n[0],d:n[1],m:m,w:ww,hold:hd});
       else C.board.push({k:'d',c:n[0],d:n[1],e:n[2],f:n[3],m:m,w:2,hold:hd});
     }
+    if(dashOn()){
+      var lastIt=C.board[C.board.length-1];dashAuto();
+      if(lastIt&&lastIt.g&&dashHits(lastIt,lastIt.g)){C.board.pop();save();toast('No space. Make room or remove a widget first.');return}
+      dashAdd=false;
+    }
     bdNote.textContent='';save();syncBoard();
   });
   bdSetKind('s');
@@ -2965,7 +3165,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var optFull=$('#optFull');
   var landMQ=(typeof window.matchMedia==='function')?window.matchMedia('(orientation:landscape) and (max-height:520px)'):null;
   function fullNative(){ if(NB&&NB.immersive){try{NB.immersive(!!store.prefs.full||!!(landMQ&&landMQ.matches))}catch(e){}} }
-  if(landMQ){ if(landMQ.addEventListener) landMQ.addEventListener('change',fullNative); else if(landMQ.addListener) landMQ.addListener(fullNative); }
+  function landChange(){fullNative();syncLayout()}
+  if(landMQ){ if(landMQ.addEventListener) landMQ.addEventListener('change',landChange); else if(landMQ.addListener) landMQ.addListener(landChange); }
+  if(dashOn()) syncLayout();
   optFull.addEventListener('change',function(){store.prefs.full=optFull.checked;save();fullNative()});
   var optSound=$('#optSound'), optHaptic=$('#optHaptic'), pinBtn=$('#pinBtn');
   function syncApp(){
@@ -3097,7 +3299,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'New model':'Model baharu','Delete':'Padam','Confirm delete':'Sahkan padam','Confirm':'Sahkan','Model colour':'Warna model','Theme':'Tema','Layout':'Susun atur',
     'Model list is full.':'Senarai model penuh.','New model created from the current settings':'Model baharu dicipta daripada tetapan semasa',
     'Quick actions':'Tindakan pantas',
-    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
+    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Dashboard when the phone is sideways':'Dashboard bila telefon mengiring','Edit':'Ubah','Add widget':'Tambah widget','Done':'Selesai','Reset layout':'Set semula susunan','Exit dashboard':'Keluar dashboard','Layout reset.':'Susunan disetkan semula.','No space. Make room or remove a widget first.':'Tiada ruang. Kosongkan ruang atau buang satu widget dahulu.','The board is full (16 controls).':'Papan penuh (16 kawalan).','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
     'Fine control (expo)':'Kawalan halus (expo)','Slider':'Gelangsar','Hold':'Tahan','Control type':'Jenis kawalan','Response curve':'Lengkung tindak balas',
     'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
     'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
