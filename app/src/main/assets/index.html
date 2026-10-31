@@ -797,6 +797,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root .dw .qbtn.lbtn::before,:root .dw .qbtn.lbtn.on::before{left:6px;width:24px;height:24px}
   :root .dw .tgl .led{left:8px;width:18px;height:18px}
 }
+@container (max-width:190px){
+  :root .dw .qbtn.turbo{font-size:12px;letter-spacing:.05em;gap:4px}
+  :root .dw .qbtn.turbo::before{width:14px;height:18px}
+}
+@container (max-width:110px){
+  :root .dw .qbtn.turbo{font-size:0;letter-spacing:0;gap:0}
+  :root .dw .qbtn.turbo::before{width:20px;height:24px}
+}
+@container (max-width:250px){
+  :root .dw .tgd{font-size:0;letter-spacing:0;gap:0}
+  :root .dw .tgd i{font-size:18px}
+}
 @container (max-width:80px){
   :root[data-skin="studs"] .dw .qbtn.lbtn,:root .dw .tgl.led{padding:0;font-size:0;letter-spacing:0}
   :root .dw .qbtn.lbtn::before,:root .dw .qbtn.lbtn.on::before{left:50%;transform:translate(-50%,-50%)}
@@ -856,6 +868,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .touch .knob:not(#z),:root[data-skin="studs"] .pad:not(#z).touch .knob:not(#z){box-shadow:0 calc(14px*var(--s,1)) calc(20px*var(--s,1)) rgba(0,0,0,.78),inset 0 calc(-10px*var(--s,1)) calc(14px*var(--s,1)) rgba(90,50,0,.6),inset 0 calc(4px*var(--s,1)) calc(6px*var(--s,1)) rgba(255,255,255,.5),0 0 calc(28px*var(--s,1)) calc(9px*var(--s,1)) rgba(255,200,40,.85)}
 :root[data-skin="studs"] .pad:not(#z) .knob:not(#z),:root[data-skin="studs"] .pad:not(#z)>.knob:not(#z),:root[data-skin="studs"] .bdw>.pad:not(#z) .knob:not(#z),:root[data-skin="studs"] .bd-pads .pad:not(#z) .knob:not(#z){width:38%;left:31%;top:31%}
 :root:not(.dash)[data-skin="studs"] .bd-pads{gap:24px}
+.bdw .qbtn.turbo::before{flex:none}
 </style>
 </head>
 <body>
