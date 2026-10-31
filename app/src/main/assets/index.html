@@ -710,6 +710,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
 /* Dashboard: full landscape canvas with free widgets */
 :root.dash,:root.dash body{overflow:hidden;overscroll-behavior:none}
+:root.dash body{position:fixed;left:0;top:0;right:0;bottom:0;width:100%}
 :root.dash main{padding-top:6px;padding-bottom:4px}
 :root.dash .bar-banner{display:none}
 :root.dash main>*:not(.cols),:root.dash .cols>*:not(#boardCard),:root.dash #boardCard>h2,:root.dash #bdNote,:root.dash #boardCard>.rec-row,:root.dash .bd-dashchk{display:none}
@@ -2789,7 +2790,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var par=bdGrid.parentElement, pw=(par&&par.clientWidth)||window.innerWidth;
     var hd=document.querySelector('header'), top=hd?hd.getBoundingClientRect().bottom:0;
     DCELL.w=Math.max(10,Math.floor(pw/DGX));
-    DCELL.h=Math.max(10,Math.floor(Math.max(150,window.innerHeight-top-46)/DGY));
+    DCELL.h=Math.max(10,Math.floor(Math.max(150,window.innerHeight-top-58)/DGY));
   }
   function dashStyle(el,g){
     el.style.left=(g[0]*DCELL.w)+'px';el.style.top=(g[1]*DCELL.h)+'px';
@@ -2798,6 +2799,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function dashFit(){
     var on=dashOn();
     document.documentElement.classList.toggle('dash',on);
+    if(on){try{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}catch(_){}}
     if(!bdGrid) return;
     if(!on){bdGrid.style.height='';bdGrid.style.width='';bdGrid.style.margin='';bdGrid.style.backgroundSize='';return}
     dashCell();
@@ -3142,7 +3144,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   $('#dbReset').addEventListener('click',function(){C.board.forEach(function(o){delete o.g});save();syncBoard();toast('Layout reset.')});
   $('#dbExit').addEventListener('click',function(){C.dash=false;bdEditing=false;dashAdd=false;save();syncLayout()});
   $('#bdDash').addEventListener('change',function(){C.dash=$('#bdDash').checked;save();syncLayout()});
-  window.addEventListener('resize',function(){if(dashOn()) dashFit()});
+  window.addEventListener('resize',function(){if(dashOn()){dashFit();setTimeout(dashFit,250)}});
   bdTypes.forEach(function(t){t[1].addEventListener('click',function(){bdSetKind(t[0])})});
   bdMode.addEventListener('change',bdFill);
   $('#bdAdd').addEventListener('click',function(){
