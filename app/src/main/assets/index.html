@@ -2815,25 +2815,43 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   function dashHitsG(a,b){return a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]}
   function dashHits(it,g){return C.board.some(function(o){return o!==it&&o[DG.k]&&dashHitsG(o[DG.k],g)})}
-  function dashAuto(){
-    var changed=false;
-    var list=C.board.filter(function(o){return !o[DG.k]});
-    if(!list.length) return;
-    list.sort(function(a,b){return (b.k==='e'?1:0)-(a.k==='e'?1:0)});
-    list.forEach(function(it){
-      var sz=dashSize(it), mn=DMIN[it.k]||[3,3], g=null;
-      if(it.k==='e'&&!dashHits(it,[DG.x-sz[0],DG.y-sz[1],sz[0],sz[1]])) g=[DG.x-sz[0],DG.y-sz[1],sz[0],sz[1]];
-      for(var shrink=0;!g&&shrink<12;shrink++){
-        var w=Math.max(mn[0],sz[0]-shrink*4), h=Math.max(mn[1],sz[1]-shrink*4);
-        for(var y=0;!g&&y<=DG.y-h;y++) for(var x=0;!g&&x<=DG.x-w;x++){
-          var t=[x,y,w,h];
-          if(!dashHits(it,t)) g=t;
-        }
+  function dashFind(it,f){
+    var sz=dashSize(it), mn=DMIN[it.k]||[3,3];
+    var w0=Math.max(mn[0],Math.round(sz[0]*f)), h0=Math.max(mn[1],Math.round(sz[1]*f));
+    if(it.k==='e'&&!dashHits(it,[DG.x-w0,DG.y-h0,w0,h0])) return [DG.x-w0,DG.y-h0,w0,h0];
+    for(var shrink=0;shrink<12;shrink++){
+      var w=Math.max(mn[0],w0-shrink*2), h=Math.max(mn[1],h0-shrink*2);
+      for(var y=0;y<=DG.y-h;y++) for(var x=0;x<=DG.x-w;x++){
+        var t=[x,y,w,h];
+        if(!dashHits(it,t)) return t;
       }
-      it[DG.k]=g||[0,0,mn[0],mn[1]];
-      changed=true;
-    });
-    if(changed) save();
+      if(w===mn[0]&&h===mn[1]) break;
+    }
+    return null;
+  }
+  // Place widgets that have no position yet. Never overlap: if they do not fit,
+  // try again with every new widget smaller and biggest first. Returns false if
+  // some widget still could not get its own space.
+  function dashAuto(){
+    var list=C.board.filter(function(o){return !o[DG.k]});
+    if(!list.length) return true;
+    var byArea=list.slice().sort(function(a,b){
+      if(a.k==='e'||b.k==='e') return (b.k==='e'?1:0)-(a.k==='e'?1:0);
+      var A=dashSize(a),B=dashSize(b);return B[0]*B[1]-A[0]*A[1]});
+    var tries=[[list,1],[byArea,1],[byArea,.85],[byArea,.7],[byArea,.55],[byArea,.4],[byArea,0]];
+    var ok=false;
+    for(var t=0;t<tries.length&&!ok;t++){
+      list.forEach(function(o){delete o[DG.k]});
+      var order=tries[t][0].slice().sort(function(a,b){return (b.k==='e'?1:0)-(a.k==='e'?1:0)});
+      ok=true;
+      for(var i=0;i<order.length;i++){var g=dashFind(order[i],tries[t][1]);if(!g){ok=false;break}order[i][DG.k]=g}
+    }
+    if(!ok){
+      list.forEach(function(o){if(!o[DG.k]){var mn=DMIN[o.k]||[3,3];o[DG.k]=[0,0,mn[0],mn[1]]}});
+      toast('Too many widgets to fit on the screen. Remove one.');
+    }
+    save();
+    return ok;
   }
   function dashRefit(it){
     if(!it[DG.k]) return;
@@ -3211,6 +3229,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(C.board.length>=16){BD_UNDO.push(u);toast('Board is full.');return}
     var it=u.it, k=DG&&DG.k, g=k&&it[k];
     if(g&&C.board.some(function(o){var h=o[k];return h&&g[0]<h[0]+h[2]&&h[0]<g[0]+g[2]&&g[1]<h[1]+h[3]&&h[1]<g[1]+g[3]})) delete it[k];
+    if(k&&!it[k]){var g2=dashFind(it,1);if(!g2){BD_UNDO.push(u);toast('No free space to put it back.');return}it[k]=g2}
     C.board.splice(Math.min(u.q,C.board.length),0,it);
     var n=C.board.length;C.board=cleanBoard(C.board);
     if(C.board.length<n){BD_UNDO.length=0;toast('Could not put it back.')}else toast('Widget put back.');
@@ -3257,8 +3276,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       else C.board.push({k:'d',c:n[0],d:n[1],e:n[2],f:n[3],m:m,w:2,hold:hd});
     }
     if(dashOn()){
-      var lastIt=C.board[C.board.length-1];dashAuto();
-      if(lastIt&&lastIt[DG.k]&&dashHits(lastIt,lastIt[DG.k])){C.board.pop();save();toast('No space. Make room or remove a widget first.');return}
+      var lastIt=C.board[C.board.length-1], lg=lastIt&&dashFind(lastIt,1);
+      if(!lg){C.board.pop();save();toast('No space. Make room or remove a widget first.');return}
+      lastIt[DG.k]=lg;
       dashAdd=false;
     }
     bdNote.textContent='';save();syncBoard();
