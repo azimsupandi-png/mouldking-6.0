@@ -204,6 +204,10 @@ public class MainActivity extends Activity {
 
     private boolean fullScreen = true;
 
+    private boolean lightBars;
+    private int barSb, barNb;
+    private boolean barSaved;
+
     private void applyFull() {
         int f = fullScreen
             ? (android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -212,7 +216,14 @@ public class MainActivity extends Activity {
                 | android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-            : android.view.View.SYSTEM_UI_FLAG_VISIBLE;
+            : (lightBars
+                ? (android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+                : android.view.View.SYSTEM_UI_FLAG_VISIBLE);
+        try {
+            if (!barSaved) { barSb = getWindow().getStatusBarColor(); barNb = getWindow().getNavigationBarColor(); barSaved = true; }
+            getWindow().setStatusBarColor(lightBars ? 0xFFE9EBEE : barSb);
+            getWindow().setNavigationBarColor(lightBars ? 0xFFE9EBEE : barNb);
+        } catch (RuntimeException ignored) { }
         try { getWindow().getDecorView().setSystemUiVisibility(f); } catch (RuntimeException ignored) { }
     }
 
@@ -430,6 +441,12 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void immersive(final boolean on) {
             runOnUiThread(() -> { fullScreen = on; applyFull(); });
+        }
+
+        @JavascriptInterface
+        public void setBars(final String mode) {
+            final boolean l = "light".equals(mode);
+            runOnUiThread(() -> { lightBars = l; applyFull(); });
         }
 
         @JavascriptInterface

@@ -903,6 +903,74 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash-l .dtpl-cols{flex-direction:row;flex:1 1 auto;overflow:hidden}
 :root.dash-l .dtpl-col{flex:1 1 0;overflow:auto;padding-right:2px}
 :root.dash-l .dtpl-col #dtplMineH{margin-top:0}
+/* ===== Theme A: Matte light (per model). Same widgets and yellow parts, light matte surfaces ===== */
+:root.matte[data-skin="studs"]{--bg:#dfe2e6;--panel:#f3f4f6;--well:#d9dce1;--line:#c3c8cf;--fg:#1f242b;--muted:#5d6570;color-scheme:light}
+:root.matte[data-skin="studs"] body{background-color:#dcdfe3!important;background-image:radial-gradient(120% 80% at 30% 0%,#f3f4f6 0,#e1e4e8 55%,#d2d6db 100%)!important;background-size:auto!important;background-attachment:fixed!important;color:#1f242b}
+:root.matte .bar{background:linear-gradient(#f8f9fa,#e6e8eb)!important;box-shadow:0 3px 8px rgba(40,46,56,.18)!important}
+:root.matte .bar h1,:root.matte .bar h1 .bw{color:#1f242b}
+:root.matte .card,:root.matte[data-skin="studs"] .card{background:linear-gradient(180deg,#f7f8f9,#eceef1)!important;border-color:#cfd3d9!important;box-shadow:0 6px 16px rgba(40,46,56,.16),inset 0 1px 0 #fff!important;color:#1f242b}
+:root.matte h2,:root.matte h3,:root.matte summary,:root.matte label,:root.matte .seglbl{color:#2a3038}
+:root.matte .muted,:root.matte .note,:root.matte small,:root.matte .hint{color:#5d6570}
+/* text fields and selects */
+:root.matte .txt,:root.matte select,:root.matte input[type=text],:root.matte textarea{background:#e3e6ea!important;color:#1f242b!important;border-color:#c3c8cf!important;box-shadow:inset 0 2px 4px rgba(50,56,66,.18)!important}
+:root.matte select option{background:#f3f4f6;color:#1f242b}
+:root.matte ::placeholder{color:#7d8590}
+/* 3D buttons: light matte when off, yellow when on */
+:root.matte .btn,:root.matte .bdw .tgl,:root.matte .bdw .tgd,:root.matte .bdw .tgl .k,:root.matte .bdw .qbtn,:root.matte .bdw .hold,:root.matte .seg .btn{--mOff:linear-gradient(#fdfdfe,#e8eaed 55%,#d6d9de)!important}
+:root.matte .btn:not([aria-pressed="true"]):not(.on):not(.estop),
+:root.matte .bdw .tgl:not(.on):not(.latch),:root.matte .bdw .tgl.latch:not(.on) .k,
+:root.matte .bdw .tgd:not(.on),:root.matte .bdw .qbtn:not(.on),:root.matte[data-skin="studs"] .bdw .qbtn.lbtn:not(.on){
+  background:linear-gradient(#fdfdfe,#e8eaed 55%,#d6d9de)!important;color:#3d434c!important;text-shadow:0 1px 0 #fff!important;border-color:#b9bec6!important;
+  box-shadow:0 4px 7px rgba(40,46,56,.22),inset 0 2px 1px #fff,inset 0 -3px 5px rgba(60,66,78,.14)!important}
+:root.matte .btn:not([aria-pressed="true"]):not(.on):not(.estop):active,:root.matte .bdw .tgd:not(.on):active{box-shadow:0 2px 3px rgba(40,46,56,.22),inset 0 2px 4px rgba(60,66,78,.2)!important}
+:root.matte .btn:disabled{opacity:.5}
+:root.matte #profDel:not([aria-pressed="true"]){color:#c62828!important}
+:root.matte .bdw .tgl.latch.on .k{color:#2a1c00!important;text-shadow:0 1px 0 rgba(255,255,255,.4)!important}
+:root.matte .bdw .qbtn.turbo:not(.on){color:#a86f00!important}
+:root.matte .bdw .qbtn.turbo:not(.on)::before{filter:drop-shadow(0 0 0 #000) saturate(1.3)}
+/* recessed wells: slider rails, tracks, hold bars, latch slots */
+:root.matte[data-skin="studs"] .track,:root.matte[data-skin="studs"] .hold,:root.matte .bdw .tgl.latch,:root.matte .bdw .tgl.latch.on{background:linear-gradient(#c3c7cd,#dcdfe3)!important;border-color:#c0c5cc!important;box-shadow:inset 0 4px 8px rgba(50,56,66,.35),0 1px 0 #fff!important}
+:root.matte[data-skin="studs"] .track::before{background:linear-gradient(#9aa0a9,#9aa0a9) center/calc(100% - 44px) 4px no-repeat,repeating-linear-gradient(90deg,#aab0b8 0 2px,transparent 2px 12.5%) center/calc(100% - 44px) 18px no-repeat!important}
+:root.matte[data-skin="studs"] .bdw input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(#aeb3bb,#cdd0d5)!important;border-color:#b5bac1!important;border-top-color:#8f959e!important;border-bottom-color:#f4f5f7!important;box-shadow:inset 0 4px 7px rgba(50,56,66,.45),0 1px 0 #fff!important}
+:root.matte .bdw .tgbar{background:#c6cad0;box-shadow:inset 0 2px 3px rgba(50,56,66,.4)}
+:root.matte[data-skin="studs"] .meter-wrap .meter{box-shadow:0 0 0 3px #c3c8cf,inset 0 3px 6px rgba(50,56,66,.35)!important;background:conic-gradient(var(--fwd) calc(var(--m)*3.6deg),#d3d6db 0)!important}
+/* board / dashboard widgets */
+:root.matte .bdw,:root.matte[data-skin="studs"] .bdw{background:linear-gradient(#f5f6f8,#e7e9ed)!important;border:2px solid #cfd3d9!important;box-shadow:0 5px 12px rgba(40,46,56,.16),inset 0 1px 0 #fff!important;color:#1f242b}
+:root.matte .bdw-h,:root.matte .bdw-h span,:root.matte .bdw-h output{color:#2a3038}
+:root.matte .bdw select{background:#e3e6ea!important;color:#1f242b!important}
+:root.matte .dashbar .btn{height:38px}
+/* joystick: same design, light dish */
+:root.matte[data-skin="studs"] .pad:not(#z){background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 0l10 13H0z' fill='%23c58f00'/%3E%3C/svg%3E") center 3.5%/calc(20px*var(--s,1)) calc(13px*var(--s,1)) no-repeat,
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 13L0 0h20z' fill='%23c58f00'/%3E%3C/svg%3E") center 96.5%/calc(20px*var(--s,1)) calc(13px*var(--s,1)) no-repeat,
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M0 10L13 0v20z' fill='%23c58f00'/%3E%3C/svg%3E") 3.5% center/calc(13px*var(--s,1)) calc(20px*var(--s,1)) no-repeat,
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M13 10L0 0v20z' fill='%23c58f00'/%3E%3C/svg%3E") 96.5% center/calc(13px*var(--s,1)) calc(20px*var(--s,1)) no-repeat,
+  linear-gradient(#b4b9c1,#b4b9c1) center/calc(2px*var(--s,1)) 56% no-repeat,
+  linear-gradient(#b4b9c1,#b4b9c1) center/56% calc(2px*var(--s,1)) no-repeat,
+  radial-gradient(circle at 50% 40%,#eceef1 0,#d6d9de 60%,#c6cad0 100%)!important;
+  border-color:#bfc4cb!important;
+  box-shadow:0 0 0 calc(2px*var(--s,1)) #9aa0a9,0 0 0 calc(10px*var(--s,1)) #7f858f,0 calc(10px*var(--s,1)) calc(18px*var(--s,1)) calc(8px*var(--s,1)) rgba(40,46,56,.22),inset 0 calc(10px*var(--s,1)) calc(22px*var(--s,1)) rgba(60,66,78,.42),inset 0 calc(-3px*var(--s,1)) calc(6px*var(--s,1)) #fff!important}
+:root.matte[data-skin="studs"] .pad:not(#z)::after{border-color:#9ea4ad!important}
+/* logs, panels, dialogs, toast */
+:root.matte pre,:root.matte .log,:root.matte #log,:root.matte .frames{background:#e3e6ea!important;color:#2a3038!important;border-color:#c3c8cf!important}
+:root.matte .dtpl{background:rgba(60,66,78,.35)}
+:root.matte .dtpl-in{background:#f3f4f6;border-color:#cfd3d9;box-shadow:0 12px 30px rgba(40,46,56,.3)}
+:root.matte .dtpl-in h3,:root.matte .dtpl-in h4{color:#a86f00}
+:root.matte .dtpl-in p,:root.matte .dtpl-in .btn small{color:#5d6570;opacity:1}
+:root.matte .dtpl-save input{background:#e3e6ea;color:#1f242b;border-color:#c3c8cf}
+:root.matte .dtpl-in .dtpl-del{color:#c62828!important}
+:root.matte .dtpl-in .dtpl-del.arm{background:#c62828!important;color:#fff!important;text-shadow:none!important}
+:root.matte #toast{background:#2a3038;color:#f3f4f6}
+:root.matte .dw.dw-ed{outline-color:#c58f00}
+:root.matte .hubstat[data-st=on]{--c:#22a83c;color:#1d7a32}:root.matte .hubstat[data-st=off]{--c:#d93030;color:#b42323}:root.matte .hubstat[data-st=busy]{--c:#d99a00;color:#8a6200}
+:root.matte .bar .cap{color:#5d6570}
+:root.matte .adv input[type=range],:root.matte .set input[type=range],:root.matte #calCard input[type=range]{color-scheme:light}
+:root.matte.dash #boardCard{background:none!important;border:0!important;box-shadow:none!important}
+:root.matte.dash .dw.estopw{background:none!important;border:0!important;box-shadow:none!important}
+:root.matte.dash #boardGrid.editing{background-image:linear-gradient(rgba(60,66,78,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(60,66,78,.12) 1px,transparent 1px)}
+:root.matte.dash #bdEditor{background:#f3f4f6;color:#1f242b}
+:root.matte.dash .dw.bad{background:rgba(255,60,60,.25)!important}
+:root.matte .dtpl-in .btn{color:#2a3038!important}
 </style>
 </head>
 <body>
@@ -952,6 +1020,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       <label>Model name<input class="txt" id="profName" type="text" maxlength="24" autocomplete="off"></label>
     </div>
     <div class="swatches" id="swatches" role="group" aria-label="Model colour"><span>Colour</span></div>
+    <div class="seglbl" id="toneLbl">Theme</div>
+    <div class="seg" id="toneSeg" role="group" aria-label="Theme"><button class="btn" id="toneDark" type="button" aria-pressed="true">3D dark</button><button class="btn" id="toneMatte" type="button" aria-pressed="false">Matte light</button></div>
     <div class="seg" role="group" aria-label="Theme" hidden><button class="btn" id="thStd" type="button" aria-pressed="true">Classic</button><button class="btn" id="thBuild" type="button" aria-pressed="false">Construction</button><button class="btn" id="thStuds" type="button" aria-pressed="false">Studs</button></div>
     <div class="seglbl" id="spdLbl">Speed</div>
     <div class="seg" id="spdSeg" role="group" aria-label="Speed">
@@ -1448,6 +1518,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(c.accentV!==2) d.accent=({4:1,5:2})[d.accent]||0; else d.accent=Math.min(2,d.accent);
     d.accentV=2;
     d.theme='studs';
+    d.tone=c.tone==='matte'?'matte':'dark';
     var pd=(c.pad&&typeof c.pad==='object')?c.pad:{};
     d.pad={on:pd.on!==false,dead:Math.round(num(pd.dead,5,40,12)),trig:Math.round(num(pd.trig,-1,NMAX-1,-1)),map:{}};
     var msrc=(pd.map&&typeof pd.map==='object')?pd.map:{};
@@ -1964,7 +2035,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   function syncAll(){
     refs.forEach(function(r,i){syncChannel(i)});
-    syncSticks();syncSettings();syncLayout();syncProfiles();syncRec();paintAccent();paintSkin();paintLamps();syncSeq();syncSafety();syncApp();buildGpMap();syncSpeed();syncRecTools();bkPaint();syncBoard();syncTiltUi();
+    syncSticks();syncSettings();syncLayout();syncProfiles();syncRec();paintAccent();paintSkin();paintTone();paintLamps();syncSeq();syncSafety();syncApp();buildGpMap();syncSpeed();syncRecTools();bkPaint();syncBoard();syncTiltUi();
   }
   var ACC=['#FF7A2F','#FF4B3E','#F5B800'];
   var swBox=$('#swatches'),swBtns=ACC.map(function(c,n){
@@ -1983,10 +2054,19 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var a=$('#thStd'),b=$('#thBuild'),c3=$('#thStuds');
     a.setAttribute('aria-pressed',String(C.theme!=='build'&&C.theme!=='studs'));b.setAttribute('aria-pressed',String(C.theme==='build'));c3.setAttribute('aria-pressed',String(C.theme==='studs'));
   }
+  function paintTone(){
+    var m=C.tone==='matte', de=document.documentElement;
+    if(de&&de.classList) de.classList.toggle('matte',m);
+    $('#toneDark').setAttribute('aria-pressed',String(!m));$('#toneMatte').setAttribute('aria-pressed',String(m));
+    var mt=document.querySelector('meta[name=theme-color]');if(mt) mt.setAttribute('content',m?'#e9ebee':'#14161a');
+    if(NB&&NB.setBars){try{NB.setBars(m?'light':'dark')}catch(e){}}
+  }
+  $('#toneDark').addEventListener('click',function(){C.tone='dark';save();paintTone()});
+  $('#toneMatte').addEventListener('click',function(){C.tone='matte';save();paintTone()});
   function setTheme(t){
     C.theme=t;
     if((t==='build'||t==='studs')&&C.accent===0) C.accent=2;
-    paintAccent();paintSkin();save();
+    paintAccent();paintSkin();paintTone();save();
   }
   $('#thStd').addEventListener('click',function(){setTheme('std')});
   $('#thBuild').addEventListener('click',function(){setTheme('build')});
