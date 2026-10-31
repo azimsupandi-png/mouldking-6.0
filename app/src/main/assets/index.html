@@ -773,7 +773,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     repeating-radial-gradient(circle at 50% 50%,rgba(70,40,0,.5) 0 1px,transparent 1px 4px) center/52% 52% no-repeat,
     radial-gradient(circle at 36% 26%,#fff3a8 0,#ffd84d 22%,#f4b800 50%,#b07f00 88%,#7a5600 100%);
   box-shadow:0 2px 0 #7a5600,0 11px 8px -3px rgba(0,0,0,.9),inset 0 -6px 8px rgba(60,30,0,.6),inset 0 3px 4px rgba(255,255,255,.65),0 0 calc(var(--gl)*24px) calc(var(--gl)*5px) rgba(255,200,40,calc(var(--gl)*.85))}
-:root.dash-l .bar-in{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+:root.dash-l .bar-in{padding-left:16px;padding-right:max(14px,env(safe-area-inset-right,0px))}
 :root[data-skin="studs"] .pad,:root[data-skin="studs"] .bd-pads .pad,:root[data-skin="studs"] .cols.dual .pad,:root[data-skin="studs"] .bdw>.pad{border-color:transparent;background:
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 0l10 13H0z' fill='%23ffc400' fill-opacity='.95'/%3E%3C/svg%3E") center 2.5%/13px 9px no-repeat,
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 13L0 0h20z' fill='%23ffc400' fill-opacity='.95'/%3E%3C/svg%3E") center 97.5%/13px 9px no-repeat,
@@ -804,6 +804,20 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 }
 :root[data-skin="studs"] .bdw input[type=range]{--g:0;--t:0;--gl:max(var(--g),var(--t))}
 :root[data-skin="studs"] .bdw input[type=range]:active{--t:1}
+/* portrait / non-dashboard board sizing */
+:root:not(.dash) .bdv{height:170px}
+:root:not(.dash)[data-skin="studs"] .bdv input[type=range],:root:not(.dash) .bdv input[type=range]{width:150px;margin-left:-75px}
+:root:not(.dash) .bdw:has(.bd-pads){padding-left:6px;padding-right:6px}
+:root:not(.dash)[data-skin="studs"] .bd-pads{gap:16px}
+:root:not(.dash)[data-skin="studs"] .bd-pads .pad{width:calc(100% - 4px);max-width:none;margin:0 auto 8px;
+  box-shadow:0 10px 16px rgba(0,0,0,.8),0 0 0 1px #000,inset 0 2px 0 rgba(255,255,255,.28),inset 0 12px 22px #000,inset 0 -3px 5px rgba(255,255,255,.12),0 2px 0 3px #2c3037,0 0 0 5px #101216}
+:root:not(.dash) .bdw .tgl{height:38px;font-size:13px;border-radius:19px}
+:root:not(.dash) .bdw .tgl .led{width:16px;height:16px}
+:root:not(.dash) .bdw .tgl.led{padding:0 8px 0 36px}
+:root:not(.dash) .bdw .tgl.latch .k{font-size:12px;border-radius:16px}
+:root:not(.dash)[data-skin="studs"] .bdw .qbtn.lbtn{height:38px;min-height:38px;font-size:13px;border-radius:19px;padding:0 8px 0 38px}
+:root:not(.dash) .bdw .qbtn.lbtn::before,:root:not(.dash) .bdw .qbtn.lbtn.on::before{width:24px;height:24px;left:7px}
+:root:not(.dash) .bdw .tgd{height:40px}
 </style>
 </head>
 <body>
