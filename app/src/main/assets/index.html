@@ -711,7 +711,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 /* Dashboard: full landscape canvas with free widgets */
 :root.dash,:root.dash body{overflow:hidden;overscroll-behavior:none}
 :root.dash body{position:fixed;left:0;top:0;right:0;bottom:0;width:100%}
-:root.dash main{padding-top:6px;padding-bottom:4px}
+:root.dash main{padding-top:6px;padding-bottom:4px;padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}
 :root.dash .bar-banner{display:none}
 :root.dash main>*:not(.cols),:root.dash .cols>*:not(#boardCard),:root.dash #boardCard>h2,:root.dash #bdNote,:root.dash #boardCard>.rec-row,:root.dash .bd-dashchk{display:none}
 :root.dash .cols{display:block}
@@ -2789,16 +2789,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(!dashHits(it,g)){it.g=g;return}
     delete it.g;dashAuto();
   }
-  var DCELL={w:30,h:24};
+  var DCELL={w:30,h:24,pw:720,ph:288};
   function dashCell(){
     var par=bdGrid.parentElement, pw=(par&&par.clientWidth)||window.innerWidth;
     var hd=document.querySelector('header'), top=hd?hd.getBoundingClientRect().bottom:0;
-    DCELL.w=Math.max(10,Math.floor(pw/DGX));
-    DCELL.h=Math.max(10,Math.floor(Math.max(150,window.innerHeight-top-12)/DGY));
+    DCELL.pw=Math.floor(pw);DCELL.ph=Math.floor(Math.max(150,window.innerHeight-top-12));
+    DCELL.w=DCELL.pw/DGX;DCELL.h=DCELL.ph/DGY;
   }
   function dashStyle(el,g){
-    el.style.left=(g[0]*DCELL.w)+'px';el.style.top=(g[1]*DCELL.h)+'px';
-    el.style.width=(g[2]*DCELL.w)+'px';el.style.height=(g[3]*DCELL.h)+'px';
+    var x0=Math.round(g[0]*DCELL.w), x1=Math.round((g[0]+g[2])*DCELL.w), y0=Math.round(g[1]*DCELL.h), y1=Math.round((g[1]+g[3])*DCELL.h);
+    el.style.left=x0+'px';el.style.top=y0+'px';el.style.width=(x1-x0)+'px';el.style.height=(y1-y0)+'px';
   }
   function dashFit(){
     var on=dashOn();
@@ -2809,9 +2809,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     dashCell();
     var hdr=document.querySelector('header'), htop=hdr?hdr.getBoundingClientRect().bottom:51;
     var dbar=$('#dashBar');if(dbar) dbar.style.top=Math.max(0,Math.round((htop-5-34)/2))+'px';
-    bdGrid.style.width=(DCELL.w*DGX)+'px';bdGrid.style.height=(DCELL.h*DGY)+'px';
-    var pw0=(bdGrid.parentElement&&bdGrid.parentElement.clientWidth)||window.innerWidth;
-    bdGrid.style.margin='0 0 0 '+Math.max(0,Math.floor((pw0-DCELL.w*DGX)/2))+'px';
+    bdGrid.style.width=DCELL.pw+'px';bdGrid.style.height=DCELL.ph+'px';bdGrid.style.margin='0';
     bdGrid.style.backgroundSize=DCELL.w+'px '+DCELL.h+'px';
     bdW.forEach(function(w){if(w.el&&w.it&&w.it.g) dashStyle(w.el,w.it.g)});
     if(typeof bdGrid.querySelectorAll!=='function') return;
@@ -2833,14 +2831,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         bv.style.height=bh+'px';
         if(inp){
           inp.style.zoom='1';var tk=inp.offsetHeight||46;
-          var kv=Math.max(1,Math.min(2.4,aw/tk)), lw=bh/kv;
+          var kv=Math.max(1,Math.min(4,aw/tk,bh/(2.6*tk))), lw=bh/kv;
           inp.style.zoom=String(kv);inp.style.width=lw+'px';inp.style.marginLeft=(-lw/2)+'px';inp.style.marginTop=(-tk/2)+'px';
         }
       }else if(el.querySelector){
         var ct=el.querySelector(':scope > input[type=range], :scope > .tgl, :scope > .tgdir, :scope > .qbtn');
         if(ct){
           ct.style.zoom='1';ct.style.width='';
-          var cb=ct.offsetHeight||44, kc=Math.max(1,Math.min(2.4,ah/cb));
+          var cb=ct.offsetHeight||44, kc=Math.max(1,Math.min(4,ah/cb,ct.matches&&ct.matches('input')?aw/(2.6*cb):4));
           ct.style.zoom=String(kc);ct.style.width=(aw/kc)+'px';
         }
       }
