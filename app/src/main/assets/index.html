@@ -718,10 +718,12 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash #boardCard{padding:0;border:0;background:none;box-shadow:none;margin:0}
 :root.dash #boardGrid{display:block;position:relative;margin:0 auto}
 :root:not(.dash) .dashbar{display:none}
-.dashbar{position:relative;z-index:31;display:flex;gap:8px;justify-content:center;align-items:center;height:40px;padding-top:6px}
-.dashbar .btn{height:34px;min-height:34px;padding:0 14px;font-size:13px;flex:0 0 auto}
+.dashbar{display:flex;gap:6px;justify-content:center;align-items:center;height:34px}
+.dashbar .btn{height:34px;min-height:34px;padding:0 12px;font-size:12px;flex:0 0 auto}
+:root.dash .dashbar{position:fixed;left:50%;transform:translateX(-50%);top:6px;z-index:40;max-width:calc(100% - 340px);overflow:hidden}
+:root.dash .bar-in{padding-block:2px}
 :root.dash #boardGrid.editing{background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px)}
-:root.dash #bdEditor{position:fixed;left:0;right:0;bottom:46px;max-height:52vh;overflow:auto;z-index:30;background:var(--panel);border-top:3px solid #f4b800;padding:12px max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px)) 16px;box-shadow:0 -8px 24px rgba(0,0,0,.6)}
+:root.dash #bdEditor{position:fixed;left:0;right:0;bottom:0;max-height:56vh;overflow:auto;z-index:30;background:var(--panel);border-top:3px solid #f4b800;padding:12px max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px)) 16px;box-shadow:0 -8px 24px rgba(0,0,0,.6)}
 :root.dash .dw{position:absolute;display:flex;flex-direction:column;gap:3px;padding:5px 7px;overflow:hidden;box-sizing:border-box;margin:0;align-content:normal}
 :root.dash .dw>*{min-width:0}
 :root.dash .dw>.bdw-h{flex:none;margin:0}
@@ -852,9 +854,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       <p class="rec-stat" id="bdNote"></p>
       <div class="dashbar" id="dashBar">
         <button class="btn" id="dbEdit" type="button" aria-pressed="false">Edit</button>
-        <button class="btn" id="dbAdd" type="button" aria-pressed="false" hidden>Add widget</button>
-        <button class="btn" id="dbReset" type="button">Reset layout</button>
-        <button class="btn" id="dbExit" type="button">Exit dashboard</button>
+        <button class="btn" id="dbAdd" type="button" aria-pressed="false" aria-label="Add widget" hidden>+ Add</button>
+        <button class="btn" id="dbReset" type="button" aria-label="Reset layout">Reset</button>
+        <button class="btn" id="dbExit" type="button" aria-label="Exit dashboard">Exit</button>
       </div>
       <label class="check bd-dashchk" for="bdDash"><input id="bdDash" type="checkbox">Dashboard when the phone is sideways</label>
       <div class="rec-row"><button class="btn" id="bdEdit" type="button" aria-pressed="false">Edit board</button></div>
@@ -1093,7 +1095,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider',blink:'off',bright:100});
-    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,dash:false,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,dash:false,dgv:2,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -1167,8 +1169,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     return out;
   }
-  var DGX=24, DGY=12, DHUE=[0,-45,-20,75,135,190,235,290];
-  var DMIN={s:[6,3],h:[5,3],j:[5,6],d:[10,6],m:[6,3],l:[3,3],t:[3,3],b:[3,3],q:[3,3],e:[3,3]};
+  var DGX=48, DGY=24, DHUE=[0,-45,-20,75,135,190,235,290];
+  var DMIN={s:[12,6],h:[10,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],q:[6,6],e:[6,6]};
   function cleanBoard(b){
     var out=[];
     if(!Array.isArray(b)) return out;
@@ -1241,6 +1243,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.zone=pickOf(c.zone,[25,50,75,100],100);
     d.testPwr=Math.round(num(c.testPwr,10,100,60));
     d.dash=c.dash===true;
+    d.dgv=2;
     d.hubNames=[0,1,2].map(function(q){var v=Array.isArray(c.hubNames)?c.hubNames[q]:'';return typeof v==='string'?v.replace(/[\u0000-\u001f<>]/g,'').slice(0,12):''});
     d.spring=true;
     var s1=c.s1||{mode:c.mode,a:c.a,b:c.b}, s2=c.s2||{};
@@ -1251,6 +1254,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.layout=(c.layout==='joy'||c.layout==='dual'||c.layout==='board')?c.layout:'std';
     d.speed=(c.speed==='slow'||c.speed==='normal')?c.speed:'fast';
     d.board=cleanBoard(c.board);
+    if(c.dgv!==2) d.board.forEach(function(it){if(it.g) it.g=it.g.map(function(q){return q*2})});
     var tl=(c.tilt&&typeof c.tilt==='object')?c.tilt:{};
     d.tilt={on:tl.on===true,sens:pickOf(tl.sens,[30,45,60],45),inv:tl.inv===true,all:tl.all===true};
     // Colour choices are now orange(0), red(1), yellow(2). Older saves used six: pink maps to red, yellow to yellow, the rest to orange.
@@ -2744,13 +2748,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function dashOn(){return !!(C.layout==='board'&&C.dash&&landMQ&&landMQ.matches)}
   function dashSize(it){
     var k=it.k, wd=it.w===2;
-    if(k==='j') return [6,8];
-    if(k==='d') return [12,8];
-    if(k==='s'||k==='m') return it.v?[3,8]:(wd?[12,3]:[8,3]);
-    if(k==='h') return wd?[10,3]:[7,3];
-    if(k==='t') return it.y==='dir'?[9,3]:(wd?[6,3]:[4,3]);
-    if(k==='e') return [4,4];
-    return [4,3];
+    if(k==='j') return [12,16];
+    if(k==='d') return [24,16];
+    if(k==='s'||k==='m') return it.v?[6,16]:(wd?[24,6]:[16,6]);
+    if(k==='h') return wd?[20,6]:[14,6];
+    if(k==='t') return it.y==='dir'?[18,6]:(wd?[12,6]:[8,6]);
+    if(k==='e') return [8,8];
+    return [8,6];
   }
   function dashHitsG(a,b){return a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]}
   function dashHits(it,g){return C.board.some(function(o){return o!==it&&o.g&&dashHitsG(o.g,g)})}
@@ -2766,7 +2770,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       var sz=dashSize(it), mn=DMIN[it.k]||[3,3], g=null;
       if(it.k==='e'&&!dashHits(it,[DGX-sz[0],DGY-sz[1],sz[0],sz[1]])) g=[DGX-sz[0],DGY-sz[1],sz[0],sz[1]];
       for(var shrink=0;!g&&shrink<3;shrink++){
-        var w=Math.max(mn[0],sz[0]-shrink*2), h=Math.max(mn[1],sz[1]-shrink*2);
+        var w=Math.max(mn[0],sz[0]-shrink*4), h=Math.max(mn[1],sz[1]-shrink*4);
         for(var y=0;!g&&y<=DGY-h;y++) for(var x=0;!g&&x<=DGX-w;x++){
           var t=[x,y,w,h];
           if(!dashHits(it,t)) g=t;
@@ -2790,7 +2794,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var par=bdGrid.parentElement, pw=(par&&par.clientWidth)||window.innerWidth;
     var hd=document.querySelector('header'), top=hd?hd.getBoundingClientRect().bottom:0;
     DCELL.w=Math.max(10,Math.floor(pw/DGX));
-    DCELL.h=Math.max(10,Math.floor(Math.max(150,window.innerHeight-top-58)/DGY));
+    DCELL.h=Math.max(10,Math.floor(Math.max(150,window.innerHeight-top-12)/DGY));
   }
   function dashStyle(el,g){
     el.style.left=(g[0]*DCELL.w)+'px';el.style.top=(g[1]*DCELL.h)+'px';
@@ -2801,8 +2805,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     document.documentElement.classList.toggle('dash',on);
     if(on){try{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}catch(_){}}
     if(!bdGrid) return;
-    if(!on){bdGrid.style.height='';bdGrid.style.width='';bdGrid.style.margin='';bdGrid.style.backgroundSize='';return}
+    if(!on){var dbar0=$('#dashBar');if(dbar0) dbar0.style.top='';bdGrid.style.height='';bdGrid.style.width='';bdGrid.style.margin='';bdGrid.style.backgroundSize='';return}
     dashCell();
+    var hdr=document.querySelector('header'), htop=hdr?hdr.getBoundingClientRect().bottom:51;
+    var dbar=$('#dashBar');if(dbar) dbar.style.top=Math.max(0,Math.round((htop-5-34)/2))+'px';
     bdGrid.style.width=(DCELL.w*DGX)+'px';bdGrid.style.height=(DCELL.h*DGY)+'px';
     var pw0=(bdGrid.parentElement&&bdGrid.parentElement.clientWidth)||window.innerWidth;
     bdGrid.style.margin='0 0 0 '+Math.max(0,Math.floor((pw0-DCELL.w*DGX)/2))+'px';
@@ -2813,6 +2819,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       var hh=0, hd2=el.querySelector('.bdw-h');
       if(hd2) hh=hd2.offsetHeight+3;
       var aw=el.clientWidth-14, ah=el.clientHeight-10-hh;
+      var esb=el.querySelector('.dw-es');
+      if(esb){var es0=Math.max(20,Math.floor(Math.min(el.clientWidth,el.clientHeight)-4));esb.style.width=es0+'px';esb.style.height=es0+'px';esb.style.alignSelf='center'}
       var pads=[].slice.call(el.querySelectorAll('.pad'));
       if(pads.length){
         var sp=Math.max(30,Math.min(pads.length>1?(aw-8)/2:aw,ah));
@@ -3327,7 +3335,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'New model':'Model baharu','Delete':'Padam','Confirm delete':'Sahkan padam','Confirm':'Sahkan','Model colour':'Warna model','Theme':'Tema','Layout':'Susun atur',
     'Model list is full.':'Senarai model penuh.','New model created from the current settings':'Model baharu dicipta daripada tetapan semasa',
     'Quick actions':'Tindakan pantas',
-    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Dashboard when the phone is sideways':'Dashboard bila telefon mengiring','Edit':'Ubah','Add widget':'Tambah widget','Done':'Selesai','Reset layout':'Set semula susunan','Exit dashboard':'Keluar dashboard','Layout reset.':'Susunan disetkan semula.','No space. Make room or remove a widget first.':'Tiada ruang. Kosongkan ruang atau buang satu widget dahulu.','The board is full (16 controls).':'Papan penuh (16 kawalan).','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
+    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Dashboard when the phone is sideways':'Dashboard bila telefon mengiring','Edit':'Ubah','Add widget':'Tambah widget','+ Add':'+ Tambah','Reset':'Set semula','Exit':'Keluar','Done':'Selesai','Reset layout':'Set semula susunan','Exit dashboard':'Keluar dashboard','Layout reset.':'Susunan disetkan semula.','No space. Make room or remove a widget first.':'Tiada ruang. Kosongkan ruang atau buang satu widget dahulu.','The board is full (16 controls).':'Papan penuh (16 kawalan).','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
     'Fine control (expo)':'Kawalan halus (expo)','Slider':'Gelangsar','Hold':'Tahan','Control type':'Jenis kawalan','Response curve':'Lengkung tindak balas',
     'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
     'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
