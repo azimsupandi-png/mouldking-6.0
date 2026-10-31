@@ -885,6 +885,24 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 @container (max-width:150px){
   :root.dash .dw .bdw-ed .btn{min-width:28px!important;width:28px!important;flex:0 0 28px!important;height:28px!important;min-height:28px!important;font-size:13px}
 }
+.dtpl-in h4{margin:6px 0 0;font-size:13px;color:#f4b800;letter-spacing:.04em}
+.dtpl-in h4[hidden]{display:none}
+.dtpl-mine{display:flex;flex-direction:column;gap:6px}
+.dtpl-row{display:flex;gap:6px}
+.dtpl-row .btn:first-child{flex:1 1 auto;min-width:0}
+.dtpl-in .dtpl-del{flex:0 0 auto;align-items:center;justify-content:center;width:auto;min-width:44px;padding:0 12px;color:#ff8a8a}
+.dtpl-in .dtpl-del.arm{background:#7a1414;color:#fff;border-color:#a11}
+.dtpl-save{display:flex;gap:6px;margin-top:4px}
+.dtpl-save input{flex:1 1 auto;min-width:0;height:44px;border-radius:22px;border:2px solid #2b2f36;background:#0b0c0f;color:#e8eaee;padding:0 14px;font:inherit;font-size:14px}
+.dtpl-in .dtpl-save .btn{flex:0 0 auto;align-items:center;justify-content:center}
+.dtpl-in .dtpl-note{font-size:11px;margin:0}
+.dtpl-cols{display:flex;flex-direction:column;gap:8px;min-height:0}
+.dtpl-col{display:flex;flex-direction:column;gap:8px;min-width:0}
+:root.dash-l .dtpl-in{width:min(820px,100%);max-height:calc(100vh - 24px);overflow:hidden}
+:root.dash-l .dtpl{padding:12px}
+:root.dash-l .dtpl-cols{flex-direction:row;flex:1 1 auto;overflow:hidden}
+:root.dash-l .dtpl-col{flex:1 1 0;overflow:auto;padding-right:2px}
+:root.dash-l .dtpl-col #dtplMineH{margin-top:0}
 </style>
 </head>
 <body>
@@ -995,9 +1013,19 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         <div class="dtpl-in">
           <h3>Layout templates</h3>
           <p>Replaces the current layout. Press Back to undo.</p>
+          <div class="dtpl-cols"><div class="dtpl-col">
           <button class="btn" type="button" data-tpl="car">Car / Truck<small>Drive slider, steering slider, lights, Turbo, winch, E-Stop</small></button>
           <button class="btn" type="button" data-tpl="exc">Excavator<small>Thin track slider at the sides, double joystick for boom, arm, bucket, swing</small></button>
           <button class="btn" type="button" data-tpl="dual">Dual stick<small>Two big joysticks, E-Stop, lights and Turbo in the middle</small></button>
+          </div><div class="dtpl-col">
+          <div class="dtpl-save">
+            <input id="dtplName" type="text" maxlength="24" placeholder="Template name" aria-label="Template name" autocomplete="off">
+            <button class="btn" type="button" id="dtplSave">Save current layout</button>
+          </div>
+          <p class="dtpl-note">My templates work in every model. Up to 10.</p>
+          <h4 id="dtplMineH">My templates</h4>
+          <div id="dtplMine" class="dtpl-mine"></div>
+          </div></div>
           <button class="btn" type="button" id="dbTplX">Cancel</button>
         </div>
       </div>
@@ -1449,7 +1477,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     ];
   }
   function cleanLim(a){var D=[[40,80],[70,60],[100,40]];return D.map(function(d,i){var x=(Array.isArray(a)&&a[i]&&typeof a[i]==='object')?a[i]:{};return {l:Math.round(num(x.l,10,100,d[0])),r:Math.round(num(x.r,0,100,d[1]))}})}
-  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),lim:cleanLim(p.lim),autoBackup:p.autoBackup!==false,full:p.full!==false,lastBackup:Math.max(0,+p.lastBackup||0)}}
+  function cleanTpls(a){
+    var out=[];if(!Array.isArray(a)) return out;
+    a.slice(0,10).forEach(function(t){
+      if(!t||typeof t!=='object') return;
+      var n=String(t.name||'').replace(/\s+/g,' ').trim().slice(0,24), b=cleanBoard(t.board);
+      if(n&&b.length&&!out.some(function(o){return o.name===n})) out.push({name:n,board:b});
+    });
+    return out;
+  }
+  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),lim:cleanLim(p.lim),autoBackup:p.autoBackup!==false,full:p.full!==false,lastBackup:Math.max(0,+p.lastBackup||0),tpls:cleanTpls(p.tpls)}}
   var store={active:null,profiles:[],prefs:cleanPrefs()};
   try{
     var raw=localStorage.getItem('mk6v2');
@@ -2203,7 +2240,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   /* ---------- Backup ---------- */
   var ioText=$('#ioText'), ioApply=$('#ioApply'), ioMsg=$('#ioMsg');
   function exportJson(){
-    return JSON.stringify({app:'mk6console',version:3,profiles:store.profiles.map(function(p){return {name:p.name,label:p.label||'',cfg:p.cfg}})});
+    return JSON.stringify({app:'mk6console',version:3,profiles:store.profiles.map(function(p){return {name:p.name,label:p.label||'',cfg:p.cfg}}),tpls:store.prefs.tpls});
   }
   function uniqueName(n){
     var base=n||'Imported model', name=base, k=2;
@@ -2216,15 +2253,20 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var data;
     try{data=JSON.parse(text)}catch(e){ioMsg.textContent='That is not valid model data.';return}
     var list=data&&Array.isArray(data.profiles)?data.profiles:(data&&data.cfg?[data]:null);
-    if(!list||!list.length){ioMsg.textContent='No models found in that data.';return}
+    var hasT=!!(data&&Array.isArray(data.tpls)&&data.tpls.length);
+    if((!list||!list.length)&&!hasT){ioMsg.textContent='No models found in that data.';return}
+    list=list||[];
     var added=0;
     list.slice(0,10).forEach(function(p){
       if(!p||typeof p!=='object'||store.profiles.length>=MAX_MODELS) return;
       store.profiles.push({id:uid(),name:uniqueName(tr(String(p.name||'Imported model').slice(0,24))),label:(typeof p.label==='string'?p.label.slice(0,24):''),cfg:sanitizeCfg(p.cfg)});
       added++;
     });
+    var tAdd=0;
+    if(data&&Array.isArray(data.tpls)) cleanTpls(data.tpls).forEach(function(t){if(store.prefs.tpls.length<10&&!store.prefs.tpls.some(function(o){return o.name===t.name})){store.prefs.tpls.push(t);tAdd++}});
+    if(tAdd&&!added) save();
     if(added){save();syncProfiles()}
-    ioMsg.textContent=added?('Imported '+added+' model'+(added===1?'':'s')+'. Pick them in the Model list.'):'Nothing could be imported.';
+    ioMsg.textContent=(added?('Imported '+added+' model'+(added===1?'':'s')+'. Pick them in the Model list.'):(tAdd?'':'Nothing could be imported.'))+(tAdd?((added?' ':'')+'Imported '+tAdd+' layout template'+(tAdd===1?'':'s')+'.'):'');
   }
   window.onImportText=importText;
   window.onFileResult=function(kind,result){
@@ -3337,18 +3379,62 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     dual:[{k:'j',c:0,d:1,m:'axis',w:1,g:[0,0,19,24]},{k:'e',w:1,g:[19,0,10,8]},{k:'l',c:4,w:1,g:[19,8,10,8]},{k:'b',c:0,w:1,g:[19,16,10,8]},
           {k:'j',c:2,d:3,m:'axis',w:1,g:[29,0,19,24]}]
   };
-  function dashTplShow(on){$('#dashTpl').hidden=!on}
+  function dtplMine(){
+    var box=$('#dtplMine');box.textContent='';
+    var L2=store.prefs.tpls;
+    $('#dtplMineH').hidden=!L2.length;
+    L2.forEach(function(t,i){
+      var row=document.createElement('div');row.className='dtpl-row';
+      var b=document.createElement('button');b.type='button';b.className='btn';b.setAttribute('data-my',String(i));
+      b.appendChild(document.createTextNode(t.name));
+      var sm=document.createElement('small');sm.textContent=t.board.length+' widget'+(t.board.length===1?'':'s');b.appendChild(sm);
+      var x=document.createElement('button');x.type='button';x.className='btn dtpl-del';x.setAttribute('data-del',String(i));x.setAttribute('aria-label','Delete template '+t.name);x.textContent='\u2715';
+      row.appendChild(b);row.appendChild(x);box.appendChild(row);
+    });
+    $('#dtplSave').disabled=!C.board.length;
+  }
+  function dtplApply(board,label){
+    dashOn();
+    BD_UNDO.push({board:JSON.parse(JSON.stringify(C.board))});if(BD_UNDO.length>20)BD_UNDO.shift();
+    C.board=cleanBoard(JSON.parse(JSON.stringify(board)));
+    if(DG.k!=='g') C.board.forEach(function(o){if(o.g){o[DG.k]=o.g.slice()}});
+    dashTplShow(false);dashAdd=false;save();syncBoard();toast(label+' layout. Back undoes it.');
+  }
+  function dashTplShow(on){$('#dashTpl').hidden=!on;if(on){$('#dtplName').value='';dtplMine()}}
+  $('#dtplSave').addEventListener('click',function(){
+    if(!C.board.length) return;
+    dashOn();
+    var nm=$('#dtplName').value.replace(/\s+/g,' ').trim().slice(0,24);
+    var L2=store.prefs.tpls, ex=-1;
+    if(!nm){var k=1;do{nm='My layout '+k;k++}while(L2.some(function(o){return o.name===nm}))}
+    L2.forEach(function(o,i){if(o.name===nm) ex=i});
+    if(ex<0&&L2.length>=10){toast('Up to 10 templates. Delete one first.');return}
+    var bd=JSON.parse(JSON.stringify(C.board));
+    if(DG.k!=='g') bd.forEach(function(o){if(o[DG.k]) o.g=o[DG.k].slice()});
+    var t={name:nm,board:cleanBoard(bd)};
+    if(ex>=0) L2[ex]=t; else L2.push(t);
+    save();dtplMine();$('#dtplName').value='';
+    toast(ex>=0?('Template "'+nm+'" updated.'):('Saved as "'+nm+'".'));
+  });
+  $('#dtplName').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();$('#dtplSave').click()}});
+  $('#dtplMine').addEventListener('click',function(e){
+    var d=e.target.closest&&e.target.closest('[data-del]');
+    if(d){
+      var i=+d.getAttribute('data-del');
+      if(!d.classList.contains('arm')){d.classList.add('arm');d.textContent='Delete?';setTimeout(function(){if(d.isConnected){d.classList.remove('arm');d.textContent='\u2715'}},3000);return}
+      var gone=store.prefs.tpls.splice(i,1)[0];save();dtplMine();if(gone) toast('Template "'+gone.name+'" deleted.');
+      return;
+    }
+    var b=e.target.closest&&e.target.closest('[data-my]');if(!b) return;
+    var t=store.prefs.tpls[+b.getAttribute('data-my')];if(t) dtplApply(t.board,t.name);
+  });
   $('#dbTpl').addEventListener('click',function(){dashTplShow(true)});
   $('#dbTplX').addEventListener('click',function(){dashTplShow(false)});
   $('#dashTpl').addEventListener('click',function(e){
     if(e.target===this){dashTplShow(false);return}
     var b=e.target.closest&&e.target.closest('[data-tpl]');if(!b) return;
     var t=DTPL[b.getAttribute('data-tpl')];if(!t) return;
-    dashOn();
-    BD_UNDO.push({board:JSON.parse(JSON.stringify(C.board))});if(BD_UNDO.length>20)BD_UNDO.shift();
-    C.board=cleanBoard(JSON.parse(JSON.stringify(t)));
-    if(DG.k!=='g') C.board.forEach(function(o){if(o.g){o[DG.k]=o.g.slice()}});
-    dashTplShow(false);dashAdd=false;save();syncBoard();toast(b.firstChild.textContent.trim()+' layout. Back undoes it.');
+    dtplApply(t,b.firstChild.textContent.trim());
   });
   $('#dbBack').addEventListener('click',function(){
     var u=BD_UNDO.pop();if(!u){syncBoard();return}
@@ -3616,6 +3702,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
     'This launcher cannot add a shortcut.':'Pelancar ini tidak dapat menambah pintasan.',
     'Skip':'Langkau','Back':'Kembali','Next':'Seterusnya','Done':'Selesai',
+    'My templates':'Templat saya','Template name':'Nama templat','Save current layout':'Simpan susunan ini','My templates work in every model. Up to 10.':'Templat saya boleh digunakan dalam semua model. Maksimum 10.',
+    'Delete?':'Padam?','Up to 10 templates. Delete one first.':'Maksimum 10 templat. Padam satu dahulu.',
     'Template':'Templat','Layout templates':'Templat susunan','Replaces the current layout. Press Back to undo.':'Menggantikan susunan semasa. Tekan Kembali untuk batal.',
     'Car / Truck':'Kereta / Trak','Excavator':'Jengkaut','Dual stick':'Dua joystick',
     'Drive slider, steering slider, lights, Turbo, winch, E-Stop':'Gelangsar pandu, gelangsar stereng, lampu, Turbo, win, E-Stop',
