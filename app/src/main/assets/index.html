@@ -974,6 +974,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root .bdw input[type=range],:root[data-skin="studs"] .bdw input[type=range]{touch-action:none}
 :root .bdw .pad,:root .bdw .bdv{touch-action:none}
 :root .pwr,:root[data-skin="studs"] .pwr{touch-action:none}
+html,body{overflow-anchor:none}
 </style>
 </head>
 <body>
@@ -3958,6 +3959,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   document.addEventListener('touchmove',function(e){if((lock||onPad(e))&&e.cancelable) e.preventDefault()},{passive:false,capture:true});
   document.addEventListener('touchend',function(e){if(!e.touches||!e.touches.length) lock=false},{passive:true,capture:true});
   document.addEventListener('touchcancel',function(){lock=false},{passive:true,capture:true});
+  // Second guard: while a joystick or a board slider is held, keep the page exactly where it was
+  var held=0, hy=0, hx=0;
+  function ctl(t){return !!(t&&t.closest&&t.closest('.pad, .bdw input[type=range], .pwr'))}
+  document.addEventListener('pointerdown',function(e){if(ctl(e.target)){held++;hy=window.scrollY;hx=window.scrollX}},true);
+  function rel(){held=0}
+  document.addEventListener('pointerup',rel,true);document.addEventListener('pointercancel',rel,true);window.addEventListener('blur',rel);
+  window.addEventListener('scroll',function(){if(held&&(window.scrollY!==hy||window.scrollX!==hx)) window.scrollTo(hx,hy)},{passive:true});
 })();
 </script>
 </body>
