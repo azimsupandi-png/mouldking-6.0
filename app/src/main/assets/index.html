@@ -772,7 +772,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     radial-gradient(circle at 34% 24%,rgba(255,255,255,.9) 0,rgba(255,255,255,0) 24%),
     repeating-radial-gradient(circle at 50% 50%,rgba(70,40,0,.5) 0 1px,transparent 1px 4px) center/52% 52% no-repeat,
     radial-gradient(circle at 36% 26%,#fff3a8 0,#ffd84d 22%,#f4b800 50%,#b07f00 88%,#7a5600 100%);
-  box-shadow:0 2px 0 #7a5600,0 11px 8px -3px rgba(0,0,0,.9),inset 0 -6px 8px rgba(60,30,0,.6),inset 0 3px 4px rgba(255,255,255,.65)}
+  box-shadow:0 2px 0 #7a5600,0 11px 8px -3px rgba(0,0,0,.9),inset 0 -6px 8px rgba(60,30,0,.6),inset 0 3px 4px rgba(255,255,255,.65),0 0 calc(var(--gl)*24px) calc(var(--gl)*5px) rgba(255,200,40,calc(var(--gl)*.85))}
 :root.dash-l .bar-in{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
 :root[data-skin="studs"] .pad,:root[data-skin="studs"] .bd-pads .pad,:root[data-skin="studs"] .cols.dual .pad,:root[data-skin="studs"] .bdw>.pad{border-color:transparent;background:
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 0l10 13H0z' fill='%23ffc400' fill-opacity='.95'/%3E%3C/svg%3E") center 2.5%/13px 9px no-repeat,
@@ -786,7 +786,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     radial-gradient(circle at 74% 34%,rgba(255,255,255,.9) 0,rgba(255,255,255,0) 24%),
     repeating-radial-gradient(circle at 50% 50%,rgba(70,40,0,.5) 0 1px,transparent 1px 4px) center/52% 52% no-repeat,
     radial-gradient(circle at 74% 36%,#fff3a8 0,#ffd84d 22%,#f4b800 50%,#b07f00 88%,#7a5600 100%);
-  box-shadow:-2px 0 0 #7a5600,-11px 0 8px -3px rgba(0,0,0,.9),inset 6px 0 8px rgba(60,30,0,.6),inset -3px 0 4px rgba(255,255,255,.65)}
+  box-shadow:-2px 0 0 #7a5600,-11px 0 8px -3px rgba(0,0,0,.9),inset 6px 0 8px rgba(60,30,0,.6),inset -3px 0 4px rgba(255,255,255,.65),0 0 calc(var(--gl)*24px) calc(var(--gl)*5px) rgba(255,200,40,calc(var(--gl)*.85))}
 :root[data-skin="studs"] .pad .knob,:root[data-skin="studs"] .pad>.knob{width:min(36%,124px);left:calc(50% - min(18%,62px));top:calc(50% - min(18%,62px))}
 :root[data-skin="studs"] .bd-pads .pad .knob,:root[data-skin="studs"] .cols.dual .pad .knob,:root[data-skin="studs"] .bdw:not(.w2)>.pad .knob{width:38%;left:31%;top:31%}
 :root[data-skin="studs"] .pad::after,:root[data-skin="studs"] .bd-pads .pad::after,:root[data-skin="studs"] .cols.dual .pad::after,:root[data-skin="studs"] .bdw>.pad::after{inset:15%}
@@ -802,6 +802,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root .dw .qbtn.lbtn::before,:root .dw .qbtn.lbtn.on::before{left:50%;transform:translate(-50%,-50%)}
   :root .dw .tgl .led{left:50%;transform:translate(-50%,-50%)}
 }
+:root[data-skin="studs"] .bdw input[type=range]{--g:0;--t:0;--gl:max(var(--g),var(--t))}
+:root[data-skin="studs"] .bdw input[type=range]:active{--t:1}
 </style>
 </head>
 <body>
@@ -3636,6 +3638,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   if(!store.prefs.seen) guideOpen();
 
   setInterval(tick,50);
+})();
+</script>
+<script>
+(function(){
+  function g(el){var mn=+el.min,mx=+el.max,v=+el.value;if(!(mx>mn))return;var z=mn<0?0:mn,r=Math.abs(v-z)/Math.max(mx-z,z-mn);var q=Math.min(1,r*1.4).toFixed(2);if(el._g!==q){el._g=q;el.style.setProperty('--g',q)}}
+  function all(){var l=document.querySelectorAll('.bdw input[type=range]');for(var i=0;i<l.length;i++)g(l[i])}
+  document.addEventListener('input',function(e){var t=e.target;if(t&&t.matches&&t.matches('.bdw input[type=range]'))g(t)},true);
+  setInterval(all,120);
 })();
 </script>
 </body>
