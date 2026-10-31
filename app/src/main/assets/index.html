@@ -791,7 +791,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .bd-pads .pad .knob,:root[data-skin="studs"] .cols.dual .pad .knob,:root[data-skin="studs"] .bdw:not(.w2)>.pad .knob{width:38%;left:31%;top:31%}
 :root[data-skin="studs"] .pad::after,:root[data-skin="studs"] .bd-pads .pad::after,:root[data-skin="studs"] .cols.dual .pad::after,:root[data-skin="studs"] .bdw>.pad::after{inset:15%}
 :root[data-skin="studs"] .pad .knob,:root[data-skin="studs"] .pad>.knob,:root[data-skin="studs"] .bdw>.pad .knob{width:38%;left:31%;top:31%}
-:root.dash .dw{container-type:inline-size}
+:root.dash .dw{container-type:size}
+@container (max-height:125px){:root .dw select.lsel{display:none}}
 @container (max-width:170px){
   :root[data-skin="studs"] .dw .qbtn.lbtn,:root .dw .tgl.led{padding:0 6px 0 38px;font-size:13px;letter-spacing:.03em;justify-content:center}
   :root .dw .qbtn.lbtn::before,:root .dw .qbtn.lbtn.on::before{left:6px;width:24px;height:24px}
@@ -869,6 +870,21 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .pad:not(#z) .knob:not(#z),:root[data-skin="studs"] .pad:not(#z)>.knob:not(#z),:root[data-skin="studs"] .bdw>.pad:not(#z) .knob:not(#z),:root[data-skin="studs"] .bd-pads .pad:not(#z) .knob:not(#z){width:38%;left:31%;top:31%}
 :root:not(.dash)[data-skin="studs"] .bd-pads{gap:24px}
 .bdw .qbtn.turbo::before{flex:none}
+.dtpl{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+.dtpl[hidden]{display:none}
+.dtpl-in{background:#16181d;border:2px solid #2b2f36;border-radius:18px;padding:14px;width:min(440px,100%);max-height:calc(100vh - 32px);overflow:auto;display:flex;flex-direction:column;gap:8px;box-shadow:0 12px 30px rgba(0,0,0,.7)}
+.dtpl-in h3{margin:0;font-size:16px;color:#f4b800}
+.dtpl-in p{margin:0 0 4px;font-size:12px;opacity:.75}
+.dtpl-in .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;height:auto;min-height:44px;padding:8px 14px;gap:2px;font-size:14px}
+.dtpl-in .btn small{font-size:11px;font-weight:500;opacity:.7}
+.dtpl-in #dbTplX{align-items:center;text-align:center}
+:root.dash-l .dashbar .btn{padding:0 12px}
+:root.dash-l .dashbar{gap:4px}
+:root.dash-l .dashbar .btn{padding:0 8px;font-size:12.5px;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:root.dash .dw .bdw-ed{max-width:calc(100% - 6px);flex-wrap:wrap;justify-content:flex-end}
+@container (max-width:150px){
+  :root.dash .dw .bdw-ed .btn{min-width:28px!important;width:28px!important;flex:0 0 28px!important;height:28px!important;min-height:28px!important;font-size:13px}
+}
 </style>
 </head>
 <body>
@@ -975,9 +991,20 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       <h2>Board</h2>
       <div class="bdgrid" id="boardGrid"></div>
       <p class="rec-stat" id="bdNote"></p>
+      <div class="dtpl" id="dashTpl" hidden role="dialog" aria-label="Layout templates">
+        <div class="dtpl-in">
+          <h3>Layout templates</h3>
+          <p>Replaces the current layout. Press Back to undo.</p>
+          <button class="btn" type="button" data-tpl="car">Car / Truck<small>Drive slider, steering slider, lights, Turbo, winch, E-Stop</small></button>
+          <button class="btn" type="button" data-tpl="exc">Excavator<small>Thin track slider at the sides, double joystick for boom, arm, bucket, swing</small></button>
+          <button class="btn" type="button" data-tpl="dual">Dual stick<small>Two big joysticks, E-Stop, lights and Turbo in the middle</small></button>
+          <button class="btn" type="button" id="dbTplX">Cancel</button>
+        </div>
+      </div>
       <div class="dashbar" id="dashBar">
         <button class="btn" id="dbEdit" type="button" aria-pressed="false">Edit</button>
         <button class="btn" id="dbAdd" type="button" aria-pressed="false" aria-label="Add widget" hidden>+ Add</button>
+        <button class="btn" id="dbTpl" type="button" aria-label="Layout templates" hidden>Template</button>
         <button class="btn" id="dbReset" type="button" aria-label="Reset layout">Reset</button>
         <button class="btn" id="dbBack" type="button" aria-label="Put back the last removed widget" hidden>Back</button>
         <button class="btn" id="dbExit" type="button" aria-label="Exit dashboard">Exit</button>
@@ -1297,10 +1324,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var DG={x:48,y:24,k:'g'}, DHUE=[0,-45,-20,75,135,190,235,290];
   function dashLand(){return window.innerWidth>window.innerHeight}
   function dashSetMode(){var l=dashLand();DG.x=l?48:24;DG.y=l?24:48;DG.k=l?'g':'gp';return l}
-  function cleanG(g,k,gx,gy){
+  function dmin(it){if((it.k==='s'||it.k==='m')&&it.v) return [6,12];return DMIN[it.k]||[3,3]}
+  function cleanG(g,k,gx,gy,v){
     if(!Array.isArray(g)||g.length!==4) return null;
     g=g.map(function(q){return Math.round(+q)});
-    var mn=DMIN[k]||[3,3];
+    var mn=dmin({k:k,v:v});
     if(!g.every(function(q){return isFinite(q)})||g[0]<0||g[1]<0||g[2]<mn[0]||g[3]<mn[1]||g[0]+g[2]>gx||g[1]+g[3]>gy) return null;
     return g;
   }
@@ -1344,7 +1372,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         out.push({k:'e',w:1});
       }
       if(out.length>n0){
-        var it0=out[out.length-1], g1=cleanG(x.g,it0.k,48,24);
+        var it0=out[out.length-1], g1=cleanG(x.g,it0.k,48,24,it0.v);
         if(g1) it0.g=g1;
         var cl=Math.round(+x.col);
         if(cl>0&&cl<DHUE.length&&it0.k!=='e') it0.col=cl;
@@ -2893,7 +2921,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function dashHitsG(a,b){return a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]}
   function dashHits(it,g){return C.board.some(function(o){return o!==it&&o[DG.k]&&dashHitsG(o[DG.k],g)})}
   function dashFind(it,f){
-    var sz=dashSize(it), mn=DMIN[it.k]||[3,3];
+    var sz=dashSize(it), mn=dmin(it);
     var w0=Math.max(mn[0],Math.round(sz[0]*f)), h0=Math.max(mn[1],Math.round(sz[1]*f));
     if(it.k==='e'&&!dashHits(it,[DG.x-w0,DG.y-h0,w0,h0])) return [DG.x-w0,DG.y-h0,w0,h0];
     for(var shrink=0;shrink<12;shrink++){
@@ -2924,7 +2952,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       for(var i=0;i<order.length;i++){var g=dashFind(order[i],tries[t][1]);if(!g){ok=false;break}order[i][DG.k]=g}
     }
     if(!ok){
-      list.forEach(function(o){if(!o[DG.k]){var mn=DMIN[o.k]||[3,3];o[DG.k]=[0,0,mn[0],mn[1]]}});
+      list.forEach(function(o){if(!o[DG.k]){var mn=dmin(o);o[DG.k]=[0,0,mn[0],mn[1]]}});
       toast('Too many widgets to fit on the screen. Remove one.');
     }
     save();
@@ -2932,7 +2960,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   }
   function dashRefit(it){
     if(!it[DG.k]) return;
-    var sz=dashSize(it), mn=DMIN[it.k]||[3,3];
+    var sz=dashSize(it), mn=dmin(it);
     var w=Math.max(mn[0],Math.min(sz[0],DG.x)), h=Math.max(mn[1],Math.min(sz[1],DG.y));
     var x=Math.min(it[DG.k][0],DG.x-w), y=Math.min(it[DG.k][1],DG.y-h), g=[x,y,w,h];
     if(!dashHits(it,g)){it[DG.k]=g;return}
@@ -2989,7 +3017,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         var ct=el.querySelector(':scope > input[type=range], :scope > .tgl, :scope > .tgdir, :scope > .qbtn');
         if(ct){
           ct.style.zoom='1';ct.style.width='';
-          var cb=ct.offsetHeight||44, kc=Math.max(1,Math.min(4,ah/cb,ct.matches&&ct.matches('input')?aw/(2.6*cb):4));
+          var cb=ct.offsetHeight||44, isIn=ct.matches&&ct.matches('input'), mw=ct.classList.contains('tgdir')?230:170, kc=Math.max(1,Math.min(4,ah/cb,isIn?aw/(2.6*cb):aw/mw));
           ct.style.zoom=String(kc);ct.style.width=(aw/kc)+'px';
         }
       }
@@ -3000,7 +3028,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       if(e.target.closest&&e.target.closest('.bdw-ed')) return;
       var mode=e.target.classList.contains('dw-rs')?'rs':'mv';
       var cw=DCELL.w, ch=DCELL.h;
-      var g0=it[DG.k].slice(), g1=g0.slice(), sx=e.clientX, sy=e.clientY, pid=e.pointerId, mn=DMIN[it.k]||[3,3];
+      var g0=it[DG.k].slice(), g1=g0.slice(), sx=e.clientX, sy=e.clientY, pid=e.pointerId, mn=dmin(it);
       try{el.setPointerCapture(pid)}catch(_){}
       el.classList.add('moving');
       var mv=function(ev){
@@ -3075,6 +3103,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     bdEditor.hidden=dash0?!(bdEditing&&dashAdd):!bdEditing;
     $('#dbAdd').hidden=!bdEditing;
     $('#dbBack').hidden=!BD_UNDO.length;
+    $('#dbTpl').hidden=!bdEditing;
     $('#dbAdd').setAttribute('aria-pressed',String(dashAdd&&bdEditing));
     bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
     bdEditBtn.textContent=bdEditing?'Done editing':'Edit board';
@@ -3126,7 +3155,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           setT(lc,rt.t[lc]>0?0:C.ch[lc].bright,false);
         });
         el.appendChild(lb);w.btn=null;w.lb=lb;
-        var bs=document.createElement('select');bs.setAttribute('aria-label','Blink');
+        var bs=document.createElement('select');bs.className='lsel';bs.setAttribute('aria-label','Blink');
         [['off','Steady'],['slow','Slow blink'],['fast','Fast blink'],['pulse','Pulse']].forEach(function(o){bdOpt(bs,o[0],o[1])});
         bs.value=C.ch[lc].blink;
         bs.addEventListener('change',function(){C.ch[lc].blink=bs.value;if(refs[lc]) refs[lc].ltBl.value=bs.value;save()});
@@ -3301,8 +3330,29 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   $('#dbEdit').addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing) dashAdd=false;syncBoard()});
   $('#dbAdd').addEventListener('click',function(){dashAdd=!dashAdd;syncBoard()});
   $('#dbReset').addEventListener('click',function(){dashOn();C.board.forEach(function(o){delete o[DG.k]});save();syncBoard();toast('Layout reset.')});
+  var DTPL={
+    car:[{k:'s',c:0,w:1,v:true,g:[0,0,12,24]},{k:'l',c:2,w:1,g:[12,0,13,7]},{k:'b',c:0,w:1,g:[12,7,13,7]},
+         {k:'t',c:3,y:'dir',w:1,g:[25,0,14,7]},{k:'l',c:4,w:1,g:[25,7,14,7]},{k:'e',w:1,g:[39,0,9,14]},{k:'s',c:1,w:1,g:[12,14,36,10]}],
+    exc:[{k:'s',c:0,w:1,v:true,g:[0,0,7,24]},{k:'d',c:2,d:5,e:3,f:4,m:'axis',w:2,g:[7,0,34,24]},{k:'s',c:1,w:1,v:true,g:[41,0,7,24]}],
+    dual:[{k:'j',c:0,d:1,m:'axis',w:1,g:[0,0,19,24]},{k:'e',w:1,g:[19,0,10,8]},{k:'l',c:4,w:1,g:[19,8,10,8]},{k:'b',c:0,w:1,g:[19,16,10,8]},
+          {k:'j',c:2,d:3,m:'axis',w:1,g:[29,0,19,24]}]
+  };
+  function dashTplShow(on){$('#dashTpl').hidden=!on}
+  $('#dbTpl').addEventListener('click',function(){dashTplShow(true)});
+  $('#dbTplX').addEventListener('click',function(){dashTplShow(false)});
+  $('#dashTpl').addEventListener('click',function(e){
+    if(e.target===this){dashTplShow(false);return}
+    var b=e.target.closest&&e.target.closest('[data-tpl]');if(!b) return;
+    var t=DTPL[b.getAttribute('data-tpl')];if(!t) return;
+    dashOn();
+    BD_UNDO.push({board:JSON.parse(JSON.stringify(C.board))});if(BD_UNDO.length>20)BD_UNDO.shift();
+    C.board=cleanBoard(JSON.parse(JSON.stringify(t)));
+    if(DG.k!=='g') C.board.forEach(function(o){if(o.g){o[DG.k]=o.g.slice()}});
+    dashTplShow(false);dashAdd=false;save();syncBoard();toast(b.firstChild.textContent.trim()+' layout. Back undoes it.');
+  });
   $('#dbBack').addEventListener('click',function(){
     var u=BD_UNDO.pop();if(!u){syncBoard();return}
+    if(u.board){C.board=cleanBoard(u.board);save();syncBoard();toast('Previous layout back.');return}
     if(C.board.length>=16){BD_UNDO.push(u);toast('Board is full.');return}
     var it=u.it, k=DG&&DG.k, g=k&&it[k];
     if(g&&C.board.some(function(o){var h=o[k];return h&&g[0]<h[0]+h[2]&&h[0]<g[0]+g[2]&&g[1]<h[1]+h[3]&&h[1]<g[1]+g[3]})) delete it[k];
@@ -3566,6 +3616,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
     'This launcher cannot add a shortcut.':'Pelancar ini tidak dapat menambah pintasan.',
     'Skip':'Langkau','Back':'Kembali','Next':'Seterusnya','Done':'Selesai',
+    'Template':'Templat','Layout templates':'Templat susunan','Replaces the current layout. Press Back to undo.':'Menggantikan susunan semasa. Tekan Kembali untuk batal.',
+    'Car / Truck':'Kereta / Trak','Excavator':'Jengkaut','Dual stick':'Dua joystick',
+    'Drive slider, steering slider, lights, Turbo, winch, E-Stop':'Gelangsar pandu, gelangsar stereng, lampu, Turbo, win, E-Stop',
+    'Thin track slider at the sides, double joystick for boom, arm, bucket, swing':'Gelangsar track nipis di tepi, joystick ganda untuk boom, arm, baldi, pusingan',
+    'Two big joysticks, E-Stop, lights and Turbo in the middle':'Dua joystick besar, E-Stop, lampu dan Turbo di tengah',
     'Welcome to MK6 Console':'Selamat datang ke MK6 Console',
     'Control up to three Mould King 6.0 hubs from your phone over Bluetooth. This short guide covers the setup.':'Kawal sehingga tiga hab Mould King 6.0 dari telefon anda melalui Bluetooth. Panduan ringkas ini merangkumi persediaan.',
     'Set each hub number':'Tetapkan nombor setiap hab',
