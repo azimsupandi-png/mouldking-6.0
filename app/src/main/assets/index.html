@@ -711,17 +711,17 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 /* Dashboard: full landscape canvas with free widgets */
 :root.dash,:root.dash body{overflow:hidden;overscroll-behavior:none}
 :root.dash body{position:fixed;left:0;top:0;right:0;bottom:0;width:100%}
-:root.dash main{padding-top:6px;padding-bottom:4px;padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}
+:root.dash main{padding-top:6px;padding-bottom:4px;padding-left:8px;padding-right:8px}
 :root.dash .bar-banner{display:none}
 :root.dash main>*:not(.cols),:root.dash .cols>*:not(#boardCard),:root.dash #boardCard>h2,:root.dash #bdNote,:root.dash #boardCard>.rec-row,:root.dash .bd-dashchk{display:none}
 :root.dash .cols{display:block}
 :root.dash #boardCard{padding:0;border:0;background:none;box-shadow:none;margin:0}
 :root.dash #boardGrid{display:block;position:relative;margin:0 auto}
 :root:not(.dash) .dashbar{display:none}
-.dashbar{display:flex;gap:6px;justify-content:center;align-items:center;height:34px}
-.dashbar .btn{height:34px;min-height:34px;padding:0 12px;font-size:12px;flex:0 0 auto}
+.dashbar{display:flex;gap:8px;justify-content:center;align-items:center;height:38px}
+.dashbar .btn{height:38px;min-height:38px;padding:0 14px;font-size:13px;flex:0 0 auto}
 :root.dash .dashbar{position:fixed;left:50%;transform:translateX(-50%);top:6px;z-index:40;max-width:calc(100% - 340px);overflow:hidden}
-:root.dash .bar-in{padding-block:2px}
+:root.dash .bar-in{padding-block:4px;padding-left:8px;padding-right:8px;gap:8px;align-items:center}
 :root.dash #boardGrid.editing{background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px)}
 :root.dash #bdEditor{position:fixed;left:0;right:0;bottom:0;max-height:56vh;overflow:auto;z-index:30;background:var(--panel);border-top:3px solid #f4b800;padding:12px max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px)) 16px;box-shadow:0 -8px 24px rgba(0,0,0,.6)}
 :root.dash .dw{position:absolute;display:flex;flex-direction:column;gap:3px;padding:5px 7px;overflow:hidden;box-sizing:border-box;margin:0;align-content:normal}
@@ -2808,7 +2808,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(!on){var dbar0=$('#dashBar');if(dbar0) dbar0.style.top='';bdGrid.style.height='';bdGrid.style.width='';bdGrid.style.margin='';bdGrid.style.backgroundSize='';return}
     dashCell();
     var hdr=document.querySelector('header'), htop=hdr?hdr.getBoundingClientRect().bottom:51;
-    var dbar=$('#dashBar');if(dbar) dbar.style.top=Math.max(0,Math.round((htop-5-34)/2))+'px';
+    var bt0=$('#btBtn'), dbar=$('#dashBar');
+    if(dbar){var bq=bt0?bt0.getBoundingClientRect():null;dbar.style.top=(bq&&bq.height?Math.round(bq.top+bq.height/2-19):Math.max(0,Math.round((htop-5-38)/2)))+'px'}
     bdGrid.style.width=DCELL.pw+'px';bdGrid.style.height=DCELL.ph+'px';bdGrid.style.margin='0';
     bdGrid.style.backgroundSize=DCELL.w+'px '+DCELL.h+'px';
     bdW.forEach(function(w){if(w.el&&w.it&&w.it.g) dashStyle(w.el,w.it.g)});
