@@ -722,8 +722,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .dashbar{display:flex;gap:8px;justify-content:center;align-items:center;height:38px}
 .dashbar .btn{height:38px;min-height:38px;padding:0 14px;font-size:13px;flex:0 0 auto}
 :root.dash-l .dashbar{position:fixed;left:50%;transform:translateX(-50%);top:6px;z-index:40;max-width:calc(100% - 340px);overflow:hidden}
-:root.dash-p .dashbar{position:relative;height:46px;padding-top:8px;box-sizing:border-box}
-:root.dash-p #bdEditor{bottom:52px}
 :root.dash-l .bar-in{padding-block:4px;padding-left:8px;padding-right:8px;gap:8px;align-items:center}
 :root.dash #boardGrid.editing{background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px)}
 :root.dash #bdEditor{position:fixed;left:0;right:0;bottom:0;max-height:56vh;overflow:auto;z-index:30;background:var(--panel);border-top:3px solid #f4b800;padding:12px max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px)) 16px;box-shadow:0 -8px 24px rgba(0,0,0,.6)}
@@ -862,7 +860,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         <button class="btn" id="dbExit" type="button" aria-label="Exit dashboard">Exit</button>
       </div>
       <label class="check bd-dashchk" for="bdDash"><input id="bdDash" type="checkbox">Dashboard when the phone is sideways</label>
-      <label class="check bd-dashchk" for="bdDashP"><input id="bdDashP" type="checkbox">Dashboard when the phone is upright</label>
       <div class="rec-row"><button class="btn" id="bdEdit" type="button" aria-pressed="false">Edit board</button></div>
       <div id="bdEditor" class="bd-panel" hidden>
         <div class="seg bd-types" role="group" aria-label="Control type">
@@ -1100,7 +1097,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider',blink:'off',bright:100});
-    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,dash:false,dashP:false,dgv:2,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,dash:false,dgv:2,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -1224,9 +1221,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         out.push({k:'e',w:1});
       }
       if(out.length>n0){
-        var it0=out[out.length-1], g1=cleanG(x.g,it0.k,48,24), g2=cleanG(x.gp,it0.k,24,48);
+        var it0=out[out.length-1], g1=cleanG(x.g,it0.k,48,24);
         if(g1) it0.g=g1;
-        if(g2) it0.gp=g2;
         var cl=Math.round(+x.col);
         if(cl>0&&cl<DHUE.length&&it0.k!=='e') it0.col=cl;
       }
@@ -1254,7 +1250,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.zone=pickOf(c.zone,[25,50,75,100],100);
     d.testPwr=Math.round(num(c.testPwr,10,100,60));
     d.dash=c.dash===true;
-    d.dashP=c.dashP===true;
     d.dgv=2;
     d.hubNames=[0,1,2].map(function(q){var v=Array.isArray(c.hubNames)?c.hubNames[q]:'';return typeof v==='string'?v.replace(/[\u0000-\u001f<>]/g,'').slice(0,12):''});
     d.spring=true;
@@ -2759,7 +2754,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   /* ---------- Dashboard: free-position widgets (separate layouts for landscape and portrait) ---------- */
   function dashOn(){
     if(C.layout!=='board') return false;
-    return dashSetMode()?!!C.dash:!!C.dashP;
+    return dashSetMode()&&!!C.dash;
   }
   function dashSize(it){
     var k=it.k, wd=it.w===2, L=DG.k==='g';
@@ -2816,7 +2811,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var on=dashOn();
     document.documentElement.classList.toggle('dash',on);
     document.documentElement.classList.toggle('dash-l',on&&DG.k==='g');
-    document.documentElement.classList.toggle('dash-p',on&&DG.k==='gp');
     if(on){try{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}catch(_){}}
     if(!bdGrid) return;
     if(!on){var dbar0=$('#dashBar');if(dbar0) dbar0.style.top='';bdGrid.style.height='';bdGrid.style.width='';bdGrid.style.margin='';bdGrid.style.backgroundSize='';return}
@@ -2946,7 +2940,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     bdGrid.classList.toggle('editing',dash&&bdEditing);
     $('#dbEdit').setAttribute('aria-pressed',String(bdEditing));
     $('#dbEdit').textContent=bdEditing?'Done':'Edit';
-    $('#bdDash').checked=!!C.dash;$('#bdDashP').checked=!!C.dashP;
+    $('#bdDash').checked=!!C.dash;
     var tiltTaken=false;
     C.board.forEach(function(it){
       var el=document.createElement('div');
@@ -3164,9 +3158,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   $('#dbEdit').addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing) dashAdd=false;syncBoard()});
   $('#dbAdd').addEventListener('click',function(){dashAdd=!dashAdd;syncBoard()});
   $('#dbReset').addEventListener('click',function(){dashOn();C.board.forEach(function(o){delete o[DG.k]});save();syncBoard();toast('Layout reset.')});
-  $('#dbExit').addEventListener('click',function(){if(dashSetMode()) C.dash=false; else C.dashP=false;bdEditing=false;dashAdd=false;save();syncLayout()});
+  $('#dbExit').addEventListener('click',function(){C.dash=false;bdEditing=false;dashAdd=false;save();syncLayout()});
   $('#bdDash').addEventListener('change',function(){C.dash=$('#bdDash').checked;save();syncLayout()});
-  $('#bdDashP').addEventListener('change',function(){C.dashP=$('#bdDashP').checked;save();syncLayout()});
   var dashLastK=dashLand()?'g':'gp';
   window.addEventListener('resize',function(){
     var k=dashLand()?'g':'gp';
@@ -3356,7 +3349,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'New model':'Model baharu','Delete':'Padam','Confirm delete':'Sahkan padam','Confirm':'Sahkan','Model colour':'Warna model','Theme':'Tema','Layout':'Susun atur',
     'Model list is full.':'Senarai model penuh.','New model created from the current settings':'Model baharu dicipta daripada tetapan semasa',
     'Quick actions':'Tindakan pantas',
-    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Dashboard when the phone is sideways':'Dashboard bila telefon mengiring','Dashboard when the phone is upright':'Dashboard bila telefon tegak','Edit':'Ubah','Add widget':'Tambah widget','E-Stop':'E-Stop','+ Add':'+ Tambah','Reset':'Set semula','Exit':'Keluar','Done':'Selesai','Reset layout':'Set semula susunan','Exit dashboard':'Keluar dashboard','Layout reset.':'Susunan disetkan semula.','No space. Make room or remove a widget first.':'Tiada ruang. Kosongkan ruang atau buang satu widget dahulu.','The board is full (16 controls).':'Papan penuh (16 kawalan).','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
+    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Dashboard when the phone is sideways':'Dashboard bila telefon mengiring','Edit':'Ubah','Add widget':'Tambah widget','E-Stop':'E-Stop','+ Add':'+ Tambah','Reset':'Set semula','Exit':'Keluar','Done':'Selesai','Reset layout':'Set semula susunan','Exit dashboard':'Keluar dashboard','Layout reset.':'Susunan disetkan semula.','No space. Make room or remove a widget first.':'Tiada ruang. Kosongkan ruang atau buang satu widget dahulu.','The board is full (16 controls).':'Papan penuh (16 kawalan).','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
     'Fine control (expo)':'Kawalan halus (expo)','Slider':'Gelangsar','Hold':'Tahan','Control type':'Jenis kawalan','Response curve':'Lengkung tindak balas',
     'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
     'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
