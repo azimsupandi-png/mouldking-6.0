@@ -797,6 +797,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     repeating-radial-gradient(circle at 50% 50%,rgba(70,40,0,.5) 0 1px,transparent 1px 4px) center/52% 52% no-repeat,
     radial-gradient(circle at 74% 36%,#fff3a8 0,#ffd84d 22%,#f4b800 50%,#b07f00 88%,#7a5600 100%);
   box-shadow:-2px 0 0 #7a5600,-11px 0 8px -3px rgba(0,0,0,.9),inset 6px 0 8px rgba(60,30,0,.6),inset -3px 0 4px rgba(255,255,255,.65)}
+:root[data-skin="studs"] .pad .knob,:root[data-skin="studs"] .pad>.knob{width:min(36%,124px);left:calc(50% - min(18%,62px));top:calc(50% - min(18%,62px))}
+:root[data-skin="studs"] .bd-pads .pad .knob,:root[data-skin="studs"] .cols.dual .pad .knob,:root[data-skin="studs"] .bdw:not(.w2)>.pad .knob{width:38%;left:31%;top:31%}
 </style>
 </head>
 <body>
@@ -1656,7 +1658,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     st.selA.addEventListener('change',function(){cfgOf(k).a=+st.selA.value;syncLayout();save()});
     st.selB.addEventListener('change',function(){cfgOf(k).b=+st.selB.value;syncLayout();save()});
     function move(e){
-      var r=st.pad.getBoundingClientRect(), R=Math.max(8,(r.width-st.knob.getBoundingClientRect().width)/2-7);
+      var r=st.pad.getBoundingClientRect(), R=Math.max(8,(r.width-st.knob.getBoundingClientRect().width*0.6)/2-7);
       var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), m=Math.hypot(dx,dy);
       if(m>R){dx*=R/m;dy*=R/m}
       st.knob.style.transform='translate('+dx+'px,'+dy+'px)';
@@ -2776,7 +2778,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     var kn=document.createElement('div');kn.className='knob rest';jp.appendChild(kn);
     var pid=null;
     var jmove=function(e){
-      var r=jp.getBoundingClientRect(), R=Math.max(8,(r.width-kn.getBoundingClientRect().width)/2-7);
+      var r=jp.getBoundingClientRect(), R=Math.max(8,(r.width-kn.getBoundingClientRect().width*0.6)/2-7);
       var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), d=Math.hypot(dx,dy);
       if(d>R){dx*=R/d;dy*=R/d}
       kn.style.transform='translate('+dx+'px,'+dy+'px)';
@@ -3326,7 +3328,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function padDz(v,d){var a=Math.abs(+v||0);return a<d?0:(v<0?-1:1)*Math.min(1,(a-d)/(1-d))}
   function showKnob(k,x,y){
     var st=sticks[k];if(!st) return;
-    var R=Math.max(8,(st.pad.getBoundingClientRect().width-st.knob.getBoundingClientRect().width)/2-7);
+    var R=Math.max(8,(st.pad.getBoundingClientRect().width-st.knob.getBoundingClientRect().width*0.6)/2-7);
     st.knob.classList.toggle('rest',x===0&&y===0);
     st.knob.style.transform='translate('+(x*R)+'px,'+(-y*R)+'px)';
     st.pad.style.setProperty('--m',Math.min(1,Math.hypot(x,y)).toFixed(2));
