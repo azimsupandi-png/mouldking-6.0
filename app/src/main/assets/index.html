@@ -792,6 +792,17 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .bd-pads .pad .knob,:root[data-skin="studs"] .cols.dual .pad .knob,:root[data-skin="studs"] .bdw:not(.w2)>.pad .knob{width:38%;left:31%;top:31%}
 :root[data-skin="studs"] .pad::after,:root[data-skin="studs"] .bd-pads .pad::after,:root[data-skin="studs"] .cols.dual .pad::after,:root[data-skin="studs"] .bdw>.pad::after{inset:15%}
 :root[data-skin="studs"] .pad .knob,:root[data-skin="studs"] .pad>.knob,:root[data-skin="studs"] .bdw>.pad .knob{width:38%;left:31%;top:31%}
+:root.dash .dw{container-type:inline-size}
+@container (max-width:170px){
+  :root[data-skin="studs"] .dw .qbtn.lbtn,:root .dw .tgl.led{padding:0 6px 0 38px;font-size:13px;letter-spacing:.03em;justify-content:center}
+  :root .dw .qbtn.lbtn::before,:root .dw .qbtn.lbtn.on::before{left:6px;width:24px;height:24px}
+  :root .dw .tgl .led{left:8px;width:18px;height:18px}
+}
+@container (max-width:80px){
+  :root[data-skin="studs"] .dw .qbtn.lbtn,:root .dw .tgl.led{padding:0;font-size:0;letter-spacing:0}
+  :root .dw .qbtn.lbtn::before,:root .dw .qbtn.lbtn.on::before{left:50%;transform:translate(-50%,-50%)}
+  :root .dw .tgl .led{left:50%;transform:translate(-50%,-50%)}
+}
 </style>
 </head>
 <body>
