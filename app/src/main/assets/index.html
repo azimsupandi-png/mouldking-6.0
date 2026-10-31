@@ -241,8 +241,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   --fg:#F3F1EA; --muted:#A3A8AE; --fwd:#FFC400; --rev:#4DA3E0; --danger:#E03E3E; --ok:#51CF66; --hz:#F5B800;
   color-scheme:dark;
 }
-:root[data-skin="studs"] body{background-color:#16191d;background-attachment:fixed;
-  background-image:radial-gradient(ellipse at 50% 40%,transparent 50%,rgba(0,0,0,.7) 100%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.4' cy='.35' r='.8'%3E%3Cstop offset='0' stop-color='%23323740'/%3E%3Cstop offset='.7' stop-color='%231e2126'/%3E%3Cstop offset='1' stop-color='%2315171b'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='56' height='56' fill='%2316191d'/%3E%3Ccircle cx='28' cy='31' r='15' fill='%23000' opacity='.55'/%3E%3Ccircle cx='28' cy='28' r='14' fill='url(%23g)'/%3E%3Cellipse cx='23' cy='22' rx='6' ry='3.5' fill='%23fff' opacity='.07'/%3E%3C/svg%3E")}
+:root[data-skin="studs"] body{background-color:#0d0f12;background-attachment:fixed;
+  background-image:radial-gradient(ellipse at 50% 40%,transparent 55%,rgba(0,0,0,.6) 100%),linear-gradient(115deg,transparent 38%,rgba(255,255,255,.04) 50%,transparent 62%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cdefs%3E%3ClinearGradient id='h' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%232b3037'/%3E%3Cstop offset='.55' stop-color='%23171a1f'/%3E%3Cstop offset='1' stop-color='%230f1115'/%3E%3C/linearGradient%3E%3ClinearGradient id='v' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23262a31'/%3E%3Cstop offset='.55' stop-color='%2314171b'/%3E%3Cstop offset='1' stop-color='%230d0f12'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='12' height='12' fill='%230b0c0f'/%3E%3Crect x='0' y='0' width='6' height='6' fill='url(%23h)'/%3E%3Crect x='6' y='6' width='6' height='6' fill='url(%23h)'/%3E%3Crect x='6' y='0' width='6' height='6' fill='url(%23v)'/%3E%3Crect x='0' y='6' width='6' height='6' fill='url(%23v)'/%3E%3C/svg%3E");
+  background-size:auto,auto,12px 12px}
 :root[data-skin="studs"] .bar{box-shadow:0 6px 18px rgba(0,0,0,.6);border-bottom:3px solid var(--hz)}
 :root[data-skin="studs"] .card{border-radius:22px;border:3px solid #2b2f36;background:linear-gradient(180deg,rgba(30,33,39,.94),rgba(18,20,24,.96));box-shadow:0 8px 20px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06)}
 :root[data-skin="studs"] h2{border-left:6px solid var(--hz);padding-left:10px;letter-spacing:.1em}
@@ -720,8 +721,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root:not(.dash) .dashbar{display:none}
 .dashbar{display:flex;gap:8px;justify-content:center;align-items:center;height:38px}
 .dashbar .btn{height:38px;min-height:38px;padding:0 14px;font-size:13px;flex:0 0 auto}
-:root.dash .dashbar{position:fixed;left:50%;transform:translateX(-50%);top:6px;z-index:40;max-width:calc(100% - 340px);overflow:hidden}
-:root.dash .bar-in{padding-block:4px;padding-left:8px;padding-right:8px;gap:8px;align-items:center}
+:root.dash-l .dashbar{position:fixed;left:50%;transform:translateX(-50%);top:6px;z-index:40;max-width:calc(100% - 340px);overflow:hidden}
+:root.dash-p .dashbar{position:relative;height:46px;padding-top:8px;box-sizing:border-box}
+:root.dash-p #bdEditor{bottom:52px}
+:root.dash-l .bar-in{padding-block:4px;padding-left:8px;padding-right:8px;gap:8px;align-items:center}
 :root.dash #boardGrid.editing{background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px)}
 :root.dash #bdEditor{position:fixed;left:0;right:0;bottom:0;max-height:56vh;overflow:auto;z-index:30;background:var(--panel);border-top:3px solid #f4b800;padding:12px max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px)) 16px;box-shadow:0 -8px 24px rgba(0,0,0,.6)}
 :root.dash .dw{position:absolute;display:flex;flex-direction:column;gap:3px;padding:5px 7px;overflow:hidden;box-sizing:border-box;margin:0;align-content:normal}
@@ -734,7 +737,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash .dw .pad{box-sizing:border-box}
 :root.dash .dw .bdv{position:relative;flex:none;width:100%}
 :root.dash .dw.dw-ed{cursor:grab;touch-action:none;outline:2px dashed rgba(244,184,0,.85);outline-offset:-3px}
-:root.dash .dw.dw-ed>*:not(.bdw-h):not(.dw-rs){pointer-events:none}
+:root.dash .dw.dw-ed>*:not(.bdw-h):not(.dw-rs):not(.bdw-ed){pointer-events:none}
 :root.dash .dw.moving{opacity:.85;z-index:5}
 :root.dash .dw.bad{outline-color:#ff4d4d;background:rgba(255,60,60,.28)}
 .dw-rs{position:absolute;right:0;bottom:0;width:44px;height:44px;touch-action:none;background:linear-gradient(135deg,transparent 56%,#f4b800 56%);z-index:4}
@@ -859,6 +862,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         <button class="btn" id="dbExit" type="button" aria-label="Exit dashboard">Exit</button>
       </div>
       <label class="check bd-dashchk" for="bdDash"><input id="bdDash" type="checkbox">Dashboard when the phone is sideways</label>
+      <label class="check bd-dashchk" for="bdDashP"><input id="bdDashP" type="checkbox">Dashboard when the phone is upright</label>
       <div class="rec-row"><button class="btn" id="bdEdit" type="button" aria-pressed="false">Edit board</button></div>
       <div id="bdEditor" class="bd-panel" hidden>
         <div class="seg bd-types" role="group" aria-label="Control type">
@@ -871,6 +875,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
           <button class="btn" id="bdTT" type="button" aria-pressed="false">Toggle</button>
           <button class="btn" id="bdTB" type="button" aria-pressed="false">Turbo</button>
           <button class="btn" id="bdTQ" type="button" aria-pressed="false">Sequence</button>
+          <button class="btn" id="bdTE" type="button" aria-pressed="false">E-Stop</button>
         </div>
         <div class="bd-fields">
           <label id="bdF1"><span id="bdL1">Channel</span><select id="bdTarget"></select></label>
@@ -1095,7 +1100,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function baseCfg(names){
     var ch=[];
     for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider',blink:'off',bright:100});
-    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,dash:false,dgv:2,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
+    return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,dash:false,dashP:false,dgv:2,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
   }
   function cleanHubs(h){
     var out=[-1,-1,-1],s,t;
@@ -1169,7 +1174,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     });
     return out;
   }
-  var DGX=48, DGY=24, DHUE=[0,-45,-20,75,135,190,235,290];
+  var DG={x:48,y:24,k:'g'}, DHUE=[0,-45,-20,75,135,190,235,290];
+  function dashLand(){return window.innerWidth>window.innerHeight}
+  function dashSetMode(){var l=dashLand();DG.x=l?48:24;DG.y=l?24:48;DG.k=l?'g':'gp';return l}
+  function cleanG(g,k,gx,gy){
+    if(!Array.isArray(g)||g.length!==4) return null;
+    g=g.map(function(q){return Math.round(+q)});
+    var mn=DMIN[k]||[3,3];
+    if(!g.every(function(q){return isFinite(q)})||g[0]<0||g[1]<0||g[2]<mn[0]||g[3]<mn[1]||g[0]+g[2]>gx||g[1]+g[3]>gy) return null;
+    return g;
+  }
   var DMIN={s:[12,6],h:[10,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],q:[6,6],e:[6,6]};
   function cleanBoard(b){
     var out=[];
@@ -1210,12 +1224,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         out.push({k:'e',w:1});
       }
       if(out.length>n0){
-        var it0=out[out.length-1], g=x.g;
-        if(Array.isArray(g)&&g.length===4){
-          g=g.map(function(q){return Math.round(+q)});
-          var mn=DMIN[it0.k]||[3,3];
-          if(g.every(function(q){return isFinite(q)})&&g[0]>=0&&g[1]>=0&&g[2]>=mn[0]&&g[3]>=mn[1]&&g[0]+g[2]<=DGX&&g[1]+g[3]<=DGY) it0.g=g;
-        }
+        var it0=out[out.length-1], g1=cleanG(x.g,it0.k,48,24), g2=cleanG(x.gp,it0.k,24,48);
+        if(g1) it0.g=g1;
+        if(g2) it0.gp=g2;
         var cl=Math.round(+x.col);
         if(cl>0&&cl<DHUE.length&&it0.k!=='e') it0.col=cl;
       }
@@ -1243,6 +1254,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     d.zone=pickOf(c.zone,[25,50,75,100],100);
     d.testPwr=Math.round(num(c.testPwr,10,100,60));
     d.dash=c.dash===true;
+    d.dashP=c.dashP===true;
     d.dgv=2;
     d.hubNames=[0,1,2].map(function(q){var v=Array.isArray(c.hubNames)?c.hubNames[q]:'';return typeof v==='string'?v.replace(/[\u0000-\u001f<>]/g,'').slice(0,12):''});
     d.spring=true;
@@ -2660,7 +2672,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   var bdSel=[$('#bdTarget'),$('#bdTarget2'),$('#bdTarget3'),$('#bdTarget4')];
   var bdFields=[$('#bdF1'),$('#bdF2'),$('#bdF3'),$('#bdF4')], bdLbl=[$('#bdL1'),$('#bdL2'),$('#bdL3'),$('#bdL4')];
   var bdModeF=$('#bdFM'), bdMode=$('#bdMode'), bdWideChk=$('#bdWideChk'), bdSpring=$('#bdSpring'), bdSpringL=$('#bdSpringL');
-  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['q',$('#bdTQ')]];
+  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['q',$('#bdTQ')],['e',$('#bdTE')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
   var bdK='s', bdEditing=false, bdW=[], dashAdd=false;
@@ -2673,7 +2685,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function bdFill(){
     if(!bdSel[0]) return;
     var chans=activeIdx(), tank=bdMode.value==='tank';
-    var n=bdK==='j'?2:(bdK==='d'||bdK==='m'?4:1);
+    var n=bdK==='e'?0:bdK==='j'?2:(bdK==='d'||bdK==='m'?4:1);
     var L=bdK==='q'?['Sequence']:(bdK==='l'||bdK==='t'||bdK==='b')?[bdK==='l'?'Light channel':'Channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s'||bdK==='h')?['Channel']:
       (bdK==='j'?(tank?['Left motor','Right motor']:['Drive','Steer']):
       (tank?['Left stick: Left motor','Left stick: Right motor','Right stick: Left motor','Right stick: Right motor']:
@@ -2744,57 +2756,57 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     return jp;
   }
 
-  /* ---------- Dashboard: free-position widgets in landscape ---------- */
-  function dashOn(){return !!(C.layout==='board'&&C.dash&&landMQ&&landMQ.matches)}
+  /* ---------- Dashboard: free-position widgets (separate layouts for landscape and portrait) ---------- */
+  function dashOn(){
+    if(C.layout!=='board') return false;
+    return dashSetMode()?!!C.dash:!!C.dashP;
+  }
   function dashSize(it){
-    var k=it.k, wd=it.w===2;
-    if(k==='j') return [12,16];
-    if(k==='d') return [24,16];
-    if(k==='s'||k==='m') return it.v?[6,16]:(wd?[24,6]:[16,6]);
-    if(k==='h') return wd?[20,6]:[14,6];
-    if(k==='t') return it.y==='dir'?[18,6]:(wd?[12,6]:[8,6]);
+    var k=it.k, wd=it.w===2, L=DG.k==='g';
+    if(k==='j') return L?[12,16]:[16,18];
+    if(k==='d') return L?[24,16]:[24,14];
+    if(k==='s'||k==='m') return it.v?[6,16]:(L&&!wd?[16,6]:[24,6]);
+    if(k==='h') return L?(wd?[20,6]:[14,6]):[24,6];
+    if(k==='t') return it.y==='dir'?(L?[18,6]:[24,6]):(L?(wd?[12,6]:[8,6]):[12,6]);
     if(k==='e') return [8,8];
-    return [8,6];
+    return L?[8,6]:[12,6];
   }
   function dashHitsG(a,b){return a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]}
-  function dashHits(it,g){return C.board.some(function(o){return o!==it&&o.g&&dashHitsG(o.g,g)})}
-  function dashEnsure(){
-    if(!C.board.some(function(o){return o.k==='e'})) C.board.push({k:'e',w:1});
-  }
+  function dashHits(it,g){return C.board.some(function(o){return o!==it&&o[DG.k]&&dashHitsG(o[DG.k],g)})}
   function dashAuto(){
     var changed=false;
-    var list=C.board.filter(function(o){return !o.g});
+    var list=C.board.filter(function(o){return !o[DG.k]});
     if(!list.length) return;
     list.sort(function(a,b){return (b.k==='e'?1:0)-(a.k==='e'?1:0)});
     list.forEach(function(it){
       var sz=dashSize(it), mn=DMIN[it.k]||[3,3], g=null;
-      if(it.k==='e'&&!dashHits(it,[DGX-sz[0],DGY-sz[1],sz[0],sz[1]])) g=[DGX-sz[0],DGY-sz[1],sz[0],sz[1]];
+      if(it.k==='e'&&!dashHits(it,[DG.x-sz[0],DG.y-sz[1],sz[0],sz[1]])) g=[DG.x-sz[0],DG.y-sz[1],sz[0],sz[1]];
       for(var shrink=0;!g&&shrink<3;shrink++){
         var w=Math.max(mn[0],sz[0]-shrink*4), h=Math.max(mn[1],sz[1]-shrink*4);
-        for(var y=0;!g&&y<=DGY-h;y++) for(var x=0;!g&&x<=DGX-w;x++){
+        for(var y=0;!g&&y<=DG.y-h;y++) for(var x=0;!g&&x<=DG.x-w;x++){
           var t=[x,y,w,h];
           if(!dashHits(it,t)) g=t;
         }
       }
-      it.g=g||[0,0,mn[0],mn[1]];
+      it[DG.k]=g||[0,0,mn[0],mn[1]];
       changed=true;
     });
     if(changed) save();
   }
   function dashRefit(it){
-    if(!it.g) return;
+    if(!it[DG.k]) return;
     var sz=dashSize(it), mn=DMIN[it.k]||[3,3];
-    var w=Math.max(mn[0],Math.min(sz[0],DGX)), h=Math.max(mn[1],Math.min(sz[1],DGY));
-    var x=Math.min(it.g[0],DGX-w), y=Math.min(it.g[1],DGY-h), g=[x,y,w,h];
-    if(!dashHits(it,g)){it.g=g;return}
-    delete it.g;dashAuto();
+    var w=Math.max(mn[0],Math.min(sz[0],DG.x)), h=Math.max(mn[1],Math.min(sz[1],DG.y));
+    var x=Math.min(it[DG.k][0],DG.x-w), y=Math.min(it[DG.k][1],DG.y-h), g=[x,y,w,h];
+    if(!dashHits(it,g)){it[DG.k]=g;return}
+    delete it[DG.k];dashAuto();
   }
   var DCELL={w:30,h:24,pw:720,ph:288};
   function dashCell(){
     var par=bdGrid.parentElement, pw=(par&&par.clientWidth)||window.innerWidth;
     var hd=document.querySelector('header'), top=hd?hd.getBoundingClientRect().bottom:0;
-    DCELL.pw=Math.floor(pw);DCELL.ph=Math.floor(Math.max(150,window.innerHeight-top-12));
-    DCELL.w=DCELL.pw/DGX;DCELL.h=DCELL.ph/DGY;
+    DCELL.pw=Math.floor(pw);DCELL.ph=Math.floor(Math.max(150,window.innerHeight-top-12-(DG.k==='gp'?52:0)));
+    DCELL.w=DCELL.pw/DG.x;DCELL.h=DCELL.ph/DG.y;
   }
   function dashStyle(el,g){
     var x0=Math.round(g[0]*DCELL.w), x1=Math.round((g[0]+g[2])*DCELL.w), y0=Math.round(g[1]*DCELL.h), y1=Math.round((g[1]+g[3])*DCELL.h);
@@ -2803,16 +2815,18 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function dashFit(){
     var on=dashOn();
     document.documentElement.classList.toggle('dash',on);
+    document.documentElement.classList.toggle('dash-l',on&&DG.k==='g');
+    document.documentElement.classList.toggle('dash-p',on&&DG.k==='gp');
     if(on){try{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}catch(_){}}
     if(!bdGrid) return;
     if(!on){var dbar0=$('#dashBar');if(dbar0) dbar0.style.top='';bdGrid.style.height='';bdGrid.style.width='';bdGrid.style.margin='';bdGrid.style.backgroundSize='';return}
     dashCell();
     var hdr=document.querySelector('header'), htop=hdr?hdr.getBoundingClientRect().bottom:51;
     var bt0=$('#btBtn'), dbar=$('#dashBar');
-    if(dbar){var bq=bt0?bt0.getBoundingClientRect():null;dbar.style.top=(bq&&bq.height?Math.round(bq.top+bq.height/2-19):Math.max(0,Math.round((htop-5-38)/2)))+'px'}
+    if(dbar){var bq=bt0?bt0.getBoundingClientRect():null;if(DG.k==='gp') dbar.style.top=''; else dbar.style.top=(bq&&bq.height?Math.round(bq.top+bq.height/2-19):Math.max(0,Math.round((htop-5-38)/2)))+'px'}
     bdGrid.style.width=DCELL.pw+'px';bdGrid.style.height=DCELL.ph+'px';bdGrid.style.margin='0';
     bdGrid.style.backgroundSize=DCELL.w+'px '+DCELL.h+'px';
-    bdW.forEach(function(w){if(w.el&&w.it&&w.it.g) dashStyle(w.el,w.it.g)});
+    bdW.forEach(function(w){if(w.el&&w.it&&w.it[DG.k]) dashStyle(w.el,w.it[DG.k])});
     if(typeof bdGrid.querySelectorAll!=='function') return;
     [].slice.call(bdGrid.querySelectorAll('.dw')).forEach(function(el){
       var hh=0, hd2=el.querySelector('.bdw-h');
@@ -2850,21 +2864,21 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       if(e.target.closest&&e.target.closest('.bdw-ed')) return;
       var mode=e.target.classList.contains('dw-rs')?'rs':'mv';
       var cw=DCELL.w, ch=DCELL.h;
-      var g0=it.g.slice(), g1=g0.slice(), sx=e.clientX, sy=e.clientY, pid=e.pointerId, mn=DMIN[it.k]||[3,3];
+      var g0=it[DG.k].slice(), g1=g0.slice(), sx=e.clientX, sy=e.clientY, pid=e.pointerId, mn=DMIN[it.k]||[3,3];
       try{el.setPointerCapture(pid)}catch(_){}
       el.classList.add('moving');
       var mv=function(ev){
         if(ev.pointerId!==pid) return;
         var dx=Math.round((ev.clientX-sx)/cw), dy=Math.round((ev.clientY-sy)/ch), n=g0.slice();
-        if(mode==='mv'){n[0]=clamp(g0[0]+dx,0,DGX-g0[2]);n[1]=clamp(g0[1]+dy,0,DGY-g0[3])}
-        else{n[2]=clamp(g0[2]+dx,mn[0],DGX-g0[0]);n[3]=clamp(g0[3]+dy,mn[1],DGY-g0[1])}
+        if(mode==='mv'){n[0]=clamp(g0[0]+dx,0,DG.x-g0[2]);n[1]=clamp(g0[1]+dy,0,DG.y-g0[3])}
+        else{n[2]=clamp(g0[2]+dx,mn[0],DG.x-g0[0]);n[3]=clamp(g0[3]+dy,mn[1],DG.y-g0[1])}
         g1=n;dashStyle(el,n);el.classList.toggle('bad',dashHits(it,n));
       };
       var up=function(ev){
         if(ev.pointerId!==pid) return;
         el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);
         el.classList.remove('moving','bad');
-        if(dashHits(it,g1)){dashStyle(el,g0)}else{it.g=g1;save()}
+        if(dashHits(it,g1)){dashStyle(el,g0)}else{it[DG.k]=g1;save()}
         dashFit();
       };
       el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
@@ -2874,7 +2888,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   function dashPlace(el,it){
     el.classList.add('dw');
     if(it.k==='e') el.classList.add('estopw');
-    dashStyle(el,it.g);
+    dashStyle(el,it[DG.k]);
     if(it.col>0&&it.k!=='e') el.style.filter='hue-rotate('+DHUE[it.col]+'deg)';
     if(bdEditing){
       el.classList.add('dw-ed');
@@ -2898,7 +2912,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
       (it.t?it.t.map(function(z){return z.c}):[it.c,it.d,it.e,it.f]).forEach(function(q){if(q!==undefined&&q>=0) setT(q,0,false)});
       save();syncBoard();
     },!it.hold]);
-    if(it.k!=='e') defs.push(['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0)C.board.splice(q,1);save();syncBoard()}]);
+    defs.push(['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0)C.board.splice(q,1);save();syncBoard()}]);
     defs.forEach(function(d){
       var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=d[0];b.setAttribute('aria-label',d[1]);
       if(d.length>3) b.setAttribute('aria-pressed',String(d[3]));
@@ -2928,11 +2942,11 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
     bdEditBtn.textContent=bdEditing?'Done editing':'Edit board';
     var dash=dashOn();
-    if(dash){dashEnsure();dashAuto();dashCell()}
+    if(dash){dashAuto();dashCell()}
     bdGrid.classList.toggle('editing',dash&&bdEditing);
     $('#dbEdit').setAttribute('aria-pressed',String(bdEditing));
     $('#dbEdit').textContent=bdEditing?'Done':'Edit';
-    $('#bdDash').checked=!!C.dash;
+    $('#bdDash').checked=!!C.dash;$('#bdDashP').checked=!!C.dashP;
     var tiltTaken=false;
     C.board.forEach(function(it){
       var el=document.createElement('div');
@@ -2942,6 +2956,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         var eb=document.createElement('button');eb.type='button';eb.className='dw-es';eb.setAttribute('aria-label','Emergency stop');
         eb.addEventListener('click',function(){setEstop(!S.estop)});
         el.appendChild(eb);w.es=eb;
+        if(bdEditing) el.appendChild(bdToolbar(it));
       }else if(it.k==='q'){
         var sq=C.seq.filter(function(x){return x.id===it.c})[0];
         if(!sq) return;
@@ -3148,19 +3163,26 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;syncBoard()});
   $('#dbEdit').addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing) dashAdd=false;syncBoard()});
   $('#dbAdd').addEventListener('click',function(){dashAdd=!dashAdd;syncBoard()});
-  $('#dbReset').addEventListener('click',function(){C.board.forEach(function(o){delete o.g});save();syncBoard();toast('Layout reset.')});
-  $('#dbExit').addEventListener('click',function(){C.dash=false;bdEditing=false;dashAdd=false;save();syncLayout()});
+  $('#dbReset').addEventListener('click',function(){dashOn();C.board.forEach(function(o){delete o[DG.k]});save();syncBoard();toast('Layout reset.')});
+  $('#dbExit').addEventListener('click',function(){if(dashSetMode()) C.dash=false; else C.dashP=false;bdEditing=false;dashAdd=false;save();syncLayout()});
   $('#bdDash').addEventListener('change',function(){C.dash=$('#bdDash').checked;save();syncLayout()});
-  window.addEventListener('resize',function(){if(dashOn()){dashFit();setTimeout(dashFit,250)}});
+  $('#bdDashP').addEventListener('change',function(){C.dashP=$('#bdDashP').checked;save();syncLayout()});
+  var dashLastK=dashLand()?'g':'gp';
+  window.addEventListener('resize',function(){
+    var k=dashLand()?'g':'gp';
+    if(k!==dashLastK){dashLastK=k;syncLayout();return}
+    if(dashOn()){dashFit();setTimeout(dashFit,250)}
+  });
   bdTypes.forEach(function(t){t[1].addEventListener('click',function(){bdSetKind(t[0])})});
   bdMode.addEventListener('change',bdFill);
   $('#bdAdd').addEventListener('click',function(){
     if(C.board.length>=16){bdNote.textContent='The board is full (16 controls).';return}
     var v=bdSel.map(function(s){return s.value});
-    if(!v[0]){bdNote.textContent='Nothing to add. Make a sequence first.';return}
+    if(!v[0]&&bdK!=='e'){bdNote.textContent='Nothing to add. Make a sequence first.';return}
     var ww=bdWideChk.checked?2:1, m=bdMode.value==='tank'?'tank':'axis', n=v.map(function(x){return Math.round(+x)});
     var hd=!bdSpring.checked;
     if(bdK==='q') C.board.push({k:'q',c:v[0],w:ww});
+    else if(bdK==='e') C.board.push({k:'e',w:1});
     else if(bdK==='b') C.board.push({k:'b',c:n[0],w:ww});
     else if(bdK==='t'){
       var tsy=$('#bdTgStyle').value;
@@ -3186,7 +3208,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     }
     if(dashOn()){
       var lastIt=C.board[C.board.length-1];dashAuto();
-      if(lastIt&&lastIt.g&&dashHits(lastIt,lastIt.g)){C.board.pop();save();toast('No space. Make room or remove a widget first.');return}
+      if(lastIt&&lastIt[DG.k]&&dashHits(lastIt,lastIt[DG.k])){C.board.pop();save();toast('No space. Make room or remove a widget first.');return}
       dashAdd=false;
     }
     bdNote.textContent='';save();syncBoard();
@@ -3334,7 +3356,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     'New model':'Model baharu','Delete':'Padam','Confirm delete':'Sahkan padam','Confirm':'Sahkan','Model colour':'Warna model','Theme':'Tema','Layout':'Susun atur',
     'Model list is full.':'Senarai model penuh.','New model created from the current settings':'Model baharu dicipta daripada tetapan semasa',
     'Quick actions':'Tindakan pantas',
-    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Dashboard when the phone is sideways':'Dashboard bila telefon mengiring','Edit':'Ubah','Add widget':'Tambah widget','+ Add':'+ Tambah','Reset':'Set semula','Exit':'Keluar','Done':'Selesai','Reset layout':'Set semula susunan','Exit dashboard':'Keluar dashboard','Layout reset.':'Susunan disetkan semula.','No space. Make room or remove a widget first.':'Tiada ruang. Kosongkan ruang atau buang satu widget dahulu.','The board is full (16 controls).':'Papan penuh (16 kawalan).','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
+    'Channels':'Saluran','Reverse':'Undur','Forward':'Depan','Stop':'Henti','Channel settings':'Tetapan saluran','Maximum power':'Kuasa maksimum','Start power':'Kuasa mula','Dashboard when the phone is sideways':'Dashboard bila telefon mengiring','Dashboard when the phone is upright':'Dashboard bila telefon tegak','Edit':'Ubah','Add widget':'Tambah widget','E-Stop':'E-Stop','+ Add':'+ Tambah','Reset':'Set semula','Exit':'Keluar','Done':'Selesai','Reset layout':'Set semula susunan','Exit dashboard':'Keluar dashboard','Layout reset.':'Susunan disetkan semula.','No space. Make room or remove a widget first.':'Tiada ruang. Kosongkan ruang atau buang satu widget dahulu.','The board is full (16 controls).':'Papan penuh (16 kawalan).','Test power':'Kuasa ujian','Used by Calibration and Test hub. Ignores Limit and Speed, so raise it until the motor just moves.':'Digunakan oleh Kalibrasi dan Test hub. Abaikan Limit dan Speed; naikkan sehingga motor baru bergerak.',
     'Fine control (expo)':'Kawalan halus (expo)','Slider':'Gelangsar','Hold':'Tahan','Control type':'Jenis kawalan','Response curve':'Lengkung tindak balas',
     'Channel':'Saluran','Channel power':'Kuasa saluran','Channel name':'Nama saluran','Power channels':'Saluran kuasa','not sent':'tidak dihantar',
     'Sticks':'Stick','Left stick':'Stick kiri','Right stick':'Stick kanan','Axis':'Paksi','Tank':'Tangki','Stick mode':'Mod stick',
