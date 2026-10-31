@@ -830,22 +830,22 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .bdw input[type=range],:root[data-skin="studs"] .pwr{--t:0}
 :root[data-skin="studs"] .bdw input[type=range]:active,:root[data-skin="studs"] .bdw input[type=range].touch,:root[data-skin="studs"] .pwr:active,:root[data-skin="studs"] .pwr.touch{--t:1}
 /* ---- joystick + double joystick: chosen design (original pad and knob) + metal outer ring + yellow glow while touched ---- */
-:root[data-skin="studs"] .pad:not(#z),:root[data-skin="studs"] .bd-pads .pad:not(#z),:root[data-skin="studs"] .cols.dual .pad:not(#z),:root[data-skin="studs"] .bdw>.pad:not(#z),:root:not(.dash)[data-skin="studs"] .bd-pads .pad:not(#z){border:6px solid #2b2f36;background-clip:border-box;background-origin:padding-box;
-  box-shadow:0 0 0 2px #0b0c0f,0 0 0 10px #000,0 12px 22px 9px rgba(0,0,0,.8),inset 0 12px 30px #000,inset 0 -3px 6px rgba(255,255,255,.06)}
+:root[data-skin="studs"] .pad:not(#z),:root[data-skin="studs"] .bd-pads .pad:not(#z),:root[data-skin="studs"] .cols.dual .pad:not(#z),:root[data-skin="studs"] .bdw>.pad:not(#z),:root:not(.dash)[data-skin="studs"] .bd-pads .pad:not(#z){border:calc(6px*var(--s,1)) solid #2b2f36;background-clip:border-box;background-origin:padding-box;
+  box-shadow:0 0 0 calc(2px*var(--s,1)) #0b0c0f,0 0 0 calc(10px*var(--s,1)) #000,0 calc(12px*var(--s,1)) calc(22px*var(--s,1)) calc(9px*var(--s,1)) rgba(0,0,0,.8),inset 0 calc(12px*var(--s,1)) calc(30px*var(--s,1)) #000,inset 0 calc(-3px*var(--s,1)) calc(6px*var(--s,1)) rgba(255,255,255,.06)}
 :root[data-skin="studs"] .pad:not(#z),:root[data-skin="studs"] .bd-pads .pad:not(#z),:root[data-skin="studs"] .cols.dual .pad:not(#z),:root[data-skin="studs"] .bdw>.pad:not(#z),:root:not(.dash)[data-skin="studs"] .bd-pads .pad:not(#z){background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 0l10 13H0z' fill='%23ffc400' fill-opacity='.6'/%3E%3C/svg%3E") center 3.5%/20px 13px no-repeat,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 13L0 0h20z' fill='%23ffc400' fill-opacity='.6'/%3E%3C/svg%3E") center 96.5%/20px 13px no-repeat,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M0 10L13 0v20z' fill='%23ffc400' fill-opacity='.6'/%3E%3C/svg%3E") 3.5% center/13px 20px no-repeat,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M13 10L0 0v20z' fill='%23ffc400' fill-opacity='.6'/%3E%3C/svg%3E") 96.5% center/13px 20px no-repeat,
-    linear-gradient(#232830,#232830) center/2px 56% no-repeat,
-    linear-gradient(#232830,#232830) center/56% 2px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 0l10 13H0z' fill='%23ffc400' fill-opacity='.6'/%3E%3C/svg%3E") center 3.5%/calc(20px*var(--s,1)) calc(13px*var(--s,1)) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 13L0 0h20z' fill='%23ffc400' fill-opacity='.6'/%3E%3C/svg%3E") center 96.5%/calc(20px*var(--s,1)) calc(13px*var(--s,1)) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M0 10L13 0v20z' fill='%23ffc400' fill-opacity='.6'/%3E%3C/svg%3E") 3.5% center/calc(13px*var(--s,1)) calc(20px*var(--s,1)) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M13 10L0 0v20z' fill='%23ffc400' fill-opacity='.6'/%3E%3C/svg%3E") 96.5% center/calc(13px*var(--s,1)) calc(20px*var(--s,1)) no-repeat,
+    linear-gradient(#232830,#232830) center/calc(2px*var(--s,1)) 56% no-repeat,
+    linear-gradient(#232830,#232830) center/56% calc(2px*var(--s,1)) no-repeat,
     radial-gradient(circle,#0a0b0e 0 52%,#13161a 78%,#1b1f25 100%)}
-:root[data-skin="studs"] .pad:not(#z)::after,:root[data-skin="studs"] .bd-pads .pad:not(#z)::after,:root[data-skin="studs"] .cols.dual .pad:not(#z)::after,:root[data-skin="studs"] .bdw> .pad:not(#z)::after,:root:not(.dash)[data-skin="studs"] .bd-pads .pad:not(#z)::after{inset:13%;border:2px dashed #3d434d;box-shadow:none}
-:root[data-skin="studs"] .pad:not(#z)::before,:root[data-skin="studs"] .bd-pads .pad:not(#z)::before,:root[data-skin="studs"] .cols.dual .pad:not(#z)::before,:root[data-skin="studs"] .bdw>.pad:not(#z)::before,:root:not(.dash)[data-skin="studs"] .bd-pads .pad:not(#z)::before{content:"";display:block;position:absolute;inset:-15px;border-radius:50%;pointer-events:none;
-  background:radial-gradient(farthest-side,transparent calc(100% - 9px),#0b0c0f calc(100% - 9px) calc(100% - 7px),transparent calc(100% - 7px)),conic-gradient(from 0deg,#9ba1ad 0deg,#5a5f69 70deg,#1a1c21 130deg,#15171b 160deg,#3a3e46 230deg,#9ba1ad 290deg,#e2e6ee 315deg,#9ba1ad 360deg);
+:root[data-skin="studs"] .pad:not(#z)::after,:root[data-skin="studs"] .bd-pads .pad:not(#z)::after,:root[data-skin="studs"] .cols.dual .pad:not(#z)::after,:root[data-skin="studs"] .bdw> .pad:not(#z)::after,:root:not(.dash)[data-skin="studs"] .bd-pads .pad:not(#z)::after{inset:13%;border:max(1px,calc(2px*var(--s,1))) dashed #3d434d;box-shadow:none}
+:root[data-skin="studs"] .pad:not(#z)::before,:root[data-skin="studs"] .bd-pads .pad:not(#z)::before,:root[data-skin="studs"] .cols.dual .pad:not(#z)::before,:root[data-skin="studs"] .bdw>.pad:not(#z)::before,:root:not(.dash)[data-skin="studs"] .bd-pads .pad:not(#z)::before{content:"";display:block;position:absolute;inset:calc(-15px*var(--s,1));border-radius:50%;pointer-events:none;
+  background:radial-gradient(farthest-side,transparent calc(100% - calc(9px*var(--s,1))),#0b0c0f calc(100% - calc(9px*var(--s,1))) calc(100% - calc(7px*var(--s,1))),transparent calc(100% - calc(7px*var(--s,1)))),conic-gradient(from 0deg,#9ba1ad 0deg,#5a5f69 70deg,#1a1c21 130deg,#15171b 160deg,#3a3e46 230deg,#9ba1ad 290deg,#e2e6ee 315deg,#9ba1ad 360deg);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);
-  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8.5px))}
-:root[data-skin="studs"] .knob:not(#z),:root[data-skin="studs"] .pad:not(#z) .knob:not(#z){border:3px solid #6b4600;
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - calc(9px*var(--s,1))),#000 calc(100% - calc(9px*var(--s,1)) + .5px));mask:radial-gradient(farthest-side,transparent calc(100% - calc(9px*var(--s,1))),#000 calc(100% - calc(9px*var(--s,1)) + .5px))}
+:root[data-skin="studs"] .knob:not(#z),:root[data-skin="studs"] .pad:not(#z) .knob:not(#z){border:calc(3px*var(--s,1)) solid #6b4600;
   background:
     radial-gradient(circle at 33% 24%,rgba(255,255,255,.85) 0,rgba(255,255,255,0) 22%),
     radial-gradient(circle,transparent 0 37%,rgba(110,70,0,.6) 38% 41%,transparent 42%),
@@ -853,7 +853,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     radial-gradient(circle,#fff0a0 0 14%,#ffd21a 15% 38%,#e0a000 62%,#8f5f00 100%);
   box-shadow:none}
 
-:root[data-skin="studs"] .touch .knob:not(#z),:root[data-skin="studs"] .pad:not(#z).touch .knob:not(#z){box-shadow:0 14px 20px rgba(0,0,0,.78),inset 0 -10px 14px rgba(90,50,0,.6),inset 0 4px 6px rgba(255,255,255,.5),0 0 28px 9px rgba(255,200,40,.85)}
+:root[data-skin="studs"] .touch .knob:not(#z),:root[data-skin="studs"] .pad:not(#z).touch .knob:not(#z){box-shadow:0 calc(14px*var(--s,1)) calc(20px*var(--s,1)) rgba(0,0,0,.78),inset 0 calc(-10px*var(--s,1)) calc(14px*var(--s,1)) rgba(90,50,0,.6),inset 0 calc(4px*var(--s,1)) calc(6px*var(--s,1)) rgba(255,255,255,.5),0 0 calc(28px*var(--s,1)) calc(9px*var(--s,1)) rgba(255,200,40,.85)}
 :root[data-skin="studs"] .pad:not(#z) .knob:not(#z),:root[data-skin="studs"] .pad:not(#z)>.knob:not(#z),:root[data-skin="studs"] .bdw>.pad:not(#z) .knob:not(#z),:root[data-skin="studs"] .bd-pads .pad:not(#z) .knob:not(#z){width:38%;left:31%;top:31%}
 :root:not(.dash)[data-skin="studs"] .bd-pads{gap:24px}
 </style>
@@ -3698,6 +3698,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   document.addEventListener('pointerdown',function(e){var t=e.target&&e.target.closest&&e.target.closest(sel);if(t)t.classList.add('touch')},true);
   function off(){var l=document.querySelectorAll('.touch');for(var i=0;i<l.length;i++)l[i].classList.remove('touch')}
   document.addEventListener('pointerup',off,true);document.addEventListener('pointercancel',off,true);window.addEventListener('blur',off);
+})();
+</script>
+<script>
+(function(){
+  // scale the joystick design with the pad: 300px single / 230px double = 1
+  function fit(p){var w=p.offsetWidth;if(!w)return;var ref=p.closest('.bd-pads,.cols.dual,.pads')?230:300;p.style.setProperty('--s',(w/ref).toFixed(3))}
+  var ro=window.ResizeObserver?new ResizeObserver(function(es){es.forEach(function(e){fit(e.target)})}):null;
+  function scan(){var l=document.querySelectorAll('.pad');for(var i=0;i<l.length;i++){var p=l[i];if(!p._ro){p._ro=1;if(ro)ro.observe(p)}fit(p)}}
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+  window.addEventListener('resize',scan);scan();
 })();
 </script>
 </body>
