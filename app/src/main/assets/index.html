@@ -715,25 +715,26 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash main>*:not(.cols),:root.dash .cols>*:not(#boardCard),:root.dash #boardCard>h2,:root.dash #bdNote,:root.dash #boardCard>.rec-row,:root.dash .bd-dashchk{display:none}
 :root.dash .cols{display:block}
 :root.dash #boardCard{padding:0;border:0;background:none;box-shadow:none;margin:0}
-:root.dash #boardGrid{display:block;position:relative;width:100%;margin:0}
+:root.dash #boardGrid{display:block;position:relative;margin:0 auto}
 :root:not(.dash) .dashbar{display:none}
 .dashbar{position:relative;z-index:31;display:flex;gap:8px;justify-content:center;align-items:center;height:40px;padding-top:6px}
 .dashbar .btn{height:34px;min-height:34px;padding:0 14px;font-size:13px;flex:0 0 auto}
-:root.dash #boardGrid.editing{background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:calc(100%/24) calc(100%/12)}
+:root.dash #boardGrid.editing{background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px)}
 :root.dash #bdEditor{position:fixed;left:0;right:0;bottom:46px;max-height:52vh;overflow:auto;z-index:30;background:var(--panel);border-top:3px solid #f4b800;padding:12px max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px)) 16px;box-shadow:0 -8px 24px rgba(0,0,0,.6)}
 :root.dash .dw{position:absolute;display:flex;flex-direction:column;gap:3px;padding:5px 7px;overflow:hidden;box-sizing:border-box;margin:0;align-content:normal}
 :root.dash .dw>*{min-width:0}
 :root.dash .dw>.bdw-h{flex:none;margin:0}
 :root.dash .dw>:not(.bdw-h):not(.dw-rs){margin-top:auto;margin-bottom:auto}
 :root.dash .dw>.pad,:root.dash .dw.padw>.pad{flex:none;align-self:center;margin:auto 0;max-width:none}
-:root.dash .dw .bd-pads{display:flex;gap:8px;justify-content:center;align-items:center;flex:1;min-height:0}
+:root.dash .dw .bd-pads{display:flex;gap:8px;justify-content:center;align-items:flex-start;flex:1;min-height:0}
 :root.dash .dw .bd-pads .pad{flex:none;margin:0;max-width:none}
+:root.dash .dw .pad{box-sizing:border-box}
 :root.dash .dw .bdv{position:relative;flex:none;width:100%}
 :root.dash .dw.dw-ed{cursor:grab;touch-action:none;outline:2px dashed rgba(244,184,0,.85);outline-offset:-3px}
 :root.dash .dw.dw-ed>*:not(.bdw-h):not(.dw-rs){pointer-events:none}
 :root.dash .dw.moving{opacity:.85;z-index:5}
 :root.dash .dw.bad{outline-color:#ff4d4d;background:rgba(255,60,60,.28)}
-.dw-rs{position:absolute;right:0;bottom:0;width:32px;height:32px;touch-action:none;background:linear-gradient(135deg,transparent 52%,#f4b800 52%);z-index:4}
+.dw-rs{position:absolute;right:0;bottom:0;width:44px;height:44px;touch-action:none;background:linear-gradient(135deg,transparent 56%,#f4b800 56%);z-index:4}
 :root.dash .dw .bdw-ed{position:absolute;right:3px;top:3px;display:flex;gap:3px;z-index:6;margin:0}
 :root.dash .dw .bdw-ed .btn{min-width:34px!important;width:34px!important;flex:0 0 34px!important;height:34px!important;min-height:34px!important;padding:0!important;font-size:15px}
 :root.dash .dw.estopw{border:0;background:none;padding:2px}
@@ -2782,26 +2783,38 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     if(!dashHits(it,g)){it.g=g;return}
     delete it.g;dashAuto();
   }
+  var DCELL={w:30,h:24};
+  function dashCell(){
+    var par=bdGrid.parentElement, pw=(par&&par.clientWidth)||window.innerWidth;
+    var hd=document.querySelector('header'), top=hd?hd.getBoundingClientRect().bottom:0;
+    DCELL.w=Math.max(10,Math.floor(pw/DGX));
+    DCELL.h=Math.max(10,Math.floor(Math.max(150,window.innerHeight-top-46)/DGY));
+  }
   function dashStyle(el,g){
-    el.style.left=(g[0]/DGX*100)+'%';el.style.top=(g[1]/DGY*100)+'%';
-    el.style.width=(g[2]/DGX*100)+'%';el.style.height=(g[3]/DGY*100)+'%';
+    el.style.left=(g[0]*DCELL.w)+'px';el.style.top=(g[1]*DCELL.h)+'px';
+    el.style.width=(g[2]*DCELL.w)+'px';el.style.height=(g[3]*DCELL.h)+'px';
   }
   function dashFit(){
     var on=dashOn();
     document.documentElement.classList.toggle('dash',on);
     if(!bdGrid) return;
-    if(!on){bdGrid.style.height='';return}
-    var hd=document.querySelector('header'), top=hd?hd.getBoundingClientRect().bottom:0;
-    bdGrid.style.height=Math.max(150,window.innerHeight-top-46)+'px';
+    if(!on){bdGrid.style.height='';bdGrid.style.width='';bdGrid.style.margin='';bdGrid.style.backgroundSize='';return}
+    dashCell();
+    bdGrid.style.width=(DCELL.w*DGX)+'px';bdGrid.style.height=(DCELL.h*DGY)+'px';
+    var pw0=(bdGrid.parentElement&&bdGrid.parentElement.clientWidth)||window.innerWidth;
+    bdGrid.style.margin='0 0 0 '+Math.max(0,Math.floor((pw0-DCELL.w*DGX)/2))+'px';
+    bdGrid.style.backgroundSize=DCELL.w+'px '+DCELL.h+'px';
+    bdW.forEach(function(w){if(w.el&&w.it&&w.it.g) dashStyle(w.el,w.it.g)});
     if(typeof bdGrid.querySelectorAll!=='function') return;
     [].slice.call(bdGrid.querySelectorAll('.dw')).forEach(function(el){
       var hh=0, hd2=el.querySelector('.bdw-h');
-      if(hd2&&!el.classList.contains('dw-ed')) hh=hd2.offsetHeight+3;
+      if(hd2) hh=hd2.offsetHeight+3;
       var aw=el.clientWidth-14, ah=el.clientHeight-10-hh;
       var pads=[].slice.call(el.querySelectorAll('.pad'));
       if(pads.length){
         var sp=Math.max(30,Math.min(pads.length>1?(aw-8)/2:aw,ah));
-        pads.forEach(function(q){q.style.width=sp+'px';q.style.height=sp+'px'});
+        sp=Math.floor(sp);
+        pads.forEach(function(q){q.style.width=sp+'px';q.style.height=sp+'px';q.style.marginTop=Math.max(0,Math.floor((ah-sp)/2))+'px'});
       }
       var bv=el.querySelector('.bdv');
       if(bv){
@@ -2815,7 +2828,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     el.addEventListener('pointerdown',function(e){
       if(e.target.closest&&e.target.closest('.bdw-ed')) return;
       var mode=e.target.classList.contains('dw-rs')?'rs':'mv';
-      var cv=bdGrid.getBoundingClientRect(), cw=cv.width/DGX, ch=cv.height/DGY;
+      var cw=DCELL.w, ch=DCELL.h;
       var g0=it.g.slice(), g1=g0.slice(), sx=e.clientX, sy=e.clientY, pid=e.pointerId, mn=DMIN[it.k]||[3,3];
       try{el.setPointerCapture(pid)}catch(_){}
       el.classList.add('moving');
@@ -2894,7 +2907,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
     bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
     bdEditBtn.textContent=bdEditing?'Done editing':'Edit board';
     var dash=dashOn();
-    if(dash){dashEnsure();dashAuto()}
+    if(dash){dashEnsure();dashAuto();dashCell()}
     bdGrid.classList.toggle('editing',dash&&bdEditing);
     $('#dbEdit').setAttribute('aria-pressed',String(bdEditing));
     $('#dbEdit').textContent=bdEditing?'Done':'Edit';
@@ -3060,6 +3073,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
         }
       }
       if(dash) dashPlace(el,it);
+      w.el=el;
       bdGrid.appendChild(el);bdW.push(w);
     });
     dashFit();
