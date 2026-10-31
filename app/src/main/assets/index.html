@@ -3966,6 +3966,13 @@ html,body{overflow-anchor:none}
   function rel(){held=0}
   document.addEventListener('pointerup',rel,true);document.addEventListener('pointercancel',rel,true);window.addEventListener('blur',rel);
   window.addEventListener('scroll',function(){if(held&&(window.scrollY!==hy||window.scrollX!==hx)) window.scrollTo(hx,hy)},{passive:true});
+  // A range input that keeps focus makes Android WebView scroll it into view every time its value is
+  // updated from code (e.g. a slider that mirrors a joystick). Never let sliders keep focus.
+  function dropFocus(){var a=document.activeElement;if(a&&a.tagName==='INPUT'&&a.type==='range'){try{a.blur()}catch(_){}}}
+  document.addEventListener('pointerup',function(){setTimeout(dropFocus,0)},true);
+  document.addEventListener('pointercancel',function(){setTimeout(dropFocus,0)},true);
+  document.addEventListener('pointerdown',function(e){if(e.target&&e.target.closest&&e.target.closest('.pad')) dropFocus()},true);
+  document.addEventListener('focusin',function(e){var t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='range'&&!held) setTimeout(function(){if(!held&&document.activeElement===t) dropFocus()},0)},true);
 })();
 </script>
 </body>
