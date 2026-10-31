@@ -3949,5 +3949,16 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   window.addEventListener('resize',scan);scan();
 })();
 </script>
+<script>
+(function(){
+  // Hard lock: while a finger is on a joystick pad, the page must never scroll (some Android WebViews ignore touch-action)
+  var lock=false;
+  function onPad(e){var t=e.target;return !!(t&&t.closest&&t.closest('.pad'))}
+  document.addEventListener('touchstart',function(e){lock=onPad(e);if(lock&&e.cancelable) e.preventDefault()},{passive:false,capture:true});
+  document.addEventListener('touchmove',function(e){if((lock||onPad(e))&&e.cancelable) e.preventDefault()},{passive:false,capture:true});
+  document.addEventListener('touchend',function(e){if(!e.touches||!e.touches.length) lock=false},{passive:true,capture:true});
+  document.addEventListener('touchcancel',function(){lock=false},{passive:true,capture:true});
+})();
+</script>
 </body>
 </html>
