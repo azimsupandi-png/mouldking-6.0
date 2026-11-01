@@ -1079,6 +1079,20 @@ html,body{overflow-anchor:none}
    linear-gradient(270deg,#020203,#14161c 60%,#0a0b0e) content-box content-box,
    linear-gradient(#f4b800,#f4b800) padding-box padding-box,
    linear-gradient(260deg,#8a909a,#3a3e46 50%,#1a1c21) border-box border-box!important}
+
+/* Metal ring theme on cards, buttons and E-Stop (Steel / Gunmetal / Bronze) */
+:root{--rim:linear-gradient(135deg,#f4f7fa 0%,#a3aab4 28%,#4b505a 55%,#2b2e35 70%,#aab1bb 100%);--ln:transparent;--cf:linear-gradient(180deg,#25292f,#1c1f24 55%,#181b20);--bf:linear-gradient(180deg,#2c3037,#171a1f)}
+:root.ring-gun{--rim:linear-gradient(135deg,#8f959f 0%,#555a63 30%,#2a2d33 60%,#17191d 75%,#5a5f68 100%);--ln:#f4b800}
+:root.ring-bronze{--rim:linear-gradient(135deg,#ffe2ad 0%,#d79b52 28%,#8a5424 55%,#4a2a10 72%,#e0a766 100%)}
+:root.matte{--cf:linear-gradient(#f5f6f8,#e7e9ed);--bf:linear-gradient(#fdfdfe,#e8eaed 55%,#d6d9de)}
+:root.matte.ring-gun{--rim:linear-gradient(135deg,#aeb4bd 0%,#6a707a 35%,#363a42 65%,#20232a 80%,#7b818b 100%)}
+:root:not(#a) .bdw:not(.estopw){border:3px solid transparent!important;background:var(--cf) padding-box,var(--rim) border-box!important;box-shadow:0 4px 10px rgba(0,0,0,.45),inset 0 0 0 1.5px var(--ln)!important}
+:root.matte:not(#a) .bdw:not(.estopw){box-shadow:0 4px 10px rgba(40,46,56,.25),inset 0 0 0 1.5px var(--ln)!important}
+:root:not(#a) .bdw .hold:not(.on),:root:not(#a) .bdw .tgl:not(.on),:root:not(#a) .bdw .qbtn,:root:not(#a) .bdw .tgd:not(.on){border:2.5px solid transparent!important;background:var(--bf) padding-box,var(--rim) border-box!important;box-shadow:0 3px 5px rgba(0,0,0,.55),inset 0 2px 4px rgba(255,255,255,.07)!important}
+:root.matte:not(#a) .bdw .hold:not(.on),:root.matte:not(#a) .bdw .tgl:not(.on),:root.matte:not(#a) .bdw .qbtn,:root.matte:not(#a) .bdw .tgd:not(.on){box-shadow:0 3px 5px rgba(40,46,56,.25),inset 0 2px 3px rgba(255,255,255,.8)!important}
+:root:not(#a) .bdw .tgd.on{border:2.5px solid transparent!important;background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.45),transparent 45%) padding-box,linear-gradient(#f4b800,#f4b800) padding-box,var(--rim) border-box!important}
+:root:not(#a) .dw-es:not(.on){border:7px solid transparent!important;background:radial-gradient(circle at 36% 28%,#ff8a7a,#e01b10 45%,#8e0a05) padding-box,var(--rim) border-box!important;box-shadow:0 5px 10px rgba(0,0,0,.6),inset 0 0 0 1.5px var(--ln),inset 0 3px 6px rgba(0,0,0,.4)!important}
+:root:not(#a) .dw-es.on{border:7px solid transparent!important;background:radial-gradient(circle at 50% 25%,#fff,#d9dde3 55%,#8c929c) padding-box,var(--rim) border-box!important}
 </style>
 </head>
 <body>
