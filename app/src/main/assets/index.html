@@ -1015,7 +1015,7 @@ html,body{overflow-anchor:none}
 /* Rotation: hide the board while it is rebuilt, then fade it in (opacity only) */
 :root.rot .cols{opacity:0}
 @keyframes rotIn{from{opacity:0}to{opacity:1}}
-:root.rotin .cols{animation:rotIn .12s ease-out}
+:root.rotin .cols{animation:rotIn .16s ease-out}
 /* Auto-lite: on slow GPUs the dashboard sheds effects step by step (see autoLite script) */
 :root.dash.lite1 *{animation:none!important;transition:none!important;--g:0!important;filter:none!important}
 :root.dash.lite2 *{box-shadow:none!important;text-shadow:none!important}
@@ -3720,7 +3720,7 @@ html,body{overflow-anchor:none}
           if(dashOn()) setTimeout(dashFit,250);
         });
       });
-    },60);
+    },120);
   }
   window.addEventListener('resize',function(){
     var k=dashLand()?'g':'gp';
