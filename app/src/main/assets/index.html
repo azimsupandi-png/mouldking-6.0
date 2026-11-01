@@ -1069,6 +1069,8 @@ html,body{overflow-anchor:none}
 :root.ring-bronze[data-skin="studs"] .bdv input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(#010102,#010102) 11px center/calc(100% - 22px) 8px no-repeat,
     radial-gradient(circle,#010102 0 3.6px,transparent 4.2px) 4px center/8px 8px no-repeat,
     radial-gradient(circle,#010102 0 3.6px,transparent 4.2px) calc(100% - 4px) center/8px 8px no-repeat,linear-gradient(270deg,#020203,#14161c 60%,#0a0b0e) padding-box,linear-gradient(260deg,#fff0b8,#e8c25a 30%,#9a7420 65%,#4a360c) border-box!important}
+:root.dash .dw:not(.estopw){isolation:isolate}
+.pad{contain:style}
 </style>
 </head>
 <body>
@@ -1986,17 +1988,21 @@ html,body{overflow-anchor:none}
     st.mT.addEventListener('click',function(){cfgOf(k).mode='tank';syncSticks();save()});
     st.selA.addEventListener('change',function(){cfgOf(k).a=+st.selA.value;syncLayout();save()});
     st.selB.addEventListener('change',function(){cfgOf(k).b=+st.selB.value;syncLayout();save()});
+    var sgeo=null, sq=null, sraf=0;
     function move(e){
-      var r=st.pad.getBoundingClientRect(), R=Math.max(8,(r.width-st.knob.getBoundingClientRect().width*0.6)/2-7);
-      var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), m=Math.hypot(dx,dy);
+      if(e&&e.type==='pointermove'){sq={clientX:e.clientX,clientY:e.clientY};if(!sraf) sraf=requestAnimationFrame(function(){sraf=0;if(sq&&st.id!==null){var q=sq;sq=null;mstep(q)}});return}
+      mstep(e);
+    }
+    function mstep(e){
+      if(!sgeo){var r=st.pad.getBoundingClientRect();sgeo={cx:r.left+r.width/2,cy:r.top+r.height/2,R:Math.max(8,(r.width-st.knob.offsetWidth*0.6)/2-7)}}
+      var R=sgeo.R, dx=e.clientX-sgeo.cx, dy=e.clientY-sgeo.cy, m=Math.hypot(dx,dy);
       if(m>R){dx*=R/m;dy*=R/m}
       st.knob.style.transform='translate('+dx+'px,'+dy+'px)';
-      st.pad.style.setProperty('--m',Math.min(1,Math.hypot(dx,dy)/R).toFixed(2));
       st.y=-dy/R;
       applyStick(k,(k===0&&tiltActive())?tiltVal():dx/R,-dy/R);
     }
     st.pad.addEventListener('pointerdown',function(e){
-      st.id=e.pointerId;
+      st.id=e.pointerId;sgeo=null;
       if(k===0) TILT.zero=null;
       try{st.pad.setPointerCapture(e.pointerId)}catch(_){}
       st.knob.classList.remove('rest');move(e);
@@ -2004,6 +2010,7 @@ html,body{overflow-anchor:none}
     st.pad.addEventListener('pointermove',function(e){if(e.pointerId===st.id)move(e)});
     function end(e){
       if(e.pointerId!==st.id)return;
+      if(sq){var q0=sq;sq=null;mstep(q0)}
       st.id=null;if(cfgOf(k).hold)return;st.knob.classList.add('rest');st.knob.style.transform='translate(0,0)';st.pad.style.setProperty('--m','0');applyStick(k,0,0);
     }
     st.pad.addEventListener('pointerup',end);
@@ -3139,22 +3146,28 @@ html,body{overflow-anchor:none}
     var jp=document.createElement('div');jp.className='pad';
     var kn=document.createElement('div');kn.className='knob rest';jp.appendChild(kn);
     var pid=null;
+    var geo=null, jq=null, jraf=0;
+    var jgeo=function(){var r=jp.getBoundingClientRect();geo={cx:r.left+r.width/2,cy:r.top+r.height/2,R:Math.max(8,(r.width-kn.offsetWidth*0.6)/2-7)}};
     var jmove=function(e){
-      var r=jp.getBoundingClientRect(), R=Math.max(8,(r.width-kn.getBoundingClientRect().width*0.6)/2-7);
-      var dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), d=Math.hypot(dx,dy);
+      if(e&&e.type==='pointermove'){jq={clientX:e.clientX,clientY:e.clientY};if(!jraf) jraf=requestAnimationFrame(function(){jraf=0;if(jq&&pid!==null){var q=jq;jq=null;jstep(q)}});return}
+      if(!geo) jgeo();jstep(e);
+    };
+    var jstep=function(e){
+      if(!geo) jgeo();
+      var R=geo.R, dx=e.clientX-geo.cx, dy=e.clientY-geo.cy, d=Math.hypot(dx,dy);
       if(d>R){dx*=R/d;dy*=R/d}
       kn.style.transform='translate('+dx+'px,'+dy+'px)';
-      jp.style.setProperty('--m',Math.min(1,Math.hypot(dx,dy)/R).toFixed(2));
       it.y=-dy/R;
       noteInput();applyJoy(it,(tiltOk&&tiltActive())?tiltVal():dx/R,-dy/R);
     };
     jp.addEventListener('pointerdown',function(e){
-      pid=e.pointerId;try{jp.setPointerCapture(e.pointerId)}catch(_){}
+      pid=e.pointerId;geo=null;try{jp.setPointerCapture(e.pointerId)}catch(_){}
       if(tiltOk){TILT.zero=null;BD_TILT.cur=it}
       kn.classList.remove('rest');jmove(e)});
     jp.addEventListener('pointermove',function(e){if(e.pointerId===pid) jmove(e)});
     var jend=function(e){
       if(e.pointerId!==pid) return;
+      if(jq){var q0=jq;jq=null;jstep(q0)}
       pid=null;
       if(tiltOk&&BD_TILT.cur===it) BD_TILT.cur=null;
       if(hold) return;
@@ -3177,7 +3190,7 @@ html,body{overflow-anchor:none}
       x=Math.round(x*100)/100;y=Math.round(y*100)/100;
       if(x===p.lx&&y===p.ly) return;
       p.lx=x;p.ly=y;
-      var r=p.jp.getBoundingClientRect(), R=Math.max(8,(r.width-p.kn.getBoundingClientRect().width*0.6)/2-7);
+      var nowR=Date.now();if(!p.R||nowR-p.Rt>1500){p.R=Math.max(8,(p.jp.offsetWidth-p.kn.offsetWidth*0.6)/2-7);p.Rt=nowR}var R=p.R;
       p.kn.classList.toggle('rest',x===0&&y===0);
       p.kn.style.transform='translate('+(x*R)+'px,'+(-y*R)+'px)';
     });
