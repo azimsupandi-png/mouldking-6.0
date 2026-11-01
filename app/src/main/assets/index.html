@@ -1351,6 +1351,7 @@ html,body{overflow-anchor:none}
         <label class="rec-label">Language<select id="lang"><option value="en">English</option><option value="ms">Bahasa Melayu</option></select></label>
         <label class="check" for="optSound"><input id="optSound" type="checkbox" checked>Sound</label>
         <label class="check" for="optHaptic"><input id="optHaptic" type="checkbox" checked>Vibration</label>
+        <label class="check" for="optRelink"><input id="optRelink" type="checkbox" checked>Reconnect when I return to the app</label>
         <label class="check" for="optFull"><input id="optFull" type="checkbox" checked>Full screen (hide system bars)</label>
         <div class="rec-row" style="margin-top:12px">
           <button class="btn" id="guideBtn" type="button">Show guide</button>
@@ -1618,7 +1619,7 @@ html,body{overflow-anchor:none}
     });
     return out;
   }
-  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),lim:cleanLim(p.lim),autoBackup:p.autoBackup!==false,full:p.full!==false,lastBackup:Math.max(0,+p.lastBackup||0),tpls:cleanTpls(p.tpls)}}
+  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),lim:cleanLim(p.lim),autoBackup:p.autoBackup!==false,full:p.full!==false,relink:p.relink!==false,lastBackup:Math.max(0,+p.lastBackup||0),tpls:cleanTpls(p.tpls)}}
   var store={active:null,profiles:[],prefs:cleanPrefs()};
   try{
     var raw=localStorage.getItem('mk6v2');
@@ -2437,26 +2438,37 @@ html,body{overflow-anchor:none}
     var hs=$('#hubStat');if(hs){hs.setAttribute('data-st',!S.connected?'off':(hubMsg==='Pairing…'?'busy':'on'));hs.lastChild.textContent=t}
     link.setAttribute('data-st',!S.connected?'off':(hubMsg==='Pairing…'?'busy':'on'));
     link.setAttribute('aria-label',S.connected?'Disconnect hub':'Connect hub');paintBt();
+    // While the hub is active, the dashboard's Edit / Reset / model picker are locked so they cannot be hit by accident
+    ['#dbEdit','#dbReset','#dbModel'].forEach(function(q){var b=$(q);if(b) b.disabled=!!S.connected&&!!NB&&!bdEditing});
     if(!S.connected) refs.forEach(function(r){r.sent.textContent='not sent'});
   }
   link.addEventListener('click',function(){
     last=null;
     if(NB){
-      if(S.connected){NB.stop();S.connected=false;hubMsg='';stopPlay(true)}
+      if(S.connected){wantLink=false;NB.stop();S.connected=false;hubMsg='';stopPlay(true)}
       else{
-        hubMsg='Pairing…';S.connected=true;
+        wantLink=true;hubMsg='Pairing…';S.connected=true;
         NB.start(activeSlots().map(function(s){return C.hubs[s]}).join(','));
       }
       paintLink();return;
     }
     S.connected=!S.connected;paintLink();
   });
+  // Auto-reconnect: if the hub link was on when the app went to the background, bring it back (channels at zero) on return
+  var wantLink=false,resumeAt=0,relinkTries=0;
   window.onHubState=function(s){
     last=null;
     if(s==='connecting'){S.connected=true;hubMsg='Pairing…'}
-    else if(s==='ready'){S.connected=true;hubMsg='';feedback('ok')}
-    else if(s==='stopped'){S.connected=false;hubMsg='';stopPlay(true)}
+    else if(s==='ready'){S.connected=true;hubMsg='';relinkTries=0;feedback('ok')}
+    else if(s==='stopped'){
+      S.connected=false;hubMsg='';stopPlay(true);
+      if(wantLink&&NB&&store.prefs.relink&&S.bt!==false&&!S.estop&&Date.now()-resumeAt<3000&&relinkTries<3){
+        relinkTries++;zeroAll();hubMsg='Pairing…';S.connected=true;
+        try{NB.start(activeSlots().map(function(s){return C.hubs[s]}).join(','));toast('Reconnecting the hub. Motors are at zero.',4000)}catch(e){S.connected=false;hubMsg=''}
+      }
+    }
     else{
+      wantLink=false;
       var was=S.connected&&(s==='error');
       S.connected=false;hubMsg=HUB_TEXT[s]||'Error';live.textContent=hubMsg;stopPlay(true);feedback('lost');
       if(was) toast('Hub link lost. Motors stopped.',6000);
@@ -2741,7 +2753,7 @@ html,body{overflow-anchor:none}
   }
   window.onAppEvent=function(ev){
     if(ev==='nopin') toast('This launcher cannot add a shortcut.');
-    if(ev==='resume') tiltNative();
+    if(ev==='resume'){resumeAt=Date.now();tiltNative()}
     if(ev==='notilt') toast('This phone has no tilt sensor.',5000);
     if(ev==='backupok'){store.prefs.lastBackup=Date.now();save();bkPaint();if(bkManual) toast('Backup saved to the Downloads folder.',4000);bkManual=false}
     if(ev==='backupfail'){if(bkManual) toast('Backup failed. Use Export models instead.',5000);bkManual=false}
@@ -2749,7 +2761,7 @@ html,body{overflow-anchor:none}
     if(ev==='bt0'){S.bt=false;paintBt();return}
     if(ev==='resume') readBt();
     if(ev==='btoff'){
-      var wasOn=S.connected;
+      var wasOn=S.connected;wantLink=false;
       S.connected=false;hubMsg=HUB_TEXT.btoff;last=null;stopPlay(true);zeroAll();paintLink();
       live.textContent=hubMsg;feedback('lost');
       if(wasOn) toast('Bluetooth was switched off. Motors stopped.',8000);
@@ -3612,7 +3624,12 @@ html,body{overflow-anchor:none}
   bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;syncBoard()});
   $('#dbEdit').addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing) dashAdd=false;syncBoard()});
   $('#dbAdd').addEventListener('click',function(){dashAdd=!dashAdd;syncBoard()});
-  $('#dbReset').addEventListener('click',function(){dashOn();C.board.forEach(function(o){delete o[DG.k]});save();syncBoard();toast('Layout reset.')});
+  var rstT=0;
+  $('#dbReset').addEventListener('click',function(){
+    var b=$('#dbReset');
+    if(!rstT){b.textContent='Tap again';rstT=setTimeout(function(){rstT=0;b.textContent='Reset'},3000);return}
+    clearTimeout(rstT);rstT=0;b.textContent='Reset';
+    dashOn();C.board.forEach(function(o){delete o[DG.k]});save();syncBoard();toast('Layout reset.')});
   var DTPL={
     car:[{k:'s',c:0,w:1,v:true,g:[0,0,12,24]},{k:'l',c:2,w:1,g:[12,0,13,7]},{k:'b',c:0,w:1,g:[12,7,13,7]},
          {k:'t',c:3,y:'dir',w:1,g:[25,0,14,7]},{k:'l',c:4,w:1,g:[25,7,14,7]},{k:'e',w:1,g:[39,0,9,14]},{k:'s',c:1,w:1,g:[12,14,36,10]}],
@@ -3761,16 +3778,17 @@ html,body{overflow-anchor:none}
   if(landMQ){ if(landMQ.addEventListener) landMQ.addEventListener('change',landChange); else if(landMQ.addListener) landMQ.addListener(landChange); }
   if(dashOn()) syncLayout();
   optFull.addEventListener('change',function(){store.prefs.full=optFull.checked;save();fullNative()});
-  var optSound=$('#optSound'), optHaptic=$('#optHaptic'), pinBtn=$('#pinBtn');
+  var optSound=$('#optSound'), optHaptic=$('#optHaptic'), optRelink=$('#optRelink'), pinBtn=$('#pinBtn');
   function syncApp(){
     if(!optSound) return;
-    optSound.checked=store.prefs.sound;optHaptic.checked=store.prefs.haptic;optFull.checked=store.prefs.full;fullNative();
+    optSound.checked=store.prefs.sound;optHaptic.checked=store.prefs.haptic;if(optRelink) optRelink.checked=store.prefs.relink;optFull.checked=store.prefs.full;fullNative();
     $('#lang').value=store.prefs.lang;
     pinBtn.hidden=!(NB&&NB.pinModel);
     if(kidLim) kidLim.value=String(store.prefs.kidLimit);
     applyLock();
   }
   optSound.addEventListener('change',function(){store.prefs.sound=optSound.checked;save();if(optSound.checked) beep([700,900],0.09)});
+  if(optRelink) optRelink.addEventListener('change',function(){store.prefs.relink=optRelink.checked;save()});
   optHaptic.addEventListener('change',function(){store.prefs.haptic=optHaptic.checked;save();if(optHaptic.checked) feedback('ok')});
   pinBtn.addEventListener('click',function(){try{NB.pinModel(store.active,activeProfile().name)}catch(e){toast('This launcher cannot add a shortcut.')}});
   syncSafety();syncApp();
@@ -3976,7 +3994,7 @@ html,body{overflow-anchor:none}
     'Models saved to file.':'Model disimpan ke fail.','Cancelled.':'Dibatalkan.','Could not save the file.':'Tidak dapat menyimpan fail.','Could not read that file.':'Tidak dapat membaca fail itu.',
     'Choose where to save the file.':'Pilih tempat menyimpan fail.','Copy this text and keep it somewhere safe.':'Salin teks ini dan simpan di tempat selamat.',
     'Choose a model file.':'Pilih fail model.','Paste exported model data, then tap Apply import.':'Tampal data model yang dieksport, kemudian tekan Gunakan import.',
-    'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
+    'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Reconnect when I return to the app':'Sambung semula bila saya kembali ke app','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
     'This launcher cannot add a shortcut.':'Pelancar ini tidak dapat menambah pintasan.',
     'Skip':'Langkau','Back':'Kembali','Next':'Seterusnya','Done':'Selesai',
     'My templates':'Templat saya','Template name':'Nama templat','Save current layout':'Simpan susunan ini','My templates work in every model. Up to 10.':'Templat saya boleh digunakan dalam semua model. Maksimum 10.',
