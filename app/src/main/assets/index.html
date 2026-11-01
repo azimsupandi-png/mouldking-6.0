@@ -882,9 +882,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .dtpl-save input{flex:1 1 auto;min-width:0;height:44px;border-radius:22px;border:2px solid #2b2f36;background:#0b0c0f;color:#e8eaee;padding:0 14px;font:inherit;font-size:14px}
 .dtpl-in .dtpl-save .btn{flex:0 0 auto;align-items:center;justify-content:center}
 .dtpl-in .dtpl-note{font-size:11px;margin:0}
-.dtpl-cols{display:flex;flex-direction:column;gap:8px;min-height:0}
+.dtpl-cols{display:flex;flex-direction:column;gap:8px;min-height:0;flex:1 1 auto;overflow:auto}
+.dtpl-in>*{flex-shrink:0}.dtpl-in>.dtpl-cols{flex-shrink:1}.dtpl-col>*{flex-shrink:0}
 .dtpl-col{display:flex;flex-direction:column;gap:8px;min-width:0}
-:root.dash-l .dtpl-in{width:min(820px,100%);max-height:calc(100vh - 24px);overflow:hidden}
+:root.dash-l .dtpl-in{width:min(820px,100%);max-height:calc(100vh - 24px);height:auto;overflow:hidden}
 :root.dash-l .dtpl{padding:12px}
 :root.dash-l .dtpl-cols{flex-direction:row;flex:1 1 auto;overflow:hidden}
 :root.dash-l .dtpl-col{flex:1 1 0;overflow:auto;padding-right:2px}
@@ -1171,13 +1172,13 @@ html,body{overflow-anchor:none}
           <button class="btn" type="button" data-tpl="car">Car / Truck<small>Drive slider, steering slider, lights, Turbo, winch, E-Stop</small></button>
           <button class="btn" type="button" data-tpl="exc">Excavator<small>Thin track slider at the sides, double joystick for boom, arm, bucket, swing</small></button>
           <button class="btn" type="button" data-tpl="dual">Dual stick<small>Two big joysticks, E-Stop, lights and Turbo in the middle</small></button>
-          </div><div class="dtpl-col">
           <div class="dtpl-save">
             <input id="dtplName" type="text" maxlength="24" placeholder="Template name" aria-label="Template name" autocomplete="off">
             <button class="btn" type="button" id="dtplSave">Save current layout</button>
           </div>
           <p class="dtpl-note">My templates work in every model. Up to 10.</p>
           <div class="seg"><button class="btn" type="button" id="lxExp">Export layout</button><button class="btn" type="button" id="lxImp">Import layout</button></div>
+          </div><div class="dtpl-col">
           <h4 id="dtplMineH">My templates</h4>
           <div id="dtplMine" class="dtpl-mine"></div>
           </div></div>
@@ -3796,7 +3797,7 @@ html,body{overflow-anchor:none}
     $('#lxDlg').hidden=true;
     dtplApply(b,'Imported');
   });
-  function dashTplShow(on){$('#dashTpl').hidden=!on;if(on){$('#dtplName').value='';dtplMine()}}
+  function dashTplShow(on){$('#dashTpl').hidden=!on;if(on){$('#dtplName').value='';dtplMine();try{document.activeElement&&document.activeElement.blur()}catch(e){}}}
   $('#dtplSave').addEventListener('click',function(){
     if(!C.board.length) return;
     dashOn();
