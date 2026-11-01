@@ -104,6 +104,12 @@ public class MainActivity extends Activity {
 
         web = new WebView(this);
         setContentView(web);
+        // Short cross-fade instead of the long rotating-screenshot animation when the phone is turned
+        try{
+            WindowManager.LayoutParams rlp=getWindow().getAttributes();
+            rlp.rotationAnimation=WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
+            getWindow().setAttributes(rlp);
+        }catch(RuntimeException ignored){}
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
