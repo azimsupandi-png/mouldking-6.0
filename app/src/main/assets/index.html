@@ -1002,6 +1002,16 @@ html,body{overflow-anchor:none}
 .hubstat[data-st=on] i::after{content:"";position:absolute;inset:0;border-radius:50%;z-index:-1;background:#51cf66;opacity:0;animation:hubDot 1.8s ease-out infinite}
 @keyframes hubDot{from{transform:scale(1);opacity:.7}to{transform:scale(3);opacity:0}}
 @media (prefers-reduced-motion:reduce){.hubbtn .orb::after,.hubstat i::after{animation:none!important}}
+/* Dashboard vertical sliders: knob drawn as a separate transform-only layer (the native thumb repaint was the main GPU cost on mid-range phones) */
+.ovk{display:none}
+:root.dash .bdv input[type=range]:not(.ovr){opacity:0}
+.ovr{pointer-events:none}
+:root:not(.dash) .ovr{display:none!important}
+:root.dash .bdv input[type=range]::-webkit-slider-thumb{background:none!important;box-shadow:none!important;border:0!important}
+:root.dash .ovk{display:block;position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;background:var(--kimgv) center/100% 100% no-repeat;will-change:transform;pointer-events:none}
+:root.dash .ovk::before{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 22px 5px rgba(255,200,40,.8);opacity:var(--g,0);will-change:opacity}
+:root.dash.lite2 .ovk::before{box-shadow:none!important}
+:root.dash.lite3 .ovk{background:radial-gradient(circle at 35% 30%,#ffd98a,#e8a020 55%,#9a5600)!important}
 /* Auto-lite: on slow GPUs the dashboard sheds effects step by step (see autoLite script) */
 :root.dash.lite1 *{animation:none!important;transition:none!important;--g:0!important;filter:none!important}
 :root.dash.lite2 *{box-shadow:none!important;text-shadow:none!important}
@@ -4310,6 +4320,28 @@ html,body{overflow-anchor:none}
   }
   window.mk6Lite={get:function(){return lvl},set:function(n){lvl=Math.max(0,Math.min(3,n|0));bad=0;apply();save()}};
   apply();raf=requestAnimationFrame(loop);
+})();
+</script>
+<script>
+(function(){
+  var T=42,DX=0,DY=0,root=document.documentElement;
+  function upd(i){
+    var o=i._ok;if(!o) return;
+    var mn=+i.min,mx=+i.max,f=mx>mn?(i.value-mn)/(mx-mn):0.5,k=(((0.5-f)*(i.offsetWidth-T))+DY).toFixed(1);
+    if(i._yk!==k){i._yk=k;o.style.transform='translate('+DX+'px,'+k+'px)'}
+    var g=i.style.getPropertyValue('--g');if(i._gk!==g){i._gk=g;o.style.setProperty('--g',g||'0')}
+  }
+  function scan(){
+    if(!root.classList.contains('dash')||document.hidden) return;
+    var l=document.querySelectorAll('.bdv input[type=range]:not(.ovr)');
+    for(var n=0;n<l.length;n++){
+      var i=l[n];
+      if(!i._ok){var rc=i.cloneNode(false);rc.removeAttribute('id');rc.className=(rc.className?rc.className+' ':'')+'ovr';rc.tabIndex=-1;rc.setAttribute('aria-hidden','true');rc.value='0';i.parentNode.insertBefore(rc,i);var o=document.createElement('div');o.className='ovk';i.parentNode.appendChild(o);i._ok=o;i.addEventListener('input',function(){upd(this)})}
+      upd(i);
+    }
+  }
+  window.__ovk={set:function(x,y,t){DX=x;DY=y;T=t||T;document.querySelectorAll('.bdv input[type=range]:not(.ovr)').forEach(function(i){i._yk=null;if(i._ok){i._ok.style.width=i._ok.style.height=T+'px';i._ok.style.margin=(-T/2)+'px 0 0 '+(-T/2)+'px'}})}};
+  setInterval(scan,40);
 })();
 </script>
 </body>
