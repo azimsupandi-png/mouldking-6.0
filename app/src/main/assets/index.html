@@ -1012,6 +1012,16 @@ html,body{overflow-anchor:none}
 :root.dash .ovk::before{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 16px 4px rgba(255,200,40,.7);opacity:var(--g,0);will-change:opacity}
 :root.dash.lite2 .ovk::before{box-shadow:none!important}
 :root.dash.lite3 .ovk{background:radial-gradient(circle at 35% 30%,#ffd98a,#e8a020 55%,#9a5600)!important}
+.jc-row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;font-size:13px}
+.jc-row output{font-variant-numeric:tabular-nums;color:#f4b800;font-weight:700}
+.jc-row input[type=range]{grid-column:1/-1;width:100%}
+.dtpl-in .seg .btn{align-items:center;text-align:center;justify-content:center}
+.dtpl-in .seg{margin-bottom:0}
+#lxText{width:100%;box-sizing:border-box;background:#0b0c0f;color:#e8e8ea;border:1px solid #2b2f36;border-radius:10px;padding:8px;font:12px/1.35 monospace;resize:vertical;min-height:90px}
+.zeroable{cursor:pointer;position:relative}
+.zeroable::after{content:"";position:absolute;inset:-8px -8px -8px -14px}
+@media (max-width:640px){:root.dash-l .brand h1{font-size:16px}}
+@media (max-width:620px){:root.dash-l .dashbar{left:146px;transform:none;max-width:calc(100% - 146px - 148px);justify-content:flex-start;gap:3px}:root.dash-l .dashbar .btn{padding:0 6px!important;font-size:11.5px}}
 /* Auto-lite: on slow GPUs the dashboard sheds effects step by step (see autoLite script) */
 :root.dash.lite1 *{animation:none!important;transition:none!important;--g:0!important;filter:none!important}
 :root.dash.lite2 *{box-shadow:none!important;text-shadow:none!important}
@@ -1121,6 +1131,31 @@ html,body{overflow-anchor:none}
       <h2>Board</h2>
       <div class="bdgrid" id="boardGrid"></div>
       <p class="rec-stat" id="bdNote"></p>
+      <div class="dtpl" id="jcDlg" hidden role="dialog" aria-label="Joystick settings">
+        <div class="dtpl-in">
+          <h3>Joystick settings</h3>
+          <p>Applies to this joystick only.</p>
+          <label class="jc-row"><span>Deadzone</span><output id="jcDzO">0%</output><input id="jcDz" type="range" min="0" max="40" step="1" value="0"></label>
+          <label class="jc-row"><span>Sensitivity</span><output id="jcSnO">100%</output><input id="jcSn" type="range" min="50" max="150" step="5" value="100"></label>
+          <label class="jc-row"><span>Power limit</span><output id="jcLmO">100%</output><input id="jcLm" type="range" min="20" max="100" step="5" value="100"></label>
+          <div class="seglbl">Axis lock</div>
+          <div class="seg" id="jcAx" role="group" aria-label="Axis lock">
+            <button class="btn" type="button" data-ax="f" aria-pressed="true">Free</button>
+            <button class="btn" type="button" data-ax="x" aria-pressed="false">Left / right</button>
+            <button class="btn" type="button" data-ax="y" aria-pressed="false">Up / down</button>
+          </div>
+          <div class="seg"><button class="btn" type="button" id="jcReset">Reset</button><button class="btn" type="button" id="jcDone">Done</button></div>
+        </div>
+      </div>
+      <div class="dtpl" id="lxDlg" hidden role="dialog" aria-label="Export or import layout">
+        <div class="dtpl-in">
+          <h3>Export / import layout</h3>
+          <p id="lxHelp">Export fills the box with your layout. Copy it to keep or share. To import, paste a layout here and press Import.</p>
+          <textarea id="lxText" rows="6" spellcheck="false" autocomplete="off" aria-label="Layout text"></textarea>
+          <div class="seg"><button class="btn" type="button" id="lxCopy">Copy</button><button class="btn" type="button" id="lxImport">Import</button></div>
+          <button class="btn" type="button" id="lxX">Close</button>
+        </div>
+      </div>
       <div class="dtpl" id="dashTpl" hidden role="dialog" aria-label="Layout templates">
         <div class="dtpl-in">
           <h3>Layout templates</h3>
@@ -1135,6 +1170,7 @@ html,body{overflow-anchor:none}
             <button class="btn" type="button" id="dtplSave">Save current layout</button>
           </div>
           <p class="dtpl-note">My templates work in every model. Up to 10.</p>
+          <div class="seg"><button class="btn" type="button" id="lxExp">Export layout</button><button class="btn" type="button" id="lxImp">Import layout</button></div>
           <h4 id="dtplMineH">My templates</h4>
           <div id="dtplMine" class="dtpl-mine"></div>
           </div></div>
@@ -1351,6 +1387,7 @@ html,body{overflow-anchor:none}
         <label class="rec-label">Language<select id="lang"><option value="en">English</option><option value="ms">Bahasa Melayu</option></select></label>
         <label class="check" for="optSound"><input id="optSound" type="checkbox" checked>Sound</label>
         <label class="check" for="optHaptic"><input id="optHaptic" type="checkbox" checked>Vibration</label>
+        <label class="rec-label">Effects<select id="optFx"><option value="auto">Auto (recommended)</option><option value="full">Full</option><option value="lite">Lightweight</option></select></label>
         <label class="check" for="optRelink"><input id="optRelink" type="checkbox" checked>Reconnect when I return to the app</label>
         <label class="check" for="optFull"><input id="optFull" type="checkbox" checked>Full screen (hide system bars)</label>
         <div class="rec-row" style="margin-top:12px">
@@ -1490,6 +1527,12 @@ html,body{overflow-anchor:none}
     return g;
   }
   var DMIN={p:[12,9],r:[12,6],s:[12,6],h:[10,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],q:[6,6],e:[6,6]};
+  function ci(v,lo,hi,def){v=Math.round(+v);return (v>=lo&&v<=hi)?v:def}
+  function cleanJc(j){
+    if(!j||typeof j!=='object') return null;
+    var o={dz:ci(j.dz,0,40,0),sn:ci(j.sn,50,150,100),lm:ci(j.lm,20,100,100),ax:(j.ax==='x'||j.ax==='y')?j.ax:'f'};
+    return (o.dz===0&&o.sn===100&&o.lm===100&&o.ax==='f')?null:o;
+  }
   function cleanBoard(b){
     var out=[];
     if(!Array.isArray(b)) return out;
@@ -1502,10 +1545,10 @@ html,body{overflow-anchor:none}
         if(c>=0&&c<NMAX) out.push({k:x.k,c:c,w:w,hold:x.k==='s'&&x.hold===true,v:x.k==='s'&&x.v===true});
       }else if(x.k==='j'){
         var ja=Math.round(+x.c), jb=Math.round(+x.d);
-        if(ja>=0&&ja<NMAX&&jb>=-1&&jb<NMAX) out.push({k:'j',c:ja,d:jb,m:x.m==='tank'?'tank':'axis',w:w,hold:x.hold===true});
+        if(ja>=0&&ja<NMAX&&jb>=-1&&jb<NMAX){var jo={k:'j',c:ja,d:jb,m:x.m==='tank'?'tank':'axis',w:w,hold:x.hold===true},jj=cleanJc(x.jc);if(jj) jo.jc=jj;out.push(jo)}
       }else if(x.k==='d'){
         var da=Math.round(+x.c), db=Math.round(+x.d), dc=Math.round(+x.e), dd=Math.round(+x.f);
-        if(da>=0&&da<NMAX&&dc>=0&&dc<NMAX&&db>=-1&&db<NMAX&&dd>=-1&&dd<NMAX) out.push({k:'d',c:da,d:db,e:dc,f:dd,m:x.m==='tank'?'tank':'axis',w:2,hold:x.hold===true});
+        if(da>=0&&da<NMAX&&dc>=0&&dc<NMAX&&db>=-1&&db<NMAX&&dd>=-1&&dd<NMAX){var dobj={k:'d',c:da,d:db,e:dc,f:dd,m:x.m==='tank'?'tank':'axis',w:2,hold:x.hold===true},dj=cleanJc(x.jc);if(dj) dobj.jc=dj;out.push(dobj)}
       }else if(x.k==='l'){
         var lc=Math.round(+x.c);
         if(lc>=0&&lc<NMAX) out.push({k:'l',c:lc,w:w});
@@ -1619,7 +1662,7 @@ html,body{overflow-anchor:none}
     });
     return out;
   }
-  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),lim:cleanLim(p.lim),autoBackup:p.autoBackup!==false,full:p.full!==false,relink:p.relink!==false,lastBackup:Math.max(0,+p.lastBackup||0),tpls:cleanTpls(p.tpls)}}
+  function cleanPrefs(p){p=(p&&typeof p==='object')?p:{};return {sound:p.sound!==false,haptic:p.haptic!==false,lang:p.lang==='ms'?'ms':'en',seen:p.seen===true,lock:p.lock===true,kidLimit:pickOf(p.kidLimit,[100,70,50,30],50),lim:cleanLim(p.lim),autoBackup:p.autoBackup!==false,full:p.full!==false,relink:p.relink!==false,fx:(p.fx==='full'||p.fx==='lite')?p.fx:'auto',lastBackup:Math.max(0,+p.lastBackup||0),tpls:cleanTpls(p.tpls)}}
   var store={active:null,profiles:[],prefs:cleanPrefs()};
   try{
     var raw=localStorage.getItem('mk6v2');
@@ -3059,7 +3102,26 @@ html,body{overflow-anchor:none}
     if(C.ch[c].blink&&C.ch[c].blink!=='off') return 4;
     return v<=40?1:v<=75?2:3;
   }
-  function bdPad(a,b,m,hold,tiltOk){
+  // Per-joystick tuning: axis lock, deadzone, sensitivity, limit
+  function jshape(x,y,jc){
+    if(!jc) return [x,y];
+    if(jc.ax==='x') y=0;
+    if(jc.ax==='y') x=0;
+    var dz=jc.dz/100,g=jc.sn/100,l=jc.lm/100;
+    function f(v){var a=Math.abs(v);if(a<=dz) return 0;a=Math.min(1,(a-dz)/(1-dz)*g)*l;return v<0?-a:a}
+    return [f(x),f(y)];
+  }
+  // Slider shortcut: tap the value read-out to send that slider (and its channels) back to 0
+  function bdOutZero(out,chs){
+    if(!out) return;
+    out.classList.add('zeroable');out.setAttribute('role','button');out.setAttribute('aria-label','Set to zero');
+    out.addEventListener('click',function(e){
+      if(bdEditing) return;
+      e.stopPropagation();noteInput();
+      chs.forEach(function(q){if(q!==undefined&&q>=0) setT(q,0,false)});
+    });
+  }
+  function bdPad(a,b,m,hold,tiltOk,bi){
     var it={c:a,d:b,m:m};
     var jp=document.createElement('div');jp.className='pad';
     var kn=document.createElement('div');kn.className='knob rest';jp.appendChild(kn);
@@ -3074,9 +3136,13 @@ html,body{overflow-anchor:none}
       if(!geo) jgeo();
       var R=geo.R, dx=e.clientX-geo.cx, dy=e.clientY-geo.cy, d=Math.hypot(dx,dy);
       if(d>R){dx*=R/d;dy*=R/d}
+      var jc=bi&&bi.jc;
+      if(jc&&jc.ax==='x') dy=0;
+      if(jc&&jc.ax==='y') dx=0;
       kn.style.transform='translate('+dx+'px,'+dy+'px)';
       it.y=-dy/R;
-      noteInput();applyJoy(it,(tiltOk&&tiltActive())?tiltVal():dx/R,-dy/R);
+      var sh=jshape((tiltOk&&tiltActive())?tiltVal():dx/R,-dy/R,jc);
+      noteInput();applyJoy(it,sh[0],sh[1]);
     };
     jp.addEventListener('pointerdown',function(e){
       pid=e.pointerId;geo=null;try{jp.setPointerCapture(e.pointerId)}catch(_){}
@@ -3225,14 +3291,14 @@ html,body{overflow-anchor:none}
         bv.style.height=bh+'px';
         if(inp){
           inp.style.zoom='1';var tk=inp.offsetHeight||46;
-          var kv=Math.max(1,Math.min(4,aw/tk,bh/(2.6*tk))), lw=bh/kv;
+          var kv=Math.max(0.6,Math.min(4,aw/tk,bh/(2.6*tk))), lw=bh/kv;
           inp.style.zoom=String(kv);inp.style.width=lw+'px';inp.style.marginLeft=(-lw/2)+'px';inp.style.marginTop=(-tk/2)+'px';
         }
       }else if(el.querySelector){
         var ct=el.querySelector(':scope > input[type=range], :scope > .tgl, :scope > .tgdir, :scope > .qbtn');
         if(ct){
           ct.style.zoom='1';ct.style.width='';
-          var cb=ct.offsetHeight||44, isIn=ct.matches&&ct.matches('input'), mw=ct.classList.contains('tgdir')?230:170, kc=Math.max(1,Math.min(4,ah/cb,isIn?aw/(2.6*cb):aw/mw));
+          var cb=ct.offsetHeight||44, isIn=ct.matches&&ct.matches('input'), mw=ct.classList.contains('tgdir')?230:170, kc=Math.max(0.6,Math.min(4,ah/cb,isIn?aw/(2.6*cb):aw/mw));
           ct.style.zoom=String(kc);ct.style.width=(aw/kc)+'px';
         }
       }
@@ -3311,6 +3377,7 @@ html,body{overflow-anchor:none}
       (it.t?it.t.map(function(z){return z.c}):[it.c,it.d,it.e,it.f]).forEach(function(q){if(q!==undefined&&q>=0) setT(q,0,false)});
       save();syncBoard();
     },!it.hold]);
+    if(it.k==='j'||it.k==='d') defs.push(['\u2699','Joystick settings',function(){jcShow(it)}]);
     if(it.k!=='e') defs.push(['\u270E','Rename widget',function(e){bdRename(it,e.target.closest('.bdw-h'))}]);
     defs.push(['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0){BD_UNDO.push({it:JSON.parse(JSON.stringify(it)),q:q});if(BD_UNDO.length>20)BD_UNDO.shift();C.board.splice(q,1)}save();syncBoard()}]);
     defs.forEach(function(d){
@@ -3388,14 +3455,14 @@ html,body{overflow-anchor:none}
         el.classList.add('padw');
         bdHead(el,(it.m==='tank'?'Tank':'Stick')+' · '+tagOf(it.c)+(it.d>=0?'+'+tagOf(it.d):''),it,false);
         var tp=C.tilt.all||!tiltTaken;tiltTaken=true;
-        el.appendChild(bdPad(it.c,it.d,it.m,it.hold,tp));
+        el.appendChild(bdPad(it.c,it.d,it.m,it.hold,tp,it));
       }else if(it.k==='d'){
         var all=[it.c,it.d,it.e,it.f];
         for(var q=0;q<4;q++) if(all[q]>=0&&!isActive(all[q])) return;
         bdHead(el,'Double stick',it,false);
         var pr=document.createElement('div');pr.className='bd-pads';
         var tpd=C.tilt.all||!tiltTaken;tiltTaken=true;
-        pr.appendChild(bdPad(it.c,it.d,it.m,it.hold,tpd));pr.appendChild(bdPad(it.e,it.f,it.m,it.hold,!!C.tilt.all));
+        pr.appendChild(bdPad(it.c,it.d,it.m,it.hold,tpd,it));pr.appendChild(bdPad(it.e,it.f,it.m,it.hold,!!C.tilt.all,it));
         el.appendChild(pr);
       }else if(it.k==='p'){
         bdHead(el,'Speed & power',it,false);
@@ -3497,6 +3564,7 @@ html,body{overflow-anchor:none}
         var mt=it.t;
         if(mt.some(function(z){return !isActive(z.c)})) return;
         w.out=bdHead(el,'Mix · '+mt.map(function(z){return tagOf(z.c)+(z.r<0?'−':'')}).join(' '),it,true);
+        bdOutZero(w.out,mt.map(function(z){return z.c}));
         var mr=document.createElement('input');mr.type='range';mr.min='-100';mr.max='100';mr.step='1';mr.value='0';
         mr.setAttribute('aria-label','Mixer');
         var mset=function(v){mt.forEach(function(z){setT(z.c,Math.max(-100,Math.min(100,Math.round(v*z.r/100))),true)})};
@@ -3514,6 +3582,7 @@ html,body{overflow-anchor:none}
         var c=it.c;
         if(!isActive(c)) return;
         w.out=bdHead(el,tagOf(c)+' · '+C.ch[c].name,it,true);
+        if(it.k==='s'||it.k==='h') bdOutZero(w.out,[c]);
         if(it.k==='s'){
           var r=document.createElement('input');r.type='range';r.min='-100';r.max='100';r.step='1';r.value='0';
           r.setAttribute('aria-label','Power of channel '+tagOf(c));
@@ -3658,6 +3727,61 @@ html,body{overflow-anchor:none}
     if(DG.k!=='g') C.board.forEach(function(o){if(o.g){o[DG.k]=o.g.slice()}});
     dashTplShow(false);dashAdd=false;save();syncBoard();toast(label+' layout. Back undoes it.');
   }
+  /* ---- Joystick settings dialog ---- */
+  var jcItem=null;
+  function jcPaint(){
+    var j=jcItem&&jcItem.jc||{dz:0,sn:100,lm:100,ax:'f'};
+    $('#jcDz').value=j.dz;$('#jcSn').value=j.sn;$('#jcLm').value=j.lm;
+    $('#jcDzO').textContent=j.dz+'%';$('#jcSnO').textContent=j.sn+'%';$('#jcLmO').textContent=j.lm+'%';
+    [].forEach.call($('#jcAx').querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-ax')===j.ax))});
+  }
+  function jcShow(it){jcItem=it;jcPaint();$('#jcDlg').hidden=false}
+  function jcRead(ax){
+    if(!jcItem) return;
+    var o=cleanJc({dz:+$('#jcDz').value,sn:+$('#jcSn').value,lm:+$('#jcLm').value,ax:ax||(jcItem.jc&&jcItem.jc.ax)||'f'});
+    if(o) jcItem.jc=o; else delete jcItem.jc;
+    save();jcPaint();
+  }
+  ['#jcDz','#jcSn','#jcLm'].forEach(function(q){$(q).addEventListener('input',function(){jcRead()})});
+  [].forEach.call($('#jcAx').querySelectorAll('button'),function(b){b.addEventListener('click',function(){jcRead(b.getAttribute('data-ax'))})});
+  $('#jcReset').addEventListener('click',function(){if(jcItem){delete jcItem.jc;save();jcPaint()}});
+  $('#jcDone').addEventListener('click',function(){$('#jcDlg').hidden=true;jcItem=null});
+  /* ---- Export / import layout ---- */
+  function lxShow(mode){
+    var ta=$('#lxText');
+    $('#dashTpl').hidden=true;$('#lxDlg').hidden=false;
+    if(mode==='export'){
+      ta.value=JSON.stringify({mk6layout:1,board:C.board.map(function(o){var c=JSON.parse(JSON.stringify(o));return c})});
+      $('#lxHelp').textContent='Copy this text to keep or share your layout.';
+      $('#lxImport').hidden=true;$('#lxCopy').hidden=false;
+      try{ta.focus();ta.select()}catch(e){}
+    }else{
+      ta.value='';
+      $('#lxHelp').textContent='Paste a layout here, then press Import. It replaces the current layout. Back undoes it.';
+      $('#lxImport').hidden=false;$('#lxCopy').hidden=true;
+      try{ta.focus()}catch(e){}
+    }
+  }
+  $('#lxExp').addEventListener('click',function(){
+    if(!C.board.length){toast('Nothing to export yet.');return}
+    lxShow('export')});
+  $('#lxImp').addEventListener('click',function(){lxShow('import')});
+  $('#lxX').addEventListener('click',function(){$('#lxDlg').hidden=true});
+  $('#lxCopy').addEventListener('click',function(){
+    var ta=$('#lxText');ta.focus();ta.select();
+    var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+    if(!ok&&navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(function(){toast('Copied.')},function(){toast('Select the text and copy it.')});return}
+    toast(ok?'Copied.':'Select the text and copy it.');
+  });
+  $('#lxImport').addEventListener('click',function(){
+    var txt=$('#lxText').value.trim(),o=null;
+    try{o=JSON.parse(txt)}catch(e){}
+    var list=o&&(Array.isArray(o)?o:(o.mk6layout===1&&Array.isArray(o.board)?o.board:null));
+    var b=list?cleanBoard(list):[];
+    if(!b.length){toast('That is not a valid layout.',4000);return}
+    $('#lxDlg').hidden=true;
+    dtplApply(b,'Imported');
+  });
   function dashTplShow(on){$('#dashTpl').hidden=!on;if(on){$('#dtplName').value='';dtplMine()}}
   $('#dtplSave').addEventListener('click',function(){
     if(!C.board.length) return;
@@ -3778,16 +3902,17 @@ html,body{overflow-anchor:none}
   if(landMQ){ if(landMQ.addEventListener) landMQ.addEventListener('change',landChange); else if(landMQ.addListener) landMQ.addListener(landChange); }
   if(dashOn()) syncLayout();
   optFull.addEventListener('change',function(){store.prefs.full=optFull.checked;save();fullNative()});
-  var optSound=$('#optSound'), optHaptic=$('#optHaptic'), optRelink=$('#optRelink'), pinBtn=$('#pinBtn');
+  var optSound=$('#optSound'), optHaptic=$('#optHaptic'), optRelink=$('#optRelink'), optFx=$('#optFx'), pinBtn=$('#pinBtn');
   function syncApp(){
     if(!optSound) return;
-    optSound.checked=store.prefs.sound;optHaptic.checked=store.prefs.haptic;if(optRelink) optRelink.checked=store.prefs.relink;optFull.checked=store.prefs.full;fullNative();
+    optSound.checked=store.prefs.sound;optHaptic.checked=store.prefs.haptic;if(optRelink) optRelink.checked=store.prefs.relink;if(optFx){optFx.value=store.prefs.fx;if(window.mk6Lite) window.mk6Lite.mode(store.prefs.fx)}optFull.checked=store.prefs.full;fullNative();
     $('#lang').value=store.prefs.lang;
     pinBtn.hidden=!(NB&&NB.pinModel);
     if(kidLim) kidLim.value=String(store.prefs.kidLimit);
     applyLock();
   }
   optSound.addEventListener('change',function(){store.prefs.sound=optSound.checked;save();if(optSound.checked) beep([700,900],0.09)});
+  if(optFx) optFx.addEventListener('change',function(){store.prefs.fx=optFx.value;save();if(window.mk6Lite) window.mk6Lite.mode(optFx.value)});
   if(optRelink) optRelink.addEventListener('change',function(){store.prefs.relink=optRelink.checked;save()});
   optHaptic.addEventListener('change',function(){store.prefs.haptic=optHaptic.checked;save();if(optHaptic.checked) feedback('ok')});
   pinBtn.addEventListener('click',function(){try{NB.pinModel(store.active,activeProfile().name)}catch(e){toast('This launcher cannot add a shortcut.')}});
@@ -3994,7 +4119,7 @@ html,body{overflow-anchor:none}
     'Models saved to file.':'Model disimpan ke fail.','Cancelled.':'Dibatalkan.','Could not save the file.':'Tidak dapat menyimpan fail.','Could not read that file.':'Tidak dapat membaca fail itu.',
     'Choose where to save the file.':'Pilih tempat menyimpan fail.','Copy this text and keep it somewhere safe.':'Salin teks ini dan simpan di tempat selamat.',
     'Choose a model file.':'Pilih fail model.','Paste exported model data, then tap Apply import.':'Tampal data model yang dieksport, kemudian tekan Gunakan import.',
-    'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Reconnect when I return to the app':'Sambung semula bila saya kembali ke app','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
+    'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Reconnect when I return to the app':'Sambung semula bila saya kembali ke app','Effects':'Kesan visual','Lightweight':'Ringan','Auto (recommended)':'Auto (disyorkan)','Joystick settings':'Tetapan joystick','Applies to this joystick only.':'Untuk joystick ini sahaja.','Deadzone':'Zon mati','Sensitivity':'Kepekaan','Power limit':'Had kuasa','Axis lock':'Kunci paksi','Free':'Bebas','Left / right':'Kiri / kanan','Up / down':'Atas / bawah','Export layout':'Eksport susun atur','Import layout':'Import susun atur','Export / import layout':'Eksport / import susun atur','Import':'Import','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
     'This launcher cannot add a shortcut.':'Pelancar ini tidak dapat menambah pintasan.',
     'Skip':'Langkau','Back':'Kembali','Next':'Seterusnya','Done':'Selesai',
     'My templates':'Templat saya','Template name':'Nama templat','Save current layout':'Simpan susunan ini','My templates work in every model. Up to 10.':'Templat saya boleh digunakan dalam semua model. Maksimum 10.',
@@ -4322,21 +4447,24 @@ html,body{overflow-anchor:none}
 <script>
 (function(){
   // Auto-lite: measure frame rate while the Dashboard is shown; if it stays low, drop effects one level at a time (max 3).
-  var KEY='mk6lite',lvl=0,raf=0,last=0,dts=[],t0=0,bad=0,root=document.documentElement;
+  var KEY='mk6lite',lvl=0,raf=0,last=0,dts=[],t0=0,bad=0,root=document.documentElement,fxm='auto',autoLvl=0;
   try{lvl=Math.max(0,Math.min(3,parseInt(localStorage.getItem(KEY)||'0',10)||0))}catch(_){}
+  autoLvl=lvl;
   function apply(){for(var i=1;i<=3;i++) root.classList.toggle('lite'+i,i<=lvl)}
   function save(){try{localStorage.setItem(KEY,String(lvl))}catch(_){}}
   function loop(t){
     raf=requestAnimationFrame(loop);
-    if(document.hidden||!root.classList.contains('dash')||lvl>=3){last=0;t0=0;bad=0;dts=[];return}
+    if(fxm!=='auto'||document.hidden||!root.classList.contains('dash')||lvl>=3){last=0;t0=0;bad=0;dts=[];return}
     if(last&&t-last<250) dts.push(t-last); last=t; if(!t0) t0=t;
     if(t-t0>=2500){
       var n=dts.length,s=dts.slice().sort(function(a,b){return a-b}),med=n?s[n>>1]:0;
       dts=[];t0=t;
-      if(n>=15&&med>32){ if(++bad>=2){bad=0;lvl++;apply();save();window.dispatchEvent(new Event('mk6lite'))} } else bad=0;
+      if(n>=15&&med>32){ if(++bad>=2){bad=0;lvl++;autoLvl=lvl;apply();save();window.dispatchEvent(new Event('mk6lite'))} } else bad=0;
     }
   }
-  window.mk6Lite={get:function(){return lvl},set:function(n){lvl=Math.max(0,Math.min(3,n|0));bad=0;apply();save()}};
+  window.mk6Lite={get:function(){return lvl},set:function(n){lvl=Math.max(0,Math.min(3,n|0));autoLvl=lvl;bad=0;apply();save()},
+    mode:function(m){fxm=(m==='full'||m==='lite')?m:'auto';bad=0;lvl=fxm==='full'?0:fxm==='lite'?3:autoLvl;apply()}};
+  try{var st0=JSON.parse(localStorage.getItem('mk6v2')||'null');if(st0&&st0.prefs&&st0.prefs.fx) window.mk6Lite.mode(st0.prefs.fx)}catch(_){}
   apply();raf=requestAnimationFrame(loop);
 })();
 </script>

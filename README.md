@@ -39,6 +39,11 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 - **Hub names:** give each hub a short name, shown in the channel list.
 - **Test hub and Calibration:** move each active channel at the **Test power** set in the Calibration card (default 60%, per model). It ignores Limit and Speed, so raise it until the motor just moves.
 - **Dashboard (landscape, 3D joystick and slider, Back puts the last removed widget back; layout templates: Car / Truck, Excavator, Dual stick, plus up to 10 of your own saved layouts that work in every model and are kept in backups):** in Board layout, tick "Dashboard when the phone is sideways". The board becomes a full-screen canvas. Tap Edit to drag and resize widgets (snapped to a fine 48x24 grid, no overlaps), change each widget colour, and Add widget. An E-Stop widget can be added or removed (the header E-Stop button is always there). The layout is saved per model.
+- **Joystick tuning:** in Dashboard edit mode, the gear button on a joystick sets its deadzone, sensitivity, power limit and axis lock (free, left/right only or up/down only). Each joystick is tuned separately and the settings are saved with the layout.
+- **Slider shortcut:** tap the number at the top right of a Board slider to send it back to 0.
+- **Export / import layouts:** Template > Export layout gives a text you can copy; Import layout pastes one back (Back undoes it).
+- **Hub safety and comfort:** the hub link is restored (motors at zero) when you come back to the app, can be switched off in Settings; Edit, Reset and the model picker are locked on the Dashboard while the hub is active, and Reset needs a second tap.
+- **Effects:** Settings > Effects is Auto (the Dashboard drops glow, shadows and the knob image step by step on phones that cannot keep up), Full or Lightweight. A hidden performance readout opens by holding the title for a second.
 - **Per channel:** maximum power, start power, fine control (expo curve with preview) and slider or hold-to-move control.
 - **Record & replay:** record up to 90 seconds of control movements, then replay once or in a loop. Manual input is locked during replay and E-Stop cancels it.
 - **Backup:** export all models to a file and import them again (in the app, through the system file picker).
