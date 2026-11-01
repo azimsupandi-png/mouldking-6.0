@@ -998,6 +998,7 @@ html,body{overflow-anchor:none}
 .bdw .qbtn.lbtn.blink .lvl i.on{animation:recBlink 1s steps(2) infinite}
 :root[data-skin="studs"] .bdw .qbtn.lbtn{padding-right:36px}
 @container (max-width:150px){:root .dw .qbtn.lbtn .lvl{display:none}:root[data-skin="studs"] .dw .qbtn.lbtn{padding-right:6px}}
+.bdw .recw .tgd.dim{opacity:.55}
 </style>
 </head>
 <body>
@@ -2294,7 +2295,7 @@ html,body{overflow-anchor:none}
   function startPlay(rec0,opts){
     var rec=(rec0&&rec0.pts)?rec0:selectedRec();
     if(!rec||S.estop||S.rec||S.play) return;
-    if(NB&&!S.connected){recNote='Connect the hub first.';setSeqNote(recNote);paintRec();return}
+    if(NB&&!S.connected){recNote='Connect the hub first, then press Play.';setSeqNote(recNote);paintRec();toast(recNote);return}
     S.play={rec:rec,start:performance.now()+((opts&&opts.delay)||0)*1000,idx:0,seq:(opts&&opts.seq)||null,loop:opts&&opts.loop!==undefined?!!opts.loop:undefined,reps:(opts&&opts.reps)||1};
     paintRec();syncLock();
   }
@@ -3348,7 +3349,7 @@ html,body{overflow-anchor:none}
           var i=document.createElement('i');i.textContent=txt;b.appendChild(i);var sp=document.createElement('span');sp.textContent=lbl;b.appendChild(sp);
           b.addEventListener('click',function(){noteInput();fn()});rrow.appendChild(b);return b};
         var rb=mk('rec','\u25CF','Record',function(){if(S.rec)stopRecord();else startRecord()});
-        var pb=mk('play','\u25B6','Play',function(){if(S.play)stopPlay(true);else startPlay(null,{loop:S.loop})});
+        var pb=mk('play','\u25B6','Play',function(){if(S.play)stopPlay(true);else if(!selectedRec()) toast('No recording yet. Press Record first.');else startPlay(null,{loop:S.loop})});
         var lpb=mk('loop','\u21BB','Loop',function(){S.loop=!S.loop;if(typeof loopBox!=='undefined'&&loopBox) loopBox.checked=S.loop;if(S.play) S.play.loop=S.loop;paintBoard()});
         var nb2=mk('next','\u21C4','Next',function(){if(S.rec||S.play||C.rec.length<2) return;var q=C.rec.indexOf(selectedRec());recSel=C.rec[(q+1)%C.rec.length].id;recNote='';syncRec()});
         el.appendChild(rrow);w.recw={rb:rb,pb:pb,lpb:lpb,nb:nb2};
@@ -3499,7 +3500,7 @@ html,body{overflow-anchor:none}
       if(w.recw){
         var rw=w.recw, cur=selectedRec(), now=performance.now();
         rw.rb.classList.toggle('on',!!S.rec);rw.rb.disabled=!S.rec&&(!!S.play||S.estop);
-        rw.pb.classList.toggle('on',!!S.play);rw.pb.disabled=!S.play&&(!cur||!!S.rec||S.estop);
+        rw.pb.classList.toggle('on',!!S.play);rw.pb.disabled=!S.play&&(!!S.rec||S.estop);rw.pb.classList.toggle('dim',!S.play&&(!cur||(!!NB&&!S.connected)));
         rw.pb.querySelector('i').textContent=S.play?'\u25A0':'\u25B6';rw.pb.querySelector('span').textContent=S.play?'Stop':'Play';
         rw.rb.querySelector('span').textContent=S.rec?'Stop':'Record';
         rw.lpb.classList.toggle('on',!!S.loop);
@@ -3916,6 +3917,7 @@ html,body{overflow-anchor:none}
     'No recording':'Tiada rakaman',
     'Record / stop recording':'Rakam / henti rakam','Play / stop recording':'Main / henti rakaman',' light on/off':' lampu hidup/mati',' Turbo (hold)':' Turbo (tahan)',
     'LOW':'RENDAH','MID':'SEDERHANA','FULL':'PENUH','BLINK':'KELIP',
+    'Connect the hub first, then press Play.':'Sambung hab dahulu, kemudian tekan Main.','No recording yet. Press Record first.':'Belum ada rakaman. Tekan Rakam dahulu.',
     'Template':'Templat','Layout templates':'Templat susunan','Replaces the current layout. Press Back to undo.':'Menggantikan susunan semasa. Tekan Kembali untuk batal.',
     'Car / Truck':'Kereta / Trak','Excavator':'Jengkaut','Dual stick':'Dua joystick',
     'Drive slider, steering slider, lights, Turbo, winch, E-Stop':'Gelangsar pandu, gelangsar stereng, lampu, Turbo, win, E-Stop',
