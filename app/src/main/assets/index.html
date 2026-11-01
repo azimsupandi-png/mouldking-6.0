@@ -4232,5 +4232,43 @@ html,body{overflow-anchor:none}
   setInterval(tick,40);
 })();
 </script>
+<script>
+(function(){
+  // Live performance HUD: long-press the "MK6 CONSOLE" title (about 1 second) to show or hide it.
+  var el=null,on=false,raf=0,last=0,dts=[],timer=0,po=null,lo={n:0,dur:0,scr:0,rend:0,blk:0},dpr=window.devicePixelRatio||1,press=0;
+  function loop(t){if(!on) return;if(last) dts.push(t-last);last=t;raf=requestAnimationFrame(loop)}
+  function report(){
+    if(!el) return;
+    var n=dts.length,sum=0,mx=0,sl=0,i;
+    for(i=0;i<n;i++){sum+=dts[i];if(dts[i]>mx)mx=dts[i];if(dts[i]>25)sl++}
+    var s=dts.slice().sort(function(a,b){return a-b}),p95=n?s[Math.min(n-1,Math.floor(n*0.95))]:0,med=n?s[Math.floor(n/2)]:0;
+    var fps=sum?Math.round(n*1000/sum):0;
+    var t='fps '+fps+' (frame '+med.toFixed(1)+'ms)  p95 '+p95.toFixed(1)+'  max '+mx.toFixed(0)+'  slow '+sl;
+    if(po){
+      var k=lo.n||1;
+      t+='\nlong frames '+lo.n+'  avg '+(lo.dur/k).toFixed(0)+'ms  script '+(lo.scr/k).toFixed(0)+'  render '+(lo.rend/k).toFixed(0)
+    }else t+='\n(no long-frame timing on this WebView)';
+    t+='\n'+window.innerWidth+'x'+window.innerHeight+' @'+dpr.toFixed(2)+'  '+(document.documentElement.classList.contains('dash')?'dashboard':'page');
+    el.textContent=t;dts=[];lo={n:0,dur:0,scr:0,rend:0,blk:0};
+  }
+  function start(){
+    if(on) return;on=true;last=0;dts=[];
+    el=document.createElement('div');el.id='perfHud';
+    el.style.cssText='position:fixed;top:2px;left:50%;transform:translateX(-50%);z-index:99999;pointer-events:none;font:11px/1.35 monospace;white-space:pre;background:rgba(0,0,0,.78);color:#9fe870;padding:3px 8px;border-radius:6px;max-width:92vw';
+    document.body.appendChild(el);
+    try{po=new PerformanceObserver(function(l){l.getEntries().forEach(function(e){lo.n++;lo.dur+=e.duration;var sc=0;(e.scripts||[]).forEach(function(x){sc+=x.duration});lo.scr+=sc;if(e.renderStart) lo.rend+=Math.max(0,e.startTime+e.duration-e.renderStart)})});po.observe({type:'long-animation-frame',buffered:false})}catch(_){po=null}
+    raf=requestAnimationFrame(loop);timer=setInterval(report,1000);
+  }
+  function stop(){
+    on=false;cancelAnimationFrame(raf);clearInterval(timer);if(po){try{po.disconnect()}catch(_){}po=null}
+    if(el&&el.parentNode) el.parentNode.removeChild(el);el=null;
+  }
+  var h=document.querySelector('.brand h1')||document.querySelector('.brand');
+  if(h){
+    h.addEventListener('pointerdown',function(){clearTimeout(press);press=setTimeout(function(){on?stop():start()},900)});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(ev){h.addEventListener(ev,function(){clearTimeout(press)})});
+  }
+})();
+</script>
 </body>
 </html>
