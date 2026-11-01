@@ -1004,6 +1004,15 @@ html,body{overflow-anchor:none}
 :root:not(.dash) .bdw .qbtn.lbtn .lvl i{width:3px}
 :root:not(.dash) .bdw .qbtn.lbtn .lvl i:nth-child(1){height:5px}:root:not(.dash) .bdw .qbtn.lbtn .lvl i:nth-child(2){height:8px}:root:not(.dash) .bdw .qbtn.lbtn .lvl i:nth-child(3){height:12px}:root:not(.dash) .bdw .qbtn.lbtn .lvl i:nth-child(4){height:16px}
 @container (max-width:150px){:root[data-skin="studs"] .dw .qbtn.lbtn:not(#z){padding-right:6px!important}}
+.bdw .spw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.bdw .spw .tgd{height:auto;min-height:34px;padding:2px 0}
+.bdw .spw .tgd small{font-size:9px;opacity:.8;letter-spacing:0}
+.bdw .spw .tgd small:empty{display:none}
+#dbModel{height:38px;min-height:38px;max-width:150px;border-radius:19px;padding:0 28px 0 12px;font-size:12.5px;flex:0 1 auto;min-width:70px}
+#dbModel[hidden]{display:none}
+:root.dash #boardGrid .dguide{position:absolute;z-index:4;pointer-events:none;background:repeating-linear-gradient(90deg,#f4b800 0 6px,transparent 6px 10px)}
+:root.dash #boardGrid .dguide.v{top:0;bottom:0;width:2px;margin-left:-1px;background:repeating-linear-gradient(180deg,#f4b800 0 6px,transparent 6px 10px)}
+:root.dash #boardGrid .dguide.h{left:0;right:0;height:2px;margin-top:-1px}
 </style>
 </head>
 <body>
@@ -1138,6 +1147,7 @@ html,body{overflow-anchor:none}
         <button class="btn" id="dbTpl" type="button" aria-label="Layout templates" hidden>Template</button>
         <button class="btn" id="dbReset" type="button" aria-label="Reset layout">Reset</button>
         <button class="btn" id="dbBack" type="button" aria-label="Put back the last removed widget" hidden>Back</button>
+        <select id="dbModel" aria-label="Model"></select>
         <button class="btn" id="dbExit" type="button" aria-label="Exit dashboard">Exit</button>
       </div>
       <label class="check bd-dashchk" for="bdDash"><input id="bdDash" type="checkbox">Dashboard when the phone is sideways</label>
@@ -1155,6 +1165,7 @@ html,body{overflow-anchor:none}
           <button class="btn" id="bdTQ" type="button" aria-pressed="false">Sequence</button>
           <button class="btn" id="bdTE" type="button" aria-pressed="false">E-Stop</button>
           <button class="btn" id="bdTR" type="button" aria-pressed="false">Record</button>
+          <button class="btn" id="bdTP" type="button" aria-pressed="false">Speed &amp; power</button>
         </div>
         <div class="bd-fields">
           <label id="bdF1"><span id="bdL1">Channel</span><select id="bdTarget"></select></label>
@@ -1464,7 +1475,7 @@ html,body{overflow-anchor:none}
     if(!g.every(function(q){return isFinite(q)})||g[0]<0||g[1]<0||g[2]<mn[0]||g[3]<mn[1]||g[0]+g[2]>gx||g[1]+g[3]>gy) return null;
     return g;
   }
-  var DMIN={r:[12,6],s:[12,6],h:[10,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],q:[6,6],e:[6,6]};
+  var DMIN={p:[12,9],r:[12,6],s:[12,6],h:[10,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],q:[6,6],e:[6,6]};
   function cleanBoard(b){
     var out=[];
     if(!Array.isArray(b)) return out;
@@ -1494,6 +1505,8 @@ html,body{overflow-anchor:none}
         if(mt.length) out.push({k:'m',t:mt,c:mt[0].c,w:w,hold:x.hold===true,v:x.v===true});
       }else if(x.k==='r'){
         out.push({k:'r',w:w});
+      }else if(x.k==='p'){
+        out.push({k:'p',w:w});
       }else if(x.k==='b'){
         var bcn=Math.round(+x.c);
         if(bcn>=0&&bcn<NMAX) out.push({k:'b',c:bcn,w:w});
@@ -2268,7 +2281,7 @@ html,body{overflow-anchor:none}
     var t='';
     if(S.rec) t='Recording '+fmtTime(now-S.rec.start)+' / '+fmtTime(MAX_REC_MS);
     else if(S.play&&now<S.play.start) t='Starts in '+Math.ceil((S.play.start-now)/1000)+' s'
-    else if(S.play) t='Playing '+fmtTime(Math.min(now-S.play.start,S.play.rec.dur))+' / '+fmtTime(S.play.rec.dur)+((S.play.loop===undefined?S.loop:S.play.loop)?' (loop)':'');
+    else if(S.play) t=(S.play.preview?'Preview ':'Playing ')+fmtTime(Math.min(now-S.play.start,S.play.rec.dur))+' / '+fmtTime(S.play.rec.dur)+((S.play.loop===undefined?S.loop:S.play.loop)?' (loop)':'');
     else t=recNote||'Ready';
     if(recStat.textContent!==t) recStat.textContent=t;
   }
@@ -2300,8 +2313,9 @@ html,body{overflow-anchor:none}
   function startPlay(rec0,opts){
     var rec=(rec0&&rec0.pts)?rec0:selectedRec();
     if(!rec||S.estop||S.rec||S.play) return;
-    if(NB&&!S.connected){recNote='Connect the hub first, then press Play.';setSeqNote(recNote);paintRec();toast(recNote);return}
-    S.play={rec:rec,start:performance.now()+((opts&&opts.delay)||0)*1000,idx:0,seq:(opts&&opts.seq)||null,loop:opts&&opts.loop!==undefined?!!opts.loop:undefined,reps:(opts&&opts.reps)||1};
+    var pv=!!(NB&&!S.connected);
+    if(pv) toast('Preview on the screen only. The hub is not connected, so nothing moves.',3500);
+    S.play={preview:pv,rec:rec,start:performance.now()+((opts&&opts.delay)||0)*1000,idx:0,seq:(opts&&opts.seq)||null,loop:opts&&opts.loop!==undefined?!!opts.loop:undefined,reps:(opts&&opts.reps)||1};
     paintRec();syncLock();
   }
   function stopPlay(zero){
@@ -2313,6 +2327,7 @@ html,body{overflow-anchor:none}
   function stepPlay(now){
     var p=S.play;
     if(!p) return;
+    if(p.preview&&S.connected){stopPlay(true);toast('Hub connected. Preview stopped. Press Play to run it for real.');return}
     var el=now-p.start, dur=p.rec.dur;
     if(el<0){for(var z=0;z<NMAX;z++) setT(z,0,false,true);return}
     if(el>=dur){
@@ -2977,7 +2992,7 @@ html,body{overflow-anchor:none}
   var bdSel=[$('#bdTarget'),$('#bdTarget2'),$('#bdTarget3'),$('#bdTarget4')];
   var bdFields=[$('#bdF1'),$('#bdF2'),$('#bdF3'),$('#bdF4')], bdLbl=[$('#bdL1'),$('#bdL2'),$('#bdL3'),$('#bdL4')];
   var bdModeF=$('#bdFM'), bdMode=$('#bdMode'), bdWideChk=$('#bdWideChk'), bdSpring=$('#bdSpring'), bdSpringL=$('#bdSpringL');
-  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['q',$('#bdTQ')],['e',$('#bdTE')],['r',$('#bdTR')]];
+  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['q',$('#bdTQ')],['e',$('#bdTE')],['r',$('#bdTR')],['p',$('#bdTP')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
   var bdK='s', bdEditing=false, bdW=[], dashAdd=false;
@@ -2990,7 +3005,7 @@ html,body{overflow-anchor:none}
   function bdFill(){
     if(!bdSel[0]) return;
     var chans=activeIdx(), tank=bdMode.value==='tank';
-    var n=(bdK==='e'||bdK==='r')?0:bdK==='j'?2:(bdK==='d'||bdK==='m'?4:1);
+    var n=(bdK==='e'||bdK==='r'||bdK==='p')?0:bdK==='j'?2:(bdK==='d'||bdK==='m'?4:1);
     var L=bdK==='q'?['Sequence']:(bdK==='l'||bdK==='t'||bdK==='b')?[bdK==='l'?'Light channel':'Channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s'||bdK==='h')?['Channel']:
       (bdK==='j'?(tank?['Left motor','Right motor']:['Drive','Steer']):
       (tank?['Left stick: Left motor','Left stick: Right motor','Right stick: Left motor','Right stick: Right motor']:
@@ -3101,6 +3116,7 @@ html,body{overflow-anchor:none}
     if(k==='t') return it.y==='dir'?(L?[18,6]:[24,6]):(L?(wd?[12,6]:[8,6]):[12,6]);
     if(k==='e') return [8,8];
     if(k==='r') return L?[16,6]:[24,6];
+    if(k==='p') return L?[16,9]:[24,9];
     return L?[8,6]:[12,6];
   }
   function dashHitsG(a,b){return a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]}
@@ -3208,6 +3224,22 @@ html,body{overflow-anchor:none}
       }
     });
   }
+  function dashGuides(it,g){
+    var old=bdGrid.querySelectorAll('.dguide');for(var i=0;i<old.length;i++) old[i].remove();
+    if(!it||!g) return;
+    var xs={},ys={};
+    C.board.forEach(function(o){var h=o[DG.k];if(o===it||!h) return;
+      [h[0],h[0]+h[2]].forEach(function(v){xs[v]=1});[h[1],h[1]+h[3]].forEach(function(v){ys[v]=1});
+      xs['c'+(h[0]*2+h[2])]=h[0]+h[2]/2;ys['c'+(h[1]*2+h[3])]=h[1]+h[3]/2});
+    var mine={x:[g[0],g[0]+g[2]],y:[g[1],g[1]+g[3]]}, cx=g[0]+g[2]/2, cy=g[1]+g[3]/2;
+    function line(v,vert){var d=document.createElement('div');d.className='dguide '+(vert?'v':'h');
+      if(vert){d.style.left=Math.round(v*DCELL.w)+'px'}else{d.style.top=Math.round(v*DCELL.h)+'px'}bdGrid.appendChild(d)}
+    var done={};
+    mine.x.forEach(function(v){if(xs[v]&&!done['x'+v]&&v>0&&v<DG.x){done['x'+v]=1;line(v,true)}});
+    mine.y.forEach(function(v){if(ys[v]&&!done['y'+v]&&v>0&&v<DG.y){done['y'+v]=1;line(v,false)}});
+    Object.keys(xs).forEach(function(k){if(k.charAt(0)==='c'&&xs[k]===cx&&!done['x'+cx]){done['x'+cx]=1;line(cx,true)}});
+    Object.keys(ys).forEach(function(k){if(k.charAt(0)==='c'&&ys[k]===cy&&!done['y'+cy]){done['y'+cy]=1;line(cy,false)}});
+  }
   function dashDrag(el,it){
     el.addEventListener('pointerdown',function(e){
       if(e.target.closest&&e.target.closest('.bdw-ed,.bdw-lbl')) return;
@@ -3221,13 +3253,17 @@ html,body{overflow-anchor:none}
         var dx=Math.round((ev.clientX-sx)/cw), dy=Math.round((ev.clientY-sy)/ch), n=g0.slice();
         if(mode==='mv'){n[0]=clamp(g0[0]+dx,0,DG.x-g0[2]);n[1]=clamp(g0[1]+dy,0,DG.y-g0[3])}
         else{n[2]=clamp(g0[2]+dx,mn[0],DG.x-g0[0]);n[3]=clamp(g0[3]+dy,mn[1],DG.y-g0[1])}
-        g1=n;dashStyle(el,n);el.classList.toggle('bad',dashHits(it,n));
+        g1=n;dashStyle(el,n);el.classList.toggle('bad',dashHits(it,n));dashGuides(it,n);
       };
       var up=function(ev){
         if(ev.pointerId!==pid) return;
         el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);
         el.classList.remove('moving','bad');
-        if(dashHits(it,g1)){dashStyle(el,g0)}else{it[DG.k]=g1;save()}
+        dashGuides(null);
+        if(dashHits(it,g1)){dashStyle(el,g0)}else if(g1.join()!==g0.join()){
+          var snap=JSON.parse(JSON.stringify(C.board));snap[C.board.indexOf(it)][DG.k]=g0.slice();
+          BD_UNDO.push({board:snap,msg:mode==='mv'?'Move undone.':'Size undone.'});if(BD_UNDO.length>20)BD_UNDO.shift();
+          it[DG.k]=g1;save();syncBoard();return}
         dashFit();
       };
       el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
@@ -3307,6 +3343,7 @@ html,body{overflow-anchor:none}
     $('#dbAdd').hidden=!bdEditing;
     $('#dbBack').hidden=!BD_UNDO.length;
     $('#dbTpl').hidden=!bdEditing;
+    var dm=$('#dbModel');if(dm){dm.hidden=bdEditing;dm.innerHTML='';store.profiles.forEach(function(p){var o=document.createElement('option');o.value=p.id;o.textContent=p.label||p.name;dm.appendChild(o)});dm.value=store.active}
     $('#dbAdd').setAttribute('aria-pressed',String(dashAdd&&bdEditing));
     bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
     bdEditBtn.textContent=bdEditing?'Done editing':'Edit board';
@@ -3347,6 +3384,18 @@ html,body{overflow-anchor:none}
         var tpd=C.tilt.all||!tiltTaken;tiltTaken=true;
         pr.appendChild(bdPad(it.c,it.d,it.m,it.hold,tpd));pr.appendChild(bdPad(it.e,it.f,it.m,it.hold,!!C.tilt.all));
         el.appendChild(pr);
+      }else if(it.k==='p'){
+        bdHead(el,'Speed & power',it,false);
+        var pg2=document.createElement('div');pg2.className='spw';
+        var src=[['spdSlow','Slow'],['spdNorm','Normal'],['spdFast','Fast'],['limP0','Kid'],['limP1','Normal'],['limP2','Full']];
+        var pbs=src.map(function(q){
+          var b=document.createElement('button');b.type='button';b.className='tgd';
+          var sp=document.createElement('span');sp.textContent=q[1];b.appendChild(sp);
+          var sm=document.createElement('small');b.appendChild(sm);
+          b.addEventListener('click',function(){noteInput();var r0=$('#'+q[0]);if(r0) r0.click();paintBoard()});
+          pg2.appendChild(b);return {b:b,id:q[0],sm:sm};
+        });
+        el.appendChild(pg2);w.spw=pbs;
       }else if(it.k==='r'){
         w.out=bdHead(el,'Record',it,true);
         var rrow=document.createElement('div');rrow.className='recw';
@@ -3502,10 +3551,13 @@ html,body{overflow-anchor:none}
     if(!bdW||!bdW.length) return;
     paintPads();
     bdW.forEach(function(w){
-      if(w.recw){
+      if(w.spw){
+        w.spw.forEach(function(q){var r0=$('#'+q.id);if(!r0) return;var on=r0.getAttribute('aria-pressed')==='true';q.b.classList.toggle('on',on);
+          if(q.id.charAt(0)==='l'){var vv=$('#limV'+q.id.slice(-1));var tt=vv?vv.textContent:'';if(q.sm.textContent!==tt) q.sm.textContent=tt}});
+      }else if(w.recw){
         var rw=w.recw, cur=selectedRec(), now=performance.now();
         rw.rb.classList.toggle('on',!!S.rec);rw.rb.disabled=!S.rec&&(!!S.play||S.estop);
-        rw.pb.classList.toggle('on',!!S.play);rw.pb.disabled=!S.play&&(!!S.rec||S.estop);rw.pb.classList.toggle('dim',!S.play&&(!cur||(!!NB&&!S.connected)));
+        rw.pb.classList.toggle('on',!!S.play);rw.pb.disabled=!S.play&&(!!S.rec||S.estop);rw.pb.classList.toggle('dim',!S.play&&!cur);
         rw.pb.querySelector('i').textContent=S.play?'\u25A0':'\u25B6';rw.pb.querySelector('span').textContent=S.play?'Stop':'Play';
         rw.rb.querySelector('span').textContent=S.rec?'Stop':'Record';
         rw.lpb.classList.toggle('on',!!S.loop);
@@ -3626,7 +3678,7 @@ html,body{overflow-anchor:none}
   });
   $('#dbBack').addEventListener('click',function(){
     var u=BD_UNDO.pop();if(!u){syncBoard();return}
-    if(u.board){C.board=cleanBoard(u.board);save();syncBoard();toast('Previous layout back.');return}
+    if(u.board){C.board=cleanBoard(u.board);save();syncBoard();toast(u.msg||'Previous layout back.');return}
     if(C.board.length>=16){BD_UNDO.push(u);toast('Board is full.');return}
     var it=u.it, k=DG&&DG.k, g=k&&it[k];
     if(g&&C.board.some(function(o){var h=o[k];return h&&g[0]<h[0]+h[2]&&h[0]<g[0]+g[2]&&g[1]<h[1]+h[3]&&h[1]<g[1]+g[3]})) delete it[k];
@@ -3635,6 +3687,15 @@ html,body{overflow-anchor:none}
     var n=C.board.length;C.board=cleanBoard(C.board);
     if(C.board.length<n){BD_UNDO.length=0;toast('Could not put it back.')}else toast('Widget put back.');
     save();syncBoard()});
+  $('#dbModel').addEventListener('change',function(){
+    var v=this.value;if(!v||v===store.active) return;
+    var tp=store.profiles.filter(function(p){return p.id===v})[0];
+    if(tp&&tp.cfg){
+      if(tp.cfg.board&&tp.cfg.board.length){tp.cfg.layout='board';tp.cfg.dash=true}
+      else toast('That model has no Board layout yet, so it opens in its own layout.',4500);
+    }
+    prof.value=v;switchProfile(v);
+  });
   $('#dbExit').addEventListener('click',function(){C.dash=false;bdEditing=false;dashAdd=false;save();syncLayout()});
   $('#bdDash').addEventListener('change',function(){C.dash=$('#bdDash').checked;save();syncLayout()});
   var dashLastK=dashLand()?'g':'gp';
@@ -3648,12 +3709,13 @@ html,body{overflow-anchor:none}
   $('#bdAdd').addEventListener('click',function(){
     if(C.board.length>=16){bdNote.textContent='The board is full (16 controls).';return}
     var v=bdSel.map(function(s){return s.value});
-    if(!v[0]&&bdK!=='e'&&bdK!=='r'){bdNote.textContent='Nothing to add. Make a sequence first.';return}
+    if(!v[0]&&bdK!=='e'&&bdK!=='r'&&bdK!=='p'){bdNote.textContent='Nothing to add. Make a sequence first.';return}
     var ww=bdWideChk.checked?2:1, m=bdMode.value==='tank'?'tank':'axis', n=v.map(function(x){return Math.round(+x)});
     var hd=!bdSpring.checked;
     if(bdK==='q') C.board.push({k:'q',c:v[0],w:ww});
     else if(bdK==='e') C.board.push({k:'e',w:1});
     else if(bdK==='r') C.board.push({k:'r',w:ww});
+    else if(bdK==='p') C.board.push({k:'p',w:ww});
     else if(bdK==='b') C.board.push({k:'b',c:n[0],w:ww});
     else if(bdK==='t'){
       var tsy=$('#bdTgStyle').value;
@@ -3923,6 +3985,9 @@ html,body{overflow-anchor:none}
     'Record / stop recording':'Rakam / henti rakam','Play / stop recording':'Main / henti rakaman',' light on/off':' lampu hidup/mati',' Turbo (hold)':' Turbo (tahan)',
     'LOW':'RENDAH','MID':'SEDANG','FULL':'PENUH','BLINK':'KELIP',
     'Connect the hub first, then press Play.':'Sambung hab dahulu, kemudian tekan Main.','No recording yet. Press Record first.':'Belum ada rakaman. Tekan Rakam dahulu.',
+    'Speed & power':'Laju & kuasa','Preview on the screen only. The hub is not connected, so nothing moves.':'Pratonton pada skrin sahaja. Hab belum disambung, jadi tiada yang bergerak.',
+    'Hub connected. Preview stopped. Press Play to run it for real.':'Hab disambung. Pratonton dihentikan. Tekan Main untuk jalankan betul-betul.','Move undone.':'Alihan dibatalkan.','Size undone.':'Saiz dibatalkan.',
+    'That model has no Board layout yet, so it opens in its own layout.':'Model itu belum ada susunan Board, jadi ia dibuka dalam susunannya sendiri.',
     'Template':'Templat','Layout templates':'Templat susunan','Replaces the current layout. Press Back to undo.':'Menggantikan susunan semasa. Tekan Kembali untuk batal.',
     'Car / Truck':'Kereta / Trak','Excavator':'Jengkaut','Dual stick':'Dua joystick',
     'Drive slider, steering slider, lights, Turbo, winch, E-Stop':'Gelangsar pandu, gelangsar stereng, lampu, Turbo, win, E-Stop',
