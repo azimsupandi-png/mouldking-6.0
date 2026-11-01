@@ -57,7 +57,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 .pill{white-space:nowrap;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:20px;background:var(--well);cursor:pointer;font-size:13px;font-weight:500}
 
 
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(81,207,102,.7)}100%{box-shadow:0 0 0 9px rgba(81,207,102,0)}}
 .estop{white-space:nowrap;min-height:44px;padding:0 20px;border:0;border-radius:6px;background:var(--danger);color:#fff;
   font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .estop:active{transform:scale(.97)}
@@ -444,14 +443,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   box-shadow:0 4px 0 #0b0b0b,0 0 0 0 var(--og);transition:transform .12s,box-shadow .12s}
 .hubbtn[data-st=off]{--o1:#f05252;--o2:#b01212;--og:rgba(240,82,82,.5)}
 .hubbtn:active .orb{transform:translateY(3px);box-shadow:0 1px 0 #0b0b0b}
-.hubbtn[data-st=on] .orb{animation:orbOn 2.4s ease-in-out infinite}
-.hubbtn[data-st=on] .orb::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--o1);opacity:0;animation:orbRip 2.4s ease-out infinite}
-.hubbtn[data-st=off] .orb{animation:orbOff 3.2s ease-in-out infinite}
-.hubbtn[data-st=busy] .orb::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:3px solid transparent;border-top-color:#f6c23a;border-right-color:#f6c23a;animation:orbSpin .9s linear infinite}
-@keyframes orbOn{0%,100%{box-shadow:0 4px 0 #0b0b0b,0 0 6px 0 var(--og)}50%{box-shadow:0 4px 0 #0b0b0b,0 0 18px 4px var(--og)}}
-@keyframes orbRip{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
-@keyframes orbOff{0%,100%{filter:brightness(.85)}50%{filter:brightness(1.05)}}
-@keyframes orbSpin{to{transform:rotate(360deg)}}
+.hubbtn[data-st=on] .orb::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--o1);opacity:0}
+.hubbtn[data-st=busy] .orb::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:3px solid transparent;border-top-color:#f6c23a;border-right-color:#f6c23a}
 .bar .estop,:root[data-skin="studs"] .bar .estop{position:relative;flex:none;width:58px;height:58px;min-height:0;padding:0;border-radius:50%;border:3px solid #151515;color:#2a1d00;
   font-family:var(--f-display);font-weight:800;font-size:10.5px;line-height:1;letter-spacing:0;text-transform:uppercase;overflow:visible;
   background:radial-gradient(ellipse 60% 38% at 50% 20%,rgba(255,255,255,.6),rgba(255,255,255,0) 100%),radial-gradient(circle at 50% 62%,#ffd23a,#e29d00);box-shadow:0 5px 0 #0b0b0b,0 0 0 0 rgba(255,200,40,.5);animation:esIdle 3.6s ease-in-out infinite;text-shadow:0 1px 0 rgba(255,255,255,.35)}
@@ -468,7 +461,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .hubstat{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
 .hubstat i{display:block;width:9px;height:9px;border-radius:50%;background:var(--c)}
 .hubstat[data-st=on]{--c:#3ddc5a;color:#8fe9a1}.hubstat[data-st=off]{--c:#f05252;color:#f39a9a}.hubstat[data-st=busy]{--c:#f6c23a;color:#f6d77a}
-.hubstat[data-st=on] i{animation:pulse 1.8s ease-out infinite}
 .bar .hubbtn{width:auto;gap:0;flex:none}
 .bar .hubbtn #linkText{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .bar .estop::before{inset:3px;border-width:1.5px}
@@ -476,8 +468,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 /* ---- Header icons: white round buttons (play / Bluetooth-off / stop) ---- */
 .hubbtn[data-st=off] .orb{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 7l10 10-5 5V2l5 5L7 17' fill='none' stroke='%23111' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/58% no-repeat;animation:none;filter:none}
 .hubbtn[data-st=off] .orb::before{content:"";position:absolute;right:-6px;top:-6px;width:24px;height:24px;border-radius:50%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 3.5l7 7M10.5 3.5l-7 7' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center/60% no-repeat,#f00;box-shadow:0 2px 3px rgba(0,0,0,.4)}
-.hubbtn[data-st=on] .orb{animation:orbOn2 2.4s ease-in-out infinite}
-@keyframes orbOn2{0%,100%{box-shadow:0 5px 0 #aeb4bb,0 0 6px 0 rgba(61,220,90,.5)}50%{box-shadow:0 5px 0 #aeb4bb,0 0 22px 6px rgba(61,220,90,.6)}}
 .hubbtn:active .orb{box-shadow:0 1px 0 #aeb4bb}
 .bar .estop,:root[data-skin="studs"] .bar .estop{border:0;color:transparent;font-size:0;text-shadow:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff6a6a'/%3E%3Cstop offset='1' stop-color='%23d40000'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='5' y='5' width='14' height='14' rx='2.4' fill='url(%23r)'/%3E%3C/svg%3E") center/58% no-repeat;box-shadow:0 5px 0 #aeb4bb,0 0 0 0 rgba(244,184,0,.5);animation:esIdle2 3.6s ease-in-out infinite}
 .bar .estop::before{display:none}
@@ -495,11 +485,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .btb:active{transform:translateY(2px);box-shadow:0 2px 0 var(--b3)}
 .hubbtn .orb,.hubbtn[data-st=on] .orb,.hubbtn[data-st=off] .orb,.hubbtn[data-st=busy] .orb{width:52px;height:52px;border:0;filter:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%235df07a'/%3E%3Cstop offset='1' stop-color='%2312a02e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='8,5 19,12 8,19' fill='url(%23g)' stroke='url(%23g)' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") center/50% no-repeat;box-shadow:0 4px 0 #aeb4bb;animation:none}
 .hubbtn .orb::before,.hubbtn .orb::after,.hubbtn[data-st=on] .orb::after,.hubbtn[data-st=off] .orb::before,.hubbtn[data-st=busy] .orb::after{content:none;animation:none}
-.hubbtn[data-st=on] .orb{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='4.5' width='4.2' height='15' rx='1.6' fill='%23111'/%3E%3Crect x='13.8' y='4.5' width='4.2' height='15' rx='1.6' fill='%23111'/%3E%3C/svg%3E") center/50% no-repeat;animation:pgp 1.6s ease-out infinite}
-.hubbtn[data-st=busy] .orb{animation:pap 1s ease-out infinite}
+.hubbtn[data-st=on] .orb{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='4.5' width='4.2' height='15' rx='1.6' fill='%23111'/%3E%3Crect x='13.8' y='4.5' width='4.2' height='15' rx='1.6' fill='%23111'/%3E%3C/svg%3E") center/50% no-repeat}
 .hubbtn:active .orb{box-shadow:0 1px 0 #aeb4bb}
-@keyframes pgp{0%{box-shadow:0 4px 0 #aeb4bb,0 0 0 0 rgba(61,220,90,.75)}100%{box-shadow:0 4px 0 #aeb4bb,0 0 0 16px rgba(61,220,90,0)}}
-@keyframes pap{0%{box-shadow:0 4px 0 #aeb4bb,0 0 0 0 rgba(246,194,58,.8)}100%{box-shadow:0 4px 0 #aeb4bb,0 0 0 16px rgba(246,194,58,0)}}
 .bar .estop,:root[data-skin="studs"] .bar .estop,.bar .estop[aria-pressed="false"]{width:52px;height:52px;border:0;outline:0;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff6a6a'/%3E%3Cstop offset='1' stop-color='%23d40000'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='5' y='5' width='14' height='14' rx='2.4' fill='url(%23r)'/%3E%3C/svg%3E") center/50% no-repeat;box-shadow:0 4px 0 #aeb4bb;animation:none}
 .bar .estop[aria-pressed="true"],:root[data-skin="studs"] .bar .estop[aria-pressed="true"]{background:radial-gradient(circle at 38% 30%,#ff6a6a,#d40000) , url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='5' width='14' height='14' rx='2.4' fill='white'/%3E%3C/svg%3E") center/50% no-repeat;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='5' width='14' height='14' rx='2.4' fill='white'/%3E%3C/svg%3E") center/50% no-repeat,radial-gradient(circle at 38% 30%,#ff6a6a,#d40000);box-shadow:0 4px 0 #7a0d0d;animation:prp2 1.4s ease-out infinite}
 @keyframes prp2{0%{box-shadow:0 4px 0 #7a0d0d,0 0 0 0 rgba(255,60,30,.8)}100%{box-shadow:0 4px 0 #7a0d0d,0 0 0 16px rgba(255,60,30,0)}}
@@ -562,11 +549,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .btb::after{width:22px;height:22px;right:-5px;top:-5px}
 .btb[data-bt=on]::after{background-color:#12a02e;box-shadow:0 2px 3px rgba(0,0,0,.4)}
 .btb[data-bt=off]::after{background-color:#e02020;box-shadow:0 2px 3px rgba(0,0,0,.4)}
-.hubbtn[data-st=on] .orb{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='8,5 19,12 8,19' fill='white' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") center/50% no-repeat,radial-gradient(circle at 38% 28%,#5df07a,#12a02e 62%,#0b5a1a);box-shadow:0 4px 0 #0b5a1a;animation:pgp3 1.6s ease-out infinite}
+.hubbtn[data-st=on] .orb{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='8,5 19,12 8,19' fill='white' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") center/50% no-repeat,radial-gradient(circle at 38% 28%,#5df07a,#12a02e 62%,#0b5a1a);box-shadow:0 4px 0 #0b5a1a}
 .hubbtn[data-st=off] .orb{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='8,5 19,12 8,19' fill='%2312a02e' stroke='%2312a02e' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") center/50% no-repeat;box-shadow:0 4px 0 #aeb4bb;animation:none}
 .hubbtn[data-st=busy] .orb{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='8,5 19,12 8,19' fill='%23e0a000' stroke='%23e0a000' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") center/50% no-repeat;box-shadow:0 4px 0 #aeb4bb}
 .hubbtn[data-st=on]:active .orb{box-shadow:0 1px 0 #0b5a1a}
-@keyframes pgp3{0%{box-shadow:0 4px 0 #0b5a1a,0 0 0 0 rgba(61,220,90,.75)}100%{box-shadow:0 4px 0 #0b5a1a,0 0 0 16px rgba(61,220,90,0)}}
 @media (prefers-reduced-motion:reduce){.hubbtn[data-st=on] .orb{animation:none!important}}
 
 /* ---- Board light button: same 3D material as the toggles ---- */
@@ -963,7 +949,6 @@ html,body{overflow-anchor:none}
 .pad .parw.d{left:calc(50% - 17px*var(--s,1));top:calc((100% - 13px*var(--s,1))*.965 - 7px*var(--s,1));width:calc(34px*var(--s,1));height:calc(27px*var(--s,1));background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='27' viewBox='-7 -7 34 27'%3E%3Cdefs%3E%3Cfilter id='g' x='-1' y='-1' width='3' height='3'%3E%3CfeGaussianBlur stdDeviation='2.6'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M10 13L0 0h20z' fill='%23ffc828' stroke='%23ffc828' stroke-width='3' stroke-linejoin='round' filter='url(%23g)'/%3E%3Cpath d='M10 13L0 0h20z' fill='%23ffd23a'/%3E%3C/svg%3E")}
 .pad .parw.l{top:calc(50% - 17px*var(--s,1));left:calc((100% - 13px*var(--s,1))*.035 - 7px*var(--s,1));width:calc(27px*var(--s,1));height:calc(34px*var(--s,1));background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='27' height='34' viewBox='-7 -7 27 34'%3E%3Cdefs%3E%3Cfilter id='g' x='-1' y='-1' width='3' height='3'%3E%3CfeGaussianBlur stdDeviation='2.6'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M0 10L13 0v20z' fill='%23ffc828' stroke='%23ffc828' stroke-width='3' stroke-linejoin='round' filter='url(%23g)'/%3E%3Cpath d='M0 10L13 0v20z' fill='%23ffd23a'/%3E%3C/svg%3E")}
 .pad .parw.r{top:calc(50% - 17px*var(--s,1));left:calc((100% - 13px*var(--s,1))*.965 - 7px*var(--s,1));width:calc(27px*var(--s,1));height:calc(34px*var(--s,1));background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='27' height='34' viewBox='-7 -7 27 34'%3E%3Cdefs%3E%3Cfilter id='g' x='-1' y='-1' width='3' height='3'%3E%3CfeGaussianBlur stdDeviation='2.6'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M13 10L0 0v20z' fill='%23ffc828' stroke='%23ffc828' stroke-width='3' stroke-linejoin='round' filter='url(%23g)'/%3E%3Cpath d='M13 10L0 0v20z' fill='%23ffd23a'/%3E%3C/svg%3E")}
-.bd-pads .pad .parw.u,.cols.dual .pad .parw.u,.bdw>.pad .parw.u{}
 :root[data-skin="studs"] .bdw input[type=range]::-webkit-slider-runnable-track{border-color:transparent!important;background:
     linear-gradient(#010102,#010102) 11px center/calc(100% - 22px) 8px no-repeat,
     radial-gradient(circle,#010102 0 3.6px,transparent 4.2px) 4px center/8px 8px no-repeat,
@@ -1004,6 +989,19 @@ html,body{overflow-anchor:none}
 :root:not(#a) .dw-es.on{border:7px solid transparent!important;background:radial-gradient(circle at 50% 25%,#fff,#d9dde3 55%,#8c929c) padding-box,var(--rim) border-box!important}
 :root:not(#a) .bdw .qbtn.on,:root:not(#a) .bdw .tgl.on{border:2.5px solid transparent!important;background:radial-gradient(ellipse 70% 55% at 50% 8%,rgba(255,255,255,.6),rgba(255,255,255,0) 70%) padding-box,linear-gradient(#ffdc55,#f4b800 48%,#c68700) padding-box,var(--rim) border-box!important;color:#2a1c00!important}
 
+/* Hub ring pulses: transform/opacity only (compositor), instead of animating box-shadow every frame */
+.hubbtn{--rs:1.615;position:relative;z-index:1}
+.hubstat{position:relative;z-index:1}
+.bar .estop{z-index:2}
+.hubbtn[data-st=on] .orb,.hubbtn[data-st=busy] .orb{animation:none}
+.hubbtn[data-st=on] .orb::after,.hubbtn[data-st=busy] .orb::after{content:"";position:absolute;inset:0;border-radius:50%;z-index:-1;pointer-events:none;opacity:0;background:#3ddc5a;animation:hubRing 1.6s ease-out infinite}
+.hubbtn[data-st=busy] .orb::after{background:#f6c23a;--ra:.8;animation-duration:1s}
+@keyframes hubRing{from{transform:scale(1);opacity:var(--ra,.75)}to{transform:scale(var(--rs),var(--rs));opacity:0}}
+@media (orientation:landscape) and (max-height:520px){.hubbtn{--rs:1.842}}
+.hubstat[data-st=on] i{position:relative;animation:none}
+.hubstat[data-st=on] i::after{content:"";position:absolute;inset:0;border-radius:50%;z-index:-1;background:#51cf66;opacity:0;animation:hubDot 1.8s ease-out infinite}
+@keyframes hubDot{from{transform:scale(1);opacity:.7}to{transform:scale(3);opacity:0}}
+@media (prefers-reduced-motion:reduce){.hubbtn .orb::after,.hubstat i::after{animation:none!important}}
 </style>
 </head>
 <body>
