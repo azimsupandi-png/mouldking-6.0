@@ -999,6 +999,11 @@ html,body{overflow-anchor:none}
 :root[data-skin="studs"] .bdw .qbtn.lbtn{padding-right:36px}
 @container (max-width:150px){:root .dw .qbtn.lbtn .lvl{display:none}:root[data-skin="studs"] .dw .qbtn.lbtn{padding-right:6px}}
 .bdw .recw .tgd.dim{opacity:.55}
+:root:not(.dash)[data-skin="studs"] .bdw .qbtn.lbtn,:root[data-skin="studs"] .bdw .qbtn.lbtn:not(#z){padding-right:34px!important;justify-content:center}
+:root:not(.dash) .bdw .qbtn.lbtn .lvl{right:10px;height:16px;gap:2px}
+:root:not(.dash) .bdw .qbtn.lbtn .lvl i{width:3px}
+:root:not(.dash) .bdw .qbtn.lbtn .lvl i:nth-child(1){height:5px}:root:not(.dash) .bdw .qbtn.lbtn .lvl i:nth-child(2){height:8px}:root:not(.dash) .bdw .qbtn.lbtn .lvl i:nth-child(3){height:12px}:root:not(.dash) .bdw .qbtn.lbtn .lvl i:nth-child(4){height:16px}
+@container (max-width:150px){:root[data-skin="studs"] .dw .qbtn.lbtn:not(#z){padding-right:6px!important}}
 </style>
 </head>
 <body>
@@ -3916,7 +3921,7 @@ html,body{overflow-anchor:none}
     'Rename widget':'Namakan semula widget','Widget name':'Nama widget','Widget name (empty = default)':'Nama widget (kosong = asal)',
     'No recording':'Tiada rakaman',
     'Record / stop recording':'Rakam / henti rakam','Play / stop recording':'Main / henti rakaman',' light on/off':' lampu hidup/mati',' Turbo (hold)':' Turbo (tahan)',
-    'LOW':'RENDAH','MID':'SEDERHANA','FULL':'PENUH','BLINK':'KELIP',
+    'LOW':'RENDAH','MID':'SEDANG','FULL':'PENUH','BLINK':'KELIP',
     'Connect the hub first, then press Play.':'Sambung hab dahulu, kemudian tekan Main.','No recording yet. Press Record first.':'Belum ada rakaman. Tekan Rakam dahulu.',
     'Template':'Templat','Layout templates':'Templat susunan','Replaces the current layout. Press Back to undo.':'Menggantikan susunan semasa. Tekan Kembali untuk batal.',
     'Car / Truck':'Kereta / Trak','Excavator':'Jengkaut','Dual stick':'Dua joystick',
