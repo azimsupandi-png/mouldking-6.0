@@ -1028,6 +1028,7 @@ html,body{overflow-anchor:none}
 .zeroable::after{content:"";position:absolute;inset:-8px -8px -8px -14px}
 @media (max-width:640px){:root.dash-l .brand h1{font-size:16px}}
 @media (max-width:620px){:root.dash-l .dashbar{left:146px;transform:none;max-width:calc(100% - 146px - 148px);justify-content:flex-start;gap:3px}:root.dash-l .dashbar .btn{padding:0 6px!important;font-size:11.5px}}
+@container (max-width:250px){:root .dw .spw .tgd{font-size:10px;letter-spacing:0;gap:1px}:root .dw .spw .tgd span{font-size:10px}}
 /* Auto-lite: on slow GPUs the dashboard sheds effects step by step (see autoLite script) */
 :root.dash.lite1 *{animation:none!important;transition:none!important;--g:0!important;filter:none!important}
 :root.dash.lite2 *{box-shadow:none!important;text-shadow:none!important}
@@ -3207,8 +3208,10 @@ html,body{overflow-anchor:none}
   }
   function dashHitsG(a,b){return a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]}
   function dashHits(it,g){return C.board.some(function(o){return o!==it&&o[DG.k]&&dashHitsG(o[DG.k],g)})}
+  var DASH_TINY=0;
   function dashFind(it,f){
     var sz=dashSize(it), mn=dmin(it);
+    if(DASH_TINY) mn=[Math.max(3,Math.round(mn[0]*DASH_TINY)),Math.max(3,Math.round(mn[1]*DASH_TINY))];
     var w0=Math.max(mn[0],Math.round(sz[0]*f)), h0=Math.max(mn[1],Math.round(sz[1]*f));
     if(it.k==='e'&&!dashHits(it,[DG.x-w0,DG.y-h0,w0,h0])) return [DG.x-w0,DG.y-h0,w0,h0];
     for(var shrink=0;shrink<12;shrink++){
@@ -3230,14 +3233,17 @@ html,body{overflow-anchor:none}
     var byArea=list.slice().sort(function(a,b){
       if(a.k==='e'||b.k==='e') return (b.k==='e'?1:0)-(a.k==='e'?1:0);
       var A=dashSize(a),B=dashSize(b);return B[0]*B[1]-A[0]*A[1]});
-    var tries=[[list,1],[byArea,1],[byArea,.85],[byArea,.7],[byArea,.55],[byArea,.4],[byArea,0]];
+    var tries=[[list,1],[byArea,1],[byArea,.85],[byArea,.7],[byArea,.55],[byArea,.4],[byArea,0],[byArea,0,.9],[byArea,0,.8],[byArea,0,.7],[byArea,0,.6],[byArea,0,.5],[byArea,0,.45]];
     var ok=false;
     for(var t=0;t<tries.length&&!ok;t++){
+      DASH_TINY=tries[t][2]||0;
       list.forEach(function(o){delete o[DG.k]});
       var order=tries[t][0].slice().sort(function(a,b){return (b.k==='e'?1:0)-(a.k==='e'?1:0)});
       ok=true;
       for(var i=0;i<order.length;i++){var g=dashFind(order[i],tries[t][1]);if(!g){ok=false;break}order[i][DG.k]=g}
     }
+    var usedTiny=DASH_TINY;DASH_TINY=0;
+    if(ok&&usedTiny) toast('Many widgets, so some were made smaller. Remove one to make them bigger.',5000);
     if(!ok){
       list.forEach(function(o){if(!o[DG.k]){var mn=dmin(o);o[DG.k]=[0,0,mn[0],mn[1]]}});
       toast('Too many widgets to fit on the screen. Remove one.');
@@ -3297,14 +3303,14 @@ html,body{overflow-anchor:none}
         bv.style.height=bh+'px';
         if(inp){
           inp.style.zoom='1';var tk=inp.offsetHeight||46;
-          var kv=Math.max(0.6,Math.min(4,aw/tk,bh/(2.6*tk))), lw=bh/kv;
+          var kv=Math.max(window.innerHeight<340?0.6:1,Math.min(4,aw/tk,bh/(2.6*tk))), lw=bh/kv;
           inp.style.zoom=String(kv);inp.style.width=lw+'px';inp.style.marginLeft=(-lw/2)+'px';inp.style.marginTop=(-tk/2)+'px';
         }
       }else if(el.querySelector){
         var ct=el.querySelector(':scope > input[type=range], :scope > .tgl, :scope > .tgdir, :scope > .qbtn');
         if(ct){
           ct.style.zoom='1';ct.style.width='';
-          var cb=ct.offsetHeight||44, isIn=ct.matches&&ct.matches('input'), mw=ct.classList.contains('tgdir')?230:170, kc=Math.max(0.6,Math.min(4,ah/cb,isIn?aw/(2.6*cb):aw/mw));
+          var cb=ct.offsetHeight||44, isIn=ct.matches&&ct.matches('input'), mw=ct.classList.contains('tgdir')?230:170, kc=Math.max(window.innerHeight<340?0.6:1,Math.min(4,ah/cb,isIn?aw/(2.6*cb):aw/mw));
           ct.style.zoom=String(kc);ct.style.width=(aw/kc)+'px';
         }
       }
@@ -3704,7 +3710,9 @@ html,body{overflow-anchor:none}
     var b=$('#dbReset');
     if(!rstT){b.textContent='Tap again';rstT=setTimeout(function(){rstT=0;b.textContent='Reset'},3000);return}
     clearTimeout(rstT);rstT=0;b.textContent='Reset';
-    dashOn();C.board.forEach(function(o){delete o[DG.k]});save();syncBoard();toast('Layout reset.')});
+    dashOn();
+    BD_UNDO.push({board:JSON.parse(JSON.stringify(C.board))});if(BD_UNDO.length>20)BD_UNDO.shift();
+    C.board.forEach(function(o){delete o[DG.k]});save();syncBoard();toast('Layout reset. Back undoes it.')});
   var DTPL={
     car:[{k:'s',c:0,w:1,v:true,g:[0,0,12,24]},{k:'l',c:2,w:1,g:[12,0,13,7]},{k:'b',c:0,w:1,g:[12,7,13,7]},
          {k:'t',c:3,y:'dir',w:1,g:[25,0,14,7]},{k:'l',c:4,w:1,g:[25,7,14,7]},{k:'e',w:1,g:[39,0,9,14]},{k:'s',c:1,w:1,g:[12,14,36,10]}],
