@@ -792,7 +792,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
   :root .dw .tgd{font-size:0;letter-spacing:0;gap:0}
   :root .dw .tgd i{font-size:18px}
 }
-@container (max-width:80px){
+@container (max-width:110px){
+  :root[data-skin="studs"] .dw .qbtn.lbtn,:root .dw .tgl.led{padding:0 4px 0 30px;font-size:11px;letter-spacing:0}
+  :root .dw .qbtn.lbtn::before,:root .dw .qbtn.lbtn.on::before{left:5px;width:20px;height:20px}
+  :root .dw .tgl .led{left:6px;width:16px;height:16px}
+  :root .dw .tgl.latch{font-size:12px}
+}
+@container (max-width:56px){
   :root[data-skin="studs"] .dw .qbtn.lbtn,:root .dw .tgl.led{padding:0;font-size:0;letter-spacing:0}
   :root .dw .qbtn.lbtn::before,:root .dw .qbtn.lbtn.on::before{left:50%;transform:translate(-50%,-50%)}
   :root .dw .tgl .led{left:50%;transform:translate(-50%,-50%)}
