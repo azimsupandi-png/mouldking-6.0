@@ -1002,6 +1002,10 @@ html,body{overflow-anchor:none}
 .hubstat[data-st=on] i::after{content:"";position:absolute;inset:0;border-radius:50%;z-index:-1;background:#51cf66;opacity:0;animation:hubDot 1.8s ease-out infinite}
 @keyframes hubDot{from{transform:scale(1);opacity:.7}to{transform:scale(3);opacity:0}}
 @media (prefers-reduced-motion:reduce){.hubbtn .orb::after,.hubstat i::after{animation:none!important}}
+/* Auto-lite: on slow GPUs the dashboard sheds effects step by step (see autoLite script) */
+:root.dash.lite1 *{animation:none!important;transition:none!important;--g:0!important;filter:none!important}
+:root.dash.lite2 *{box-shadow:none!important;text-shadow:none!important}
+:root.dash.lite3 input[type=range]::-webkit-slider-thumb{background:radial-gradient(circle at 35% 30%,#ffd98a,#e8a020 55%,#9a5600)!important;border-radius:50%!important}
 </style>
 </head>
 <body>
@@ -4248,7 +4252,7 @@ html,body{overflow-anchor:none}
       var k=lo.n||1;
       t+='\nlong frames '+lo.n+'  avg '+(lo.dur/k).toFixed(0)+'ms  script '+(lo.scr/k).toFixed(0)+'  render '+(lo.rend/k).toFixed(0)
     }else t+='\n(no long-frame timing on this WebView)';
-    t+='\n'+window.innerWidth+'x'+window.innerHeight+' @'+dpr.toFixed(2)+'  '+(document.documentElement.classList.contains('dash')?'dashboard':'page');
+    t+='\nlite level '+(window.mk6Lite?window.mk6Lite.get():0)+' (tap lite to reset)';t+='\n'+window.innerWidth+'x'+window.innerHeight+' @'+dpr.toFixed(2)+'  '+(document.documentElement.classList.contains('dash')?'dashboard':'page');
     el.textContent=t;dts=[];lo={n:0,dur:0,scr:0,rend:0,blk:0};
   }
   function start(){
@@ -4265,6 +4269,8 @@ html,body{overflow-anchor:none}
       vert:'.bdv,.vert{visibility:hidden!important}',
       glow:'*{--g:0!important;animation:none!important;transition:none!important}'
     };
+    var lb=document.createElement('button');lb.textContent='lite';lb.style.cssText='pointer-events:auto;background:#222;color:#9fe870;border:1px solid #9fe870;border-radius:6px;padding:4px 8px;font:inherit';
+    lb.addEventListener('click',function(e){e.stopPropagation();if(window.mk6Lite)window.mk6Lite.set(0)});bar.appendChild(lb);
     Object.keys(T).forEach(function(k){
       var b=document.createElement('button'),st=null;b.textContent=k;
       b.style.cssText='pointer-events:auto;background:#222;color:#9fe870;border:1px solid #9fe870;border-radius:6px;padding:4px 8px;font:inherit';
@@ -4283,6 +4289,27 @@ html,body{overflow-anchor:none}
     h.addEventListener('pointerdown',function(){clearTimeout(press);press=setTimeout(function(){on?stop():start()},900)});
     ['pointerup','pointercancel','pointerleave'].forEach(function(ev){h.addEventListener(ev,function(){clearTimeout(press)})});
   }
+})();
+</script>
+<script>
+(function(){
+  // Auto-lite: measure frame rate while the Dashboard is shown; if it stays low, drop effects one level at a time (max 3).
+  var KEY='mk6lite',lvl=0,raf=0,last=0,dts=[],t0=0,bad=0,root=document.documentElement;
+  try{lvl=Math.max(0,Math.min(3,parseInt(localStorage.getItem(KEY)||'0',10)||0))}catch(_){}
+  function apply(){for(var i=1;i<=3;i++) root.classList.toggle('lite'+i,i<=lvl)}
+  function save(){try{localStorage.setItem(KEY,String(lvl))}catch(_){}}
+  function loop(t){
+    raf=requestAnimationFrame(loop);
+    if(document.hidden||!root.classList.contains('dash')||lvl>=3){last=0;t0=0;bad=0;dts=[];return}
+    if(last&&t-last<250) dts.push(t-last); last=t; if(!t0) t0=t;
+    if(t-t0>=2500){
+      var n=dts.length,s=dts.slice().sort(function(a,b){return a-b}),med=n?s[n>>1]:0;
+      dts=[];t0=t;
+      if(n>=15&&med>32){ if(++bad>=2){bad=0;lvl++;apply();save();window.dispatchEvent(new Event('mk6lite'))} } else bad=0;
+    }
+  }
+  window.mk6Lite={get:function(){return lvl},set:function(n){lvl=Math.max(0,Math.min(3,n|0));bad=0;apply();save()}};
+  apply();raf=requestAnimationFrame(loop);
 })();
 </script>
 </body>
