@@ -1009,7 +1009,7 @@ html,body{overflow-anchor:none}
 :root:not(.dash) .ovr{display:none!important}
 :root.dash .bdv input[type=range]::-webkit-slider-thumb{background:none!important;box-shadow:none!important;border:0!important}
 :root.dash .ovk{display:block;position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;background:var(--kimgv) center/100% 100% no-repeat;will-change:transform;pointer-events:none}
-:root.dash .ovk::before{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 22px 5px rgba(255,200,40,.8);opacity:var(--g,0);will-change:opacity}
+:root.dash .ovk::before{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 16px 4px rgba(255,200,40,.7);opacity:var(--g,0);will-change:opacity}
 :root.dash.lite2 .ovk::before{box-shadow:none!important}
 :root.dash.lite3 .ovk{background:radial-gradient(circle at 35% 30%,#ffd98a,#e8a020 55%,#9a5600)!important}
 /* Auto-lite: on slow GPUs the dashboard sheds effects step by step (see autoLite script) */
@@ -4324,11 +4324,15 @@ html,body{overflow-anchor:none}
 </script>
 <script>
 (function(){
-  var T=42,DX=0,DY=0,root=document.documentElement;
+  var T=40,DX=0,DY=0,root=document.documentElement;
   function upd(i){
     var o=i._ok;if(!o) return;
-    var mn=+i.min,mx=+i.max,f=mx>mn?(i.value-mn)/(mx-mn):0.5,k=(((0.5-f)*(i.offsetWidth-T))+DY).toFixed(1);
-    if(i._yk!==k){i._yk=k;o.style.transform='translate('+DX+'px,'+k+'px)'}
+    var kv=parseFloat(i.style.zoom)||1,L=i.getBoundingClientRect().height,Ts=T*kv;
+    if(!L) return;
+    var mn=+i.min,mx=+i.max,f=mx>mn?(i.value-mn)/(mx-mn):0.5,k=(((0.5-f)*(L-(T+5)*kv))+DY*kv).toFixed(1);
+    var sk=Ts.toFixed(1);
+    if(i._sk!==sk){i._sk=sk;o.style.width=o.style.height=sk+'px';o.style.margin=(-Ts/2).toFixed(1)+'px 0 0 '+(-Ts/2).toFixed(1)+'px';i._yk=null}
+    if(i._yk!==k){i._yk=k;o.style.transform='translate('+(DX*kv)+'px,'+k+'px)'}
     var g=i.style.getPropertyValue('--g');if(i._gk!==g){i._gk=g;o.style.setProperty('--g',g||'0')}
   }
   function scan(){
@@ -4340,7 +4344,7 @@ html,body{overflow-anchor:none}
       upd(i);
     }
   }
-  window.__ovk={set:function(x,y,t){DX=x;DY=y;T=t||T;document.querySelectorAll('.bdv input[type=range]:not(.ovr)').forEach(function(i){i._yk=null;if(i._ok){i._ok.style.width=i._ok.style.height=T+'px';i._ok.style.margin=(-T/2)+'px 0 0 '+(-T/2)+'px'}})}};
+  window.__ovk={set:function(x,y,t){DX=x;DY=y;T=t||T;document.querySelectorAll('.bdv input[type=range]:not(.ovr)').forEach(function(i){i._yk=null;i._sk=null})}};
   setInterval(scan,40);
 })();
 </script>
