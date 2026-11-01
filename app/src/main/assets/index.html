@@ -1031,6 +1031,23 @@ html,body{overflow-anchor:none}
     radial-gradient(circle,#010102 0 3.6px,transparent 4.2px) calc(100% - 4px) center/8px 8px no-repeat,linear-gradient(180deg,#020203,#14161c 60%,#0a0b0e) padding-box,linear-gradient(180deg,#fff0b8,#e8c25a 30%,#9a7420 65%,#4a360c) border-box!important}
 :root.matte.ring-knurl[data-skin="studs"] .bdw input[type=range]::-webkit-slider-runnable-track,:root.matte.ring-gun[data-skin="studs"] .bdw input[type=range]::-webkit-slider-runnable-track,:root.matte.ring-bronze[data-skin="studs"] .bdw input[type=range]::-webkit-slider-runnable-track{background-clip:padding-box,padding-box,padding-box,padding-box,border-box,border-box!important}
 #ringSeg .btn{font-size:13px!important;padding:0 4px!important;letter-spacing:0!important}
+/* ---- power arrows: the pad's own arrows light up with each axis ---- */
+.pad .parw{position:absolute;pointer-events:none;z-index:0;background-repeat:no-repeat;background-size:100% 100%;opacity:0;filter:drop-shadow(0 0 calc(3px*var(--s,1)) rgba(255,200,40,.9));transition:opacity .06s linear}
+.pad .parw.u{left:calc(50% - 10px*var(--s,1));top:calc((100% - 13px*var(--s,1))*.035);width:calc(20px*var(--s,1));height:calc(13px*var(--s,1));background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 0l10 13H0z' fill='%23ffd23a'/%3E%3C/svg%3E");opacity:var(--pu,0)}
+.pad .parw.d{left:calc(50% - 10px*var(--s,1));top:calc((100% - 13px*var(--s,1))*.965);width:calc(20px*var(--s,1));height:calc(13px*var(--s,1));background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13'%3E%3Cpath d='M10 13L0 0h20z' fill='%23ffd23a'/%3E%3C/svg%3E");opacity:var(--pd,0)}
+.pad .parw.l{top:calc(50% - 10px*var(--s,1));left:calc((100% - 13px*var(--s,1))*.035);width:calc(13px*var(--s,1));height:calc(20px*var(--s,1));background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M0 10L13 0v20z' fill='%23ffd23a'/%3E%3C/svg%3E");opacity:var(--pl,0)}
+.pad .parw.r{top:calc(50% - 10px*var(--s,1));left:calc((100% - 13px*var(--s,1))*.965);width:calc(13px*var(--s,1));height:calc(20px*var(--s,1));background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='20'%3E%3Cpath d='M13 10L0 0v20z' fill='%23ffd23a'/%3E%3C/svg%3E");opacity:var(--pr,0)}
+.bd-pads .pad .parw.u,.cols.dual .pad .parw.u,.bdw>.pad .parw.u{}
+:root[data-skin="studs"]:not(.ring-knurl):not(.ring-gun):not(.ring-bronze) .bdw input[type=range]::-webkit-slider-runnable-track{border-color:transparent!important;background:
+    linear-gradient(#010102,#010102) 11px center/calc(100% - 22px) 8px no-repeat,
+    radial-gradient(circle,#010102 0 3.6px,transparent 4.2px) 4px center/8px 8px no-repeat,
+    radial-gradient(circle,#010102 0 3.6px,transparent 4.2px) calc(100% - 4px) center/8px 8px no-repeat,
+    linear-gradient(180deg,#020203,#14161c 60%,#0a0b0e) padding-box,
+    linear-gradient(170deg,#e2e6ee 0%,#9ba1ad 22%,#5a5f69 45%,#1a1c21 70%,#3a3e46 88%,#9ba1ad 100%) border-box!important;
+  box-shadow:inset 0 5px 8px #000,0 0 0 1px #000,0 2px 4px rgba(0,0,0,.6)!important}
+:root.matte[data-skin="studs"]:not(.ring-knurl):not(.ring-gun):not(.ring-bronze) .bdw input[type=range]::-webkit-slider-runnable-track{background:
+    linear-gradient(#aeb3bb,#cdd0d5) padding-box,
+    linear-gradient(170deg,#ffffff 0%,#c3c8d0 30%,#8a909a 70%,#b7bcc4 100%) border-box!important}
 </style>
 </head>
 <body>
@@ -4251,6 +4268,27 @@ html,body{overflow-anchor:none}
   function all(){var l=document.querySelectorAll('main input[type=range]:not(.pwr)');for(var i=0;i<l.length;i++) if(!l[i].closest('.bdw')) p(l[i])}
   document.addEventListener('input',function(e){var t=e.target;if(t&&t.type==='range'&&!t.classList.contains('pwr')) p(t)},true);
   setInterval(all,300);all();
+})();
+</script>
+<script>
+(function(){
+  // Light the pad arrows by how hard each axis is pushed (reads the knob position, so it works for touch, gamepad and playback)
+  function prep(p){if(p._parw) return;p._parw=1;['u','d','l','r'].forEach(function(k){var i=document.createElement('i');i.className='parw '+k;p.insertBefore(i,p.firstChild)})}
+  function tick(){
+    var l=document.querySelectorAll('.pad');
+    for(var n=0;n<l.length;n++){
+      var p=l[n], kn=p.querySelector('.knob');if(!kn||!p.offsetWidth) continue;prep(p);
+      var tr=kn.style.transform||'', m=/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(tr), dx=0, dy=0;
+      if(m){dx=+m[1];dy=+m[2]}
+      var R=Math.max(8,(p.getBoundingClientRect().width-kn.getBoundingClientRect().width*0.6)/2-7);
+      var x=Math.max(-1,Math.min(1,dx/R)), y=Math.max(-1,Math.min(1,-dy/R));
+      var v={pu:y>0?y:0,pd:y<0?-y:0,pr:x>0?x:0,pl:x<0?-x:0}, key='';
+      for(var k in v){v[k]=v[k]<0.05?0:Math.min(1,0.25+v[k]*0.75);key+=v[k].toFixed(2)}
+      if(p._pk===key) continue;p._pk=key;
+      for(var k2 in v) p.style.setProperty('--'+k2,v[k2]);
+    }
+  }
+  setInterval(tick,40);
 })();
 </script>
 </body>
