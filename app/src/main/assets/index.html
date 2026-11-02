@@ -1045,7 +1045,10 @@ html,body{overflow-anchor:none}
 :root:not(#a) .btb::before,:root:not(#a) .bar .estop::before{content:"";display:block;position:absolute;inset:-9px;border:0;border-radius:0;background:none}
 :root:not(#a) .bar .hubbtn{padding:9px;background:none!important;box-shadow:none!important;border:0!important}
 :root:not(#a) .bar-in{gap:6px}
-:root.dash.has-wall body{background:linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.28)),var(--wall) center/cover no-repeat!important;background-attachment:scroll!important}
+:root.dash.has-wall{background:#0d0f12}
+:root.dash.has-wall body{background:none!important}
+#wallBg{display:none;position:fixed;left:0;right:0;bottom:0;top:0;z-index:-1;pointer-events:none;background-position:center;background-repeat:no-repeat}
+:root.dash.has-wall #wallBg{display:block}
 .dtpl-in #wallH{margin-top:10px}
 /* E-Stop: solid red with a white stop square; pulses while engaged */
 :root:not(#a) .bar .estop,:root:not(#a) .bar .estop[aria-pressed="false"]{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='6' width='12' height='12' rx='2.2' fill='white'/%3E%3C/svg%3E") center/52% no-repeat,radial-gradient(circle at 38% 30%,#ff6a6a,#d40000 70%)!important;box-shadow:0 2px 0 #7a0d0d!important}
@@ -1199,6 +1202,7 @@ html,body{overflow-anchor:none}
           <div class="seg"><button class="btn" type="button" id="lxExp">Export layout</button><button class="btn" type="button" id="lxImp">Import layout</button></div>
           <h4 id="wallH">Wallpaper (portrait)</h4>
           <div class="seg"><button class="btn" type="button" id="wallPick">Choose image</button><button class="btn" type="button" id="wallClr">Use default background</button></div>
+          <div class="seg"><button class="btn" type="button" id="wallFit">Fit: Fill</button></div>
           </div><div class="dtpl-col">
           <h4 id="dtplMineH">My templates</h4>
           <div id="dtplMine" class="dtpl-mine"></div>
@@ -3849,17 +3853,30 @@ html,body{overflow-anchor:none}
     dtplApply(b,'Imported');
   });
   /* Wallpaper: one image for portrait and one for landscape, kept in this phone only */
-  var WALL={p:'',l:''},wallLast='';
-  try{WALL.p=localStorage.getItem('mk6wp')||'';WALL.l=localStorage.getItem('mk6wl')||''}catch(e){}
+  var WALL={p:'',l:'',fit:{p:'fill',l:'fill'}},wallLast='';
+  try{WALL.p=localStorage.getItem('mk6wp')||'';WALL.l=localStorage.getItem('mk6wl')||'';WALL.fit.p=localStorage.getItem('mk6wfp')==='stretch'?'stretch':'fill';WALL.fit.l=localStorage.getItem('mk6wfl')==='stretch'?'stretch':'fill'}catch(e){}
   function wallSlot(){return document.documentElement.classList.contains('dash-l')?'l':'p'}
-  function wallApply(){
-    var R=document.documentElement,sl=wallSlot(),u=R.classList.contains('dash')?WALL[sl]:'';
-    var key=sl+'|'+(u?u.length:0);if(key===wallLast) return;wallLast=key;
-    if(u){R.style.setProperty('--wall','url("'+u+'")');R.classList.add('has-wall')}
-    else{R.style.removeProperty('--wall');R.classList.remove('has-wall')}
+  function wallEl(){
+    var e=document.getElementById('wallBg');
+    if(!e){e=document.createElement('div');e.id='wallBg';e.setAttribute('aria-hidden','true');document.body.insertBefore(e,document.body.firstChild)}
+    return e;
   }
-  new MutationObserver(wallApply).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+  function wallTop(){var bar=document.querySelector('header.bar');var t=bar?Math.round(bar.getBoundingClientRect().bottom):0;wallEl().style.top=Math.max(0,t)+'px'}
+  function wallFitOf(sl){var f=WALL.fit&&WALL.fit[sl];return f==='stretch'?'stretch':'fill'}
+  function wallApply(force){
+    var R=document.documentElement,sl=wallSlot(),u=R.classList.contains('dash')?WALL[sl]:'';
+    var key=sl+'|'+(u?u.length:0)+'|'+wallFitOf(sl);if(key===wallLast&&!force) return;wallLast=key;
+    var e=wallEl();
+    if(u){
+      e.style.backgroundImage='linear-gradient(rgba(0,0,0,.12),rgba(0,0,0,.12)),url("'+u+'")';
+      e.style.backgroundSize=wallFitOf(sl)==='stretch'?'100% 100%':'cover';
+      R.classList.add('has-wall');wallTop();
+    }else{e.style.backgroundImage='';R.classList.remove('has-wall')}
+  }
+  new MutationObserver(function(){wallApply()}).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
   wallApply();
+  window.addEventListener('resize',function(){wallTop()});
+  try{var wb=document.querySelector('header.bar');if(wb&&window.ResizeObserver) new ResizeObserver(function(){if(document.documentElement.classList.contains('has-wall')) wallTop()}).observe(wb)}catch(e){}
   window.onWallpaper=function(slot,url){
     if(!url){toast('No image was chosen.');return}
     slot=slot==='l'?'l':'p';
@@ -3867,7 +3884,7 @@ html,body{overflow-anchor:none}
     WALL[slot]=url;wallLast='';wallApply();
     toast('Wallpaper set for '+(slot==='l'?'landscape':'portrait')+'.');
   };
-  function wallLabel(){$('#wallH').textContent=wallSlot()==='l'?'Wallpaper (landscape)':'Wallpaper (portrait)';$('#wallClr').disabled=!WALL[wallSlot()]}
+  function wallLabel(){$('#wallH').textContent=wallSlot()==='l'?'Wallpaper (landscape)':'Wallpaper (portrait)';$('#wallClr').disabled=!WALL[wallSlot()];$('#wallFit').disabled=!WALL[wallSlot()];$('#wallFit').textContent=wallFitOf(wallSlot())==='stretch'?'Fit: Stretch':'Fit: Fill'}
   $('#wallPick').addEventListener('click',function(){
     var sl=wallSlot();
     if(NB&&NB.pickWallpaper){try{NB.pickWallpaper(sl)}catch(e){toast('Could not open the image picker.')}return}
@@ -3883,6 +3900,11 @@ html,body{overflow-anchor:none}
       img.onerror=function(){window.onWallpaper(sl,null)};img.src=url;
     });
     f.click();
+  });
+  $('#wallFit').addEventListener('click',function(){
+    var sl=wallSlot();WALL.fit[sl]=wallFitOf(sl)==='stretch'?'fill':'stretch';
+    try{localStorage.setItem(sl==='l'?'mk6wfl':'mk6wfp',WALL.fit[sl])}catch(e){}
+    wallApply(true);wallLabel();
   });
   $('#wallClr').addEventListener('click',function(){
     var sl=wallSlot();WALL[sl]='';
@@ -4229,7 +4251,7 @@ html,body{overflow-anchor:none}
     'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Reconnect when I return to the app':'Sambung semula bila saya kembali ke app','Effects':'Kesan visual','Lightweight':'Ringan','Auto (recommended)':'Auto (disyorkan)','Joystick settings':'Tetapan joystick','Applies to this joystick only.':'Untuk joystick ini sahaja.','Deadzone':'Zon mati','Sensitivity':'Kepekaan','Power limit':'Had kuasa','Axis lock':'Kunci paksi','Free':'Bebas','Left / right':'Kiri / kanan','Up / down':'Atas / bawah','Export layout':'Eksport susun atur','Import layout':'Import susun atur','Export / import layout':'Eksport / import susun atur','Import':'Import','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
     'This launcher cannot add a shortcut.':'Pelancar ini tidak dapat menambah pintasan.',
     'Skip':'Langkau','Back':'Kembali','Next':'Seterusnya','Done':'Selesai',
-    'My templates':'Templat saya','Wallpaper (portrait)':'Kertas dinding (menegak)','Wallpaper (landscape)':'Kertas dinding (melintang)','Choose image':'Pilih gambar','Use default background':'Guna latar lalai','No image was chosen.':'Tiada gambar dipilih.','The image is too large to save.':'Gambar terlalu besar untuk disimpan.','Wallpaper set for landscape.':'Kertas dinding melintang ditetapkan.','Wallpaper set for portrait.':'Kertas dinding menegak ditetapkan.','Default background restored.':'Latar lalai dipulihkan.','Could not open the image picker.':'Tidak dapat membuka pemilih gambar.','Template name':'Nama templat','Save current layout':'Simpan susunan ini','My templates work in every model. Up to 10.':'Templat saya boleh digunakan dalam semua model. Maksimum 10.',
+    'My templates':'Templat saya','Wallpaper (portrait)':'Kertas dinding (menegak)','Wallpaper (landscape)':'Kertas dinding (melintang)','Choose image':'Pilih gambar','Fit: Fill':'Muat: Penuhi','Fit: Stretch':'Muat: Regang','Use default background':'Guna latar lalai','No image was chosen.':'Tiada gambar dipilih.','The image is too large to save.':'Gambar terlalu besar untuk disimpan.','Wallpaper set for landscape.':'Kertas dinding melintang ditetapkan.','Wallpaper set for portrait.':'Kertas dinding menegak ditetapkan.','Default background restored.':'Latar lalai dipulihkan.','Could not open the image picker.':'Tidak dapat membuka pemilih gambar.','Template name':'Nama templat','Save current layout':'Simpan susunan ini','My templates work in every model. Up to 10.':'Templat saya boleh digunakan dalam semua model. Maksimum 10.',
     'Delete?':'Padam?','Up to 10 templates. Delete one first.':'Maksimum 10 templat. Padam satu dahulu.',
     'Rename widget':'Namakan semula widget','Widget name':'Nama widget','Widget name (empty = default)':'Nama widget (kosong = asal)',
     'No recording':'Tiada rakaman',
