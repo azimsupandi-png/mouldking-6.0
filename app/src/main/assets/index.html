@@ -3525,7 +3525,7 @@ html,body{overflow-anchor:none}
           function lpOpen(){
             lpClose();lpDone=true;
             var m=document.createElement('div');m.id='lpMenu';m.className='lpmenu';
-            [['Off',0,'off'],['Low',30,'off'],['Mid',60,'off'],['Full',100,'off'],['Slow blink',100,'slow'],['Fast blink',100,'fast'],['Pulse',100,'pulse']].forEach(function(o){
+            [['Slow blink',100,'slow'],['Fast blink',100,'fast'],['Pulse',100,'pulse']].forEach(function(o){
               var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=o[0];
               b.addEventListener('click',function(){
                 if(S.estop||S.play){lpClose();return}
