@@ -1037,6 +1037,15 @@ html,body{overflow-anchor:none}
 :root.dash.lite1 *{animation:none!important;transition:none!important;--g:0!important;filter:none!important}
 :root.dash.lite2 *{box-shadow:none!important;text-shadow:none!important}
 :root.dash.lite3 input[type=range]::-webkit-slider-thumb{background:radial-gradient(circle at 35% 30%,#ffd98a,#e8a020 55%,#9a5600)!important;border-radius:50%!important}
+/* Header controls: icon-sized (same as the battery glyph). The tap area stays larger than the drawing. */
+:root:not(#a) .btb,:root:not(#a) .hubbtn .orb,:root:not(#a) .hubbtn[data-st] .orb,:root:not(#a) .bar .estop,:root:not(#a)[data-skin="studs"] .bar .estop{width:26px!important;height:26px!important;box-shadow:0 2px 0 #aeb4bb!important}
+:root:not(#a) .btb[data-bt=on]{box-shadow:0 2px 0 #0b3f8a!important}
+:root:not(#a) .hubbtn[data-st=on] .orb{box-shadow:0 2px 0 #0b5a1a!important}
+:root:not(#a) .bar .estop[aria-pressed="true"]{box-shadow:0 2px 0 #7a0d00!important}
+:root:not(#a) .btb::after{width:12px;height:12px;right:-3px;top:-3px;border-width:1.5px}
+:root:not(#a) .btb::before,:root:not(#a) .bar .estop::before{content:"";display:block;position:absolute;inset:-9px;border:0;border-radius:0;background:none}
+:root:not(#a) .bar .hubbtn{padding:9px;background:none!important;box-shadow:none!important;border:0!important}
+:root:not(#a) .bar-in{gap:6px}
 </style>
 </head>
 <body>
