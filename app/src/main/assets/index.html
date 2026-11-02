@@ -1045,6 +1045,8 @@ html,body{overflow-anchor:none}
 :root:not(#a) .btb::before,:root:not(#a) .bar .estop::before{content:"";display:block;position:absolute;inset:-9px;border:0;border-radius:0;background:none}
 :root:not(#a) .bar .hubbtn{padding:9px;background:none!important;box-shadow:none!important;border:0!important}
 :root:not(#a) .bar-in{gap:6px}
+:root.dash.has-wall body{background:linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.28)),var(--wall) center/cover no-repeat!important;background-attachment:scroll!important}
+.dtpl-in #wallH{margin-top:10px}
 /* E-Stop: solid red with a white stop square; pulses while engaged */
 :root:not(#a) .bar .estop,:root:not(#a) .bar .estop[aria-pressed="false"]{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='6' width='12' height='12' rx='2.2' fill='white'/%3E%3C/svg%3E") center/52% no-repeat,radial-gradient(circle at 38% 30%,#ff6a6a,#d40000 70%)!important;box-shadow:0 2px 0 #7a0d0d!important}
 :root:not(#a) .bar .estop[aria-pressed="true"]{z-index:auto!important;outline:0!important;animation:none!important;box-shadow:0 2px 0 #7a0d0d!important}
@@ -1195,6 +1197,8 @@ html,body{overflow-anchor:none}
           </div>
           <p class="dtpl-note">My templates work in every model. Up to 10.</p>
           <div class="seg"><button class="btn" type="button" id="lxExp">Export layout</button><button class="btn" type="button" id="lxImp">Import layout</button></div>
+          <h4 id="wallH">Wallpaper (portrait)</h4>
+          <div class="seg"><button class="btn" type="button" id="wallPick">Choose image</button><button class="btn" type="button" id="wallClr">Use default background</button></div>
           </div><div class="dtpl-col">
           <h4 id="dtplMineH">My templates</h4>
           <div id="dtplMine" class="dtpl-mine"></div>
@@ -3844,7 +3848,48 @@ html,body{overflow-anchor:none}
     $('#lxDlg').hidden=true;
     dtplApply(b,'Imported');
   });
-  function dashTplShow(on){$('#dashTpl').hidden=!on;if(on){$('#dtplName').value='';dtplMine();var bl=function(){try{document.activeElement&&document.activeElement.blur()}catch(e){}};bl();setTimeout(bl,60)}}
+  /* Wallpaper: one image for portrait and one for landscape, kept in this phone only */
+  var WALL={p:'',l:''},wallLast='';
+  try{WALL.p=localStorage.getItem('mk6wp')||'';WALL.l=localStorage.getItem('mk6wl')||''}catch(e){}
+  function wallSlot(){return document.documentElement.classList.contains('dash-l')?'l':'p'}
+  function wallApply(){
+    var R=document.documentElement,sl=wallSlot(),u=R.classList.contains('dash')?WALL[sl]:'';
+    var key=sl+'|'+(u?u.length:0);if(key===wallLast) return;wallLast=key;
+    if(u){R.style.setProperty('--wall','url("'+u+'")');R.classList.add('has-wall')}
+    else{R.style.removeProperty('--wall');R.classList.remove('has-wall')}
+  }
+  new MutationObserver(wallApply).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+  wallApply();
+  window.onWallpaper=function(slot,url){
+    if(!url){toast('No image was chosen.');return}
+    slot=slot==='l'?'l':'p';
+    try{localStorage.setItem(slot==='l'?'mk6wl':'mk6wp',url)}catch(e){toast('The image is too large to save.');return}
+    WALL[slot]=url;wallLast='';wallApply();
+    toast('Wallpaper set for '+(slot==='l'?'landscape':'portrait')+'.');
+  };
+  function wallLabel(){$('#wallH').textContent=wallSlot()==='l'?'Wallpaper (landscape)':'Wallpaper (portrait)';$('#wallClr').disabled=!WALL[wallSlot()]}
+  $('#wallPick').addEventListener('click',function(){
+    var sl=wallSlot();
+    if(NB&&NB.pickWallpaper){try{NB.pickWallpaper(sl)}catch(e){toast('Could not open the image picker.')}return}
+    var f=document.createElement('input');f.type='file';f.accept='image/*';
+    f.addEventListener('change',function(){
+      var file=f.files&&f.files[0];if(!file){return}
+      var img=new Image(),url=URL.createObjectURL(file);
+      img.onload=function(){
+        var k=Math.min(1,1600/Math.max(img.width,img.height)),c=document.createElement('canvas');
+        c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);window.onWallpaper(sl,c.toDataURL('image/jpeg',.8));wallLabel();
+      };
+      img.onerror=function(){window.onWallpaper(sl,null)};img.src=url;
+    });
+    f.click();
+  });
+  $('#wallClr').addEventListener('click',function(){
+    var sl=wallSlot();WALL[sl]='';
+    try{localStorage.removeItem(sl==='l'?'mk6wl':'mk6wp')}catch(e){}
+    wallLast='';wallApply();wallLabel();toast('Default background restored.');
+  });
+  function dashTplShow(on){$('#dashTpl').hidden=!on;if(on){$('#dtplName').value='';dtplMine();wallLabel();var bl=function(){try{document.activeElement&&document.activeElement.blur()}catch(e){}};bl();setTimeout(bl,60)}}
   $('#dtplSave').addEventListener('click',function(){
     if(!C.board.length) return;
     dashOn();
@@ -4184,7 +4229,7 @@ html,body{overflow-anchor:none}
     'App':'Aplikasi','Language':'Bahasa','Sound':'Bunyi','Vibration':'Getaran','Reconnect when I return to the app':'Sambung semula bila saya kembali ke app','Effects':'Kesan visual','Lightweight':'Ringan','Auto (recommended)':'Auto (disyorkan)','Joystick settings':'Tetapan joystick','Applies to this joystick only.':'Untuk joystick ini sahaja.','Deadzone':'Zon mati','Sensitivity':'Kepekaan','Power limit':'Had kuasa','Axis lock':'Kunci paksi','Free':'Bebas','Left / right':'Kiri / kanan','Up / down':'Atas / bawah','Export layout':'Eksport susun atur','Import layout':'Import susun atur','Export / import layout':'Eksport / import susun atur','Import':'Import','Show guide':'Tunjuk panduan','Add model to home screen':'Tambah model ke skrin utama',
     'This launcher cannot add a shortcut.':'Pelancar ini tidak dapat menambah pintasan.',
     'Skip':'Langkau','Back':'Kembali','Next':'Seterusnya','Done':'Selesai',
-    'My templates':'Templat saya','Template name':'Nama templat','Save current layout':'Simpan susunan ini','My templates work in every model. Up to 10.':'Templat saya boleh digunakan dalam semua model. Maksimum 10.',
+    'My templates':'Templat saya','Wallpaper (portrait)':'Kertas dinding (menegak)','Wallpaper (landscape)':'Kertas dinding (melintang)','Choose image':'Pilih gambar','Use default background':'Guna latar lalai','No image was chosen.':'Tiada gambar dipilih.','The image is too large to save.':'Gambar terlalu besar untuk disimpan.','Wallpaper set for landscape.':'Kertas dinding melintang ditetapkan.','Wallpaper set for portrait.':'Kertas dinding menegak ditetapkan.','Default background restored.':'Latar lalai dipulihkan.','Could not open the image picker.':'Tidak dapat membuka pemilih gambar.','Template name':'Nama templat','Save current layout':'Simpan susunan ini','My templates work in every model. Up to 10.':'Templat saya boleh digunakan dalam semua model. Maksimum 10.',
     'Delete?':'Padam?','Up to 10 templates. Delete one first.':'Maksimum 10 templat. Padam satu dahulu.',
     'Rename widget':'Namakan semula widget','Widget name':'Nama widget','Widget name (empty = default)':'Nama widget (kosong = asal)',
     'No recording':'Tiada rakaman',

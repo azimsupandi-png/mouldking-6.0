@@ -51,6 +51,8 @@ public class MainActivity extends Activity {
     private static final int REQ_BLUETOOTH = 41;
     private static final int REQ_EXPORT = 42;
     private static final int REQ_IMPORT = 43;
+    private static final int REQ_WALL = 44;
+    private String pendingWall;
     private static final int MAX_IMPORT_BYTES = 1024 * 1024;
     private static final String PAGE = "file:///android_asset/index.html";
 
@@ -281,6 +283,17 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_WALL) {
+            final String slot = pendingWall;
+            pendingWall = null;
+            if (slot == null || resultCode != RESULT_OK || data == null || data.getData() == null) {
+                notifyWall(slot == null ? "p" : slot, null);
+                return;
+            }
+            final Uri wuri = data.getData();
+            new Thread(() -> notifyWall(slot, loadWallpaper(wuri))).start();
+            return;
+        }
         if (requestCode != REQ_EXPORT && requestCode != REQ_IMPORT) return;
         String kind = requestCode == REQ_EXPORT ? "export" : "import";
         if (resultCode != RESULT_OK || data == null || data.getData() == null) {
@@ -368,6 +381,61 @@ public class MainActivity extends Activity {
         if (web == null) return;
         web.post(() -> web.evaluateJavascript(
             "window.onAppEvent&&window.onAppEvent('" + event + "')", null));
+    }
+
+    /** Sends the picked wallpaper (or null when cancelled or unreadable) to the page as a data URL. */
+    private void notifyWall(final String slot, final String dataUrl) {
+        if (web == null) return;
+        final String js = "window.onWallpaper&&window.onWallpaper(" + JSONObject.quote(slot) + ","
+            + (dataUrl == null ? "null" : JSONObject.quote(dataUrl)) + ")";
+        web.post(() -> web.evaluateJavascript(js, null));
+    }
+
+    /** Reads an image, fixes its rotation, shrinks it to at most 1600 px and returns it as a JPEG data URL. */
+    private String loadWallpaper(Uri uri) {
+        try {
+            android.graphics.BitmapFactory.Options o = new android.graphics.BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            try (InputStream in = getContentResolver().openInputStream(uri)) {
+                if (in == null) return null;
+                android.graphics.BitmapFactory.decodeStream(in, null, o);
+            }
+            if (o.outWidth <= 0 || o.outHeight <= 0) return null;
+            int sample = 1;
+            while (Math.max(o.outWidth, o.outHeight) / (sample * 2) >= 1600) sample *= 2;
+            o.inJustDecodeBounds = false;
+            o.inSampleSize = sample;
+            android.graphics.Bitmap bmp;
+            try (InputStream in = getContentResolver().openInputStream(uri)) {
+                if (in == null) return null;
+                bmp = android.graphics.BitmapFactory.decodeStream(in, null, o);
+            }
+            if (bmp == null) return null;
+            int rot = 0;
+            try (InputStream in = getContentResolver().openInputStream(uri)) {
+                if (in != null) {
+                    int ori = new android.media.ExifInterface(in).getAttributeInt(
+                        android.media.ExifInterface.TAG_ORIENTATION, android.media.ExifInterface.ORIENTATION_NORMAL);
+                    if (ori == android.media.ExifInterface.ORIENTATION_ROTATE_90) rot = 90;
+                    else if (ori == android.media.ExifInterface.ORIENTATION_ROTATE_180) rot = 180;
+                    else if (ori == android.media.ExifInterface.ORIENTATION_ROTATE_270) rot = 270;
+                }
+            } catch (Exception ignored) {
+                // No EXIF data: use the image as it is.
+            }
+            float scale = Math.min(1f, 1600f / Math.max(bmp.getWidth(), bmp.getHeight()));
+            android.graphics.Matrix m = new android.graphics.Matrix();
+            if (scale < 1f) m.postScale(scale, scale);
+            if (rot != 0) m.postRotate(rot);
+            if (scale < 1f || rot != 0) {
+                bmp = android.graphics.Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, true);
+            }
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, bos);
+            return "data:image/jpeg;base64," + android.util.Base64.encodeToString(bos.toByteArray(), android.util.Base64.NO_WRAP);
+        } catch (Exception | OutOfMemoryError e) {
+            return null;
+        }
     }
 
     private void notifyFile(final String kind, final String result) {
@@ -544,6 +612,22 @@ public class MainActivity extends Activity {
                 } catch (RuntimeException e) {
                     pendingExport = null;
                     notifyFile("export", "fail");
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void pickWallpaper(final String slot) {
+            runOnUiThread(() -> {
+                pendingWall = slot;
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("image/*");
+                try {
+                    startActivityForResult(intent, REQ_WALL);
+                } catch (RuntimeException e) {
+                    pendingWall = null;
+                    notifyWall(slot, null);
                 }
             });
         }
