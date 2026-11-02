@@ -930,6 +930,12 @@ html,body{overflow-anchor:none}
 .bdw .dialk i{position:absolute;inset:0;display:block;transition:none}
 .bdw .dialk i::after{content:"";position:absolute;left:50%;top:7%;width:10%;height:26%;min-width:5px;transform:translateX(-50%);border-radius:4px;background:#aeb6c2}
 .bdw .dialk.on i::after{background:#ffd84a;box-shadow:0 0 8px rgba(255,200,40,.8)}
+.gedit{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:12px}
+.gbox{background:#16181d;border:2px solid #2b2f36;border-radius:16px;padding:14px;width:min(320px,100%);max-height:100%;overflow:auto;display:grid;gap:8px;color:var(--fg)}
+.gbox h3{margin:0 0 2px;font-size:16px}
+.gbox .grow{display:grid;grid-template-columns:1fr 90px auto;align-items:center;gap:8px}
+.gbox .grow input{height:38px;text-align:center}
+.gbox .gact{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .bdw .recw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .bdw .recw .tgd{height:44px}
 .bdw .recw .tgd.rec i{color:#d41414}
@@ -1646,7 +1652,12 @@ html,body{overflow-anchor:none}
         if(ucn>=0&&ucn<NMAX) out.push({k:'u',c:ucn,w:w,p:[25,50,75,100].indexOf(up0)>=0?up0:50});
       }else if(x.k==='g'){
         var gcn=Math.round(+x.c);
-        if(gcn>=0&&gcn<NMAX) out.push({k:'g',c:gcn,w:w});
+        if(gcn>=0&&gcn<NMAX){
+          var go={k:'g',c:gcn,w:w};
+          var gr0=Math.round(+x.gr);if(x.gr!==undefined&&gr0>=-100&&gr0<=0) go.gr=gr0;
+          if(Array.isArray(x.gf)){var gf0=x.gf.slice(0,5).map(function(q){return Math.round(+q)}).filter(function(q){return q>=1&&q<=100});if(gf0.length) go.gf=gf0}
+          out.push(go);
+        }
       }else if(x.k==='z'){
         var za=Math.round(+x.a);
         out.push({k:'z',w:w,a:[0,5,10,15,20,30].indexOf(za)>=0?za:15});
@@ -1821,7 +1832,49 @@ html,body{overflow-anchor:none}
   /* ---------- Channels ---------- */
   var refs=[], groups=[], wrap=$('#channels'), cols=$('#cols');
   var runBlk=[], runSince=[];
-  var GEARS=[['R',-50],['N',0],['1',35],['2',65],['3',100]];
+  function gearsOf(it){
+    var f=(it.gf&&it.gf.length)?it.gf:[35,65,100], l=[['R',it.gr===undefined?-50:it.gr],['N',0]];
+    f.forEach(function(v,i){l.push([String(i+1),v])});
+    return l;
+  }
+  function gearEdit(it){
+    var old=document.getElementById('gEdit');if(old) old.remove();
+    var rv=it.gr===undefined?-50:it.gr, fw=(it.gf&&it.gf.length?it.gf:[35,65,100]).slice();
+    var ov=document.createElement('div');ov.id='gEdit';ov.className='gedit';
+    var bx=document.createElement('div');bx.className='gbox';ov.appendChild(bx);
+    function mk(tag,txt,cls){var e=document.createElement(tag);if(txt) e.textContent=txt;if(cls) e.className=cls;return e}
+    function row(lbl,val,min,max){
+      var r=mk('label','', 'grow');r.appendChild(mk('span',lbl));
+      var i=document.createElement('input');i.type='number';i.min=String(min);i.max=String(max);i.step='5';i.inputMode='numeric';i.value=String(val);i.className='txt';
+      r.appendChild(i);r.appendChild(mk('em','%'));return {r:r,i:i};
+    }
+    var rows=[];
+    function build(){
+      bx.textContent='';
+      bx.appendChild(mk('h3','Gear settings'));
+      rows=[];
+      var r0=row('R (reverse)',rv,-100,0);rows.push(r0);bx.appendChild(r0.r);
+      fw.forEach(function(v,i){var r=row('Gear '+(i+1),v,1,100);rows.push(r);bx.appendChild(r.r)});
+      var act=mk('div','', 'gact');
+      var add=mk('button','Add gear','btn'),rm=mk('button','Remove gear','btn');
+      add.type=rm.type='button';
+      add.disabled=fw.length>=5;rm.disabled=fw.length<=1;
+      add.addEventListener('click',function(){grab();fw.push(Math.min(100,(fw[fw.length-1]||0)+10));build()});
+      rm.addEventListener('click',function(){grab();fw.pop();build()});
+      act.appendChild(add);act.appendChild(rm);bx.appendChild(act);
+      var act2=mk('div','', 'gact');
+      var sv=mk('button','Save','btn'),cn=mk('button','Cancel','btn');
+      sv.type=cn.type='button';sv.setAttribute('aria-pressed','true');
+      sv.addEventListener('click',function(){grab();it.gr=rv;it.gf=fw.slice();save();ov.remove();syncBoard()});
+      cn.addEventListener('click',function(){ov.remove()});
+      act2.appendChild(sv);act2.appendChild(cn);bx.appendChild(act2);
+    }
+    function num(i,a,b,d){var n=Math.round(+i.value);return isFinite(n)&&i.value!==''?Math.max(a,Math.min(b,n)):d}
+    function grab(){rv=num(rows[0].i,-100,0,rv);fw=fw.map(function(v,i){return num(rows[i+1].i,1,100,v)})}
+    build();
+    ov.addEventListener('click',function(e){if(e.target===ov) ov.remove()});
+    document.body.appendChild(ov);
+  }
   var SESS={ms:0,last:0,warned:false};
   function fmtSess(ms){var t=Math.floor(ms/1000),h=Math.floor(t/3600),m=Math.floor(t/60)%60,sc=t%60,z=function(n){return n<10?'0'+n:''+n};return (h?h+':':'')+z(m)+':'+z(sc)}
   function sessReset(){SESS.ms=0;SESS.warned=false;SESS.last=performance.now()}
@@ -3482,6 +3535,8 @@ html,body{overflow-anchor:none}
       save();syncBoard();
     },!it.hold]);
     if(it.k==='j'||it.k==='d') defs.push(['\u2699','Joystick settings',function(){jcShow(it)}]);
+    if(it.k==='u') defs.push(['%','Nudge power',function(){var o=[25,50,75,100];it.p=o[(o.indexOf(it.p||50)+1)%o.length];save();syncBoard()}]);
+    if(it.k==='g') defs.push(['\u2699','Gear settings',function(){gearEdit(it)}]);
     if(it.k!=='e') defs.push(['\u270E','Rename widget',function(e){bdRename(it,e.target.closest('.bdw-h'))}]);
     defs.push(['✕','Remove',function(){var q=C.board.indexOf(it);if(q>=0){BD_UNDO.push({it:JSON.parse(JSON.stringify(it)),q:q});if(BD_UNDO.length>20)BD_UNDO.shift();C.board.splice(q,1)}save();syncBoard()}]);
     defs.forEach(function(d){
@@ -3698,7 +3753,7 @@ html,body{overflow-anchor:none}
       }else if(it.k==='u'){
         var uc=it.c;
         if(!isActive(uc)) return;
-        w.out=bdHead(el,'Nudge \u00b7 '+tagOf(uc)+' \u00b7 '+C.ch[uc].name,it,true);
+        w.out=bdHead(el,'Nudge \u00b7 '+tagOf(uc)+' \u00b7 '+C.ch[uc].name+' \u00b7 '+(it.p||50)+'%',it,true);
         var ur=document.createElement('div');ur.className='tgdir nudge';ur.style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
         var ubs=[];
         [['Reverse',-1,'\u25C0'],['Forward',1,'\u25B6']].forEach(function(d){
@@ -3729,15 +3784,16 @@ html,body{overflow-anchor:none}
         var gc=it.c;
         if(!isActive(gc)) return;
         w.out=bdHead(el,'Gear \u00b7 '+tagOf(gc)+' \u00b7 '+C.ch[gc].name,it,true);
-        var gr=document.createElement('div');gr.className='tgdir gear';gr.style.gridTemplateColumns='repeat(5,minmax(0,1fr))';
+        var glist=gearsOf(it);
+        var gr=document.createElement('div');gr.className='tgdir gear';gr.style.gridTemplateColumns='repeat('+glist.length+',minmax(0,1fr))';
         var gbs=[];
-        GEARS.forEach(function(gd,gi){
+        glist.forEach(function(gd,gi){
           var b=document.createElement('button');b.type='button';b.className='tgd';b.setAttribute('data-g',String(gi));
           var ic=document.createElement('i');ic.textContent=gd[0];b.appendChild(ic);
           b.addEventListener('click',function(){noteInput();if(S.estop||S.play) return;setT(gc,gd[1],false)});
           gr.appendChild(b);gbs.push(b);
         });
-        el.appendChild(gr);w.gear={c:gc,bs:gbs};
+        el.appendChild(gr);w.gear={c:gc,bs:gbs,list:glist};
       }else if(it.k==='z'){
         var zh=bdHead(el,'Session timer',it,false);
         var zd=document.createElement('button');zd.type='button';zd.className='sesst';
@@ -3909,7 +3965,7 @@ html,body{overflow-anchor:none}
         w.nud.bs.forEach(function(b){b.disabled=S.estop||!!S.play;if(nv===0||S.estop) b.classList.remove('on')});
       }else if(w.gear){
         var gv=rt.t[w.gear.c], gi0=-1, gbest=1e9;
-        GEARS.forEach(function(gd,gi){var dd=Math.abs(gd[1]-gv);if(dd<gbest){gbest=dd;gi0=gi}});
+        w.gear.list.forEach(function(gd,gi){var dd=Math.abs(gd[1]-gv);if(dd<gbest){gbest=dd;gi0=gi}});
         if(gbest>8) gi0=-1;
         if(w.out) w.out.textContent=fmt(gv);
         w.gear.bs.forEach(function(b,i){b.classList.toggle('on',i===gi0);b.disabled=S.estop||!!S.play});
@@ -4391,7 +4447,7 @@ html,body{overflow-anchor:none}
     'Channel A drives and channel B steers. Use the Joystick layout: up and down drives, left and right steers.':'Saluran A memandu dan saluran B mengemudi. Guna susun atur Joystick: atas dan bawah memandu, kiri dan kanan mengemudi.',
     'Channels A and B drive the tracks, C, D and E move the arm, bucket and swing. Uses the Dual stick layout.':'Saluran A dan B menggerakkan track, C, D dan E menggerakkan lengan, baldi dan putaran. Guna susun atur Dua stick.',
     'Model created. Rename the channels or change the layout any time.':'Model dicipta. Anda boleh namakan semula saluran atau tukar susun atur bila-bila masa.',
-'Light settings':'Tetapan lampu','Test hub':'Uji hab','Kid':'Kanak-kanak','Full':'Penuh','Power profile':'Profil kuasa','Save current limit as profile':'Simpan had semasa sebagai profil','Save profile':'Simpan profil','Profile saved.':'Profil disimpan.','Stick range (maximum output)':'Julat stick (output maksimum)','Hub names (optional)':'Nama hab (pilihan)','Hub 1 name':'Nama hab 1','Hub 2 name':'Nama hab 2','Hub 3 name':'Nama hab 3','Turbo':'Turbo','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
+'Nudge':'Tolak','Gear':'Gear','Gear settings':'Tetapan gear','Nudge power':'Kuasa tolak','Session timer':'Pemasa sesi','Cruise lock':'Kunci pelayaran','Dial':'Dail','LOCK':'KUNCI','LOCKED':'TERKUNCI','R (reverse)':'R (undur)','Add gear':'Tambah gear','Remove gear':'Buang gear','Save':'Simpan','Cancel':'Batal','Cruise slider':'Slider pelayaran','Session timer reset.':'Pemasa sesi ditetapkan semula.','No alert \u00b7 hold to reset':'Tiada amaran \u00b7 tahan untuk set semula','Light settings':'Tetapan lampu','Test hub':'Uji hab','Kid':'Kanak-kanak','Full':'Penuh','Power profile':'Profil kuasa','Save current limit as profile':'Simpan had semasa sebagai profil','Save profile':'Simpan profil','Profile saved.':'Profil disimpan.','Stick range (maximum output)':'Julat stick (output maksimum)','Hub names (optional)':'Nama hab (pilihan)','Hub 1 name':'Nama hab 1','Hub 2 name':'Nama hab 2','Hub 3 name':'Nama hab 3','Turbo':'Turbo','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
     'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
     'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
     'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',
@@ -4471,6 +4527,10 @@ html,body{overflow-anchor:none}
     'Pick a colour and a theme per model, build sequences and quick action buttons, and map gamepad buttons. You can reopen this guide from the App card.':'Pilih warna dan tema bagi setiap model, bina jujukan dan butang tindakan pantas, dan petakan butang gamepad. Anda boleh buka semula panduan ini dari kad Aplikasi.'
   };
   var MS_RE=[
+    [/^(Nudge|Gear|Dial|Cruise) \u00b7 (.+)$/,function(m){return ({Nudge:'Tolak',Gear:'Gear',Dial:'Dail',Cruise:'Pelayaran'})[m[1]]+' \u00b7 '+m[2]}],
+    [/^Gear (\d)$/,function(m){return 'Gear '+m[1]}],
+    [/^Alert (\d+) min \u00b7 hold to reset$/,function(m){return 'Amaran '+m[1]+' min \u00b7 tahan untuk set semula'}],
+    [/^Session (\d+) min\. Check motors and battery\.$/,function(m){return 'Sesi '+m[1]+' min. Semak motor dan bateri.'}],
     [/^Colour (\d)$/,function(m){return 'Warna '+m[1]}],
     [/^Name of channel (\S+)$/,function(m){return 'Nama saluran '+m[1]}],
     [/^Power of channel (\S+)$/,function(m){return 'Kuasa saluran '+m[1]}],
