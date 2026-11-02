@@ -883,12 +883,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .dtpl-in .dtpl-save .btn{flex:0 0 auto;align-items:center;justify-content:center}
 .dtpl-in .dtpl-note{font-size:11px;margin:0}
 .dtpl-cols{display:flex;flex-direction:column;gap:8px;min-height:0;flex:1 1 auto;overflow:auto}
+.dtpl-cols{padding:4px;margin:-4px}.dtpl-save input:focus,.dtpl-save input:focus-visible{outline-offset:-2px;border-color:var(--acc)}
 .dtpl-in>*{flex-shrink:0}.dtpl-in>.dtpl-cols{flex-shrink:1}.dtpl-col>*{flex-shrink:0}
 .dtpl-col{display:flex;flex-direction:column;gap:8px;min-width:0}
 :root.dash-l .dtpl-in{width:min(820px,100%);max-height:calc(100vh - 24px);height:auto;overflow:hidden}
 :root.dash-l .dtpl{padding:12px}
 :root.dash-l .dtpl-cols{flex-direction:row;flex:1 1 auto;overflow:hidden}
-:root.dash-l .dtpl-col{flex:1 1 0;overflow:auto;padding-right:2px}
+:root.dash-l .dtpl-col{flex:1 1 0;overflow:auto;padding:4px}
 :root.dash-l .dtpl-col #dtplMineH{margin-top:0}
 
 /* text fields and selects */
@@ -3797,7 +3798,7 @@ html,body{overflow-anchor:none}
     $('#lxDlg').hidden=true;
     dtplApply(b,'Imported');
   });
-  function dashTplShow(on){$('#dashTpl').hidden=!on;if(on){$('#dtplName').value='';dtplMine();try{document.activeElement&&document.activeElement.blur()}catch(e){}}}
+  function dashTplShow(on){$('#dashTpl').hidden=!on;if(on){$('#dtplName').value='';dtplMine();var bl=function(){try{document.activeElement&&document.activeElement.blur()}catch(e){}};bl();setTimeout(bl,60)}}
   $('#dtplSave').addEventListener('click',function(){
     if(!C.board.length) return;
     dashOn();
