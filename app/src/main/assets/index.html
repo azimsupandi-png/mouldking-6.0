@@ -1059,6 +1059,17 @@ html,body{overflow-anchor:none}
 .jc-row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;font-size:13px}
 .jc-row output{font-variant-numeric:tabular-nums;color:#f4b800;font-weight:700}
 .jc-row input[type=range]{grid-column:1/-1;width:100%}
+:root #jcDlg .dtpl-in,:root.dash-l #jcDlg .dtpl-in{width:min(360px,100%);max-height:100%;overflow:auto;gap:6px;padding:14px;border-radius:16px}
+#jcDlg .dtpl-in h3{font-size:16px}
+#jcDlg .dtpl-in>p{display:none}
+#jcDlg .jc-row{grid-template-columns:minmax(0,1fr) auto;gap:2px 8px}
+#jcDlg .jc-row>span{font-size:13px;opacity:.85}
+#jcDlg .jcst{display:flex;align-items:center;gap:6px}
+#jcDlg .jcst .btn{width:40px;height:34px;min-height:34px;padding:0;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+#jcDlg .jcst output{min-width:48px;text-align:center;font-size:16px}
+#jcDlg .seglbl{font-size:13px;opacity:.85;margin-top:2px}
+#jcDlg .seg{gap:6px}
+#jcDlg .seg .btn{min-height:36px;padding:0 8px;font-size:14px;flex:1 1 0;min-width:0}
 .dtpl-in .seg .btn{align-items:center;text-align:center;justify-content:center}
 .dtpl-in .seg{margin-bottom:0}
 #lxText{width:100%;box-sizing:border-box;background:#0b0c0f;color:#e8e8ea;border:1px solid #2b2f36;border-radius:10px;padding:8px;font:12px/1.35 monospace;resize:vertical;min-height:90px}
@@ -4256,6 +4267,15 @@ html,body{overflow-anchor:none}
   ['#jcDz','#jcSn','#jcLm'].forEach(function(q){$(q).addEventListener('input',function(){jcRead()})});
   [].forEach.call($('#jcAx').querySelectorAll('button'),function(b){b.addEventListener('click',function(){jcRead(b.getAttribute('data-ax'))})});
   $('#jcReset').addEventListener('click',function(){if(jcItem){delete jcItem.jc;save();jcPaint()}});
+  ['#jcDz','#jcSn','#jcLm'].forEach(function(q){
+    var inp=$(q), out=$(q+'O').parentNode===inp.parentNode?$(q+'O'):null;
+    if(!out) return;
+    var wrap=document.createElement('div');wrap.className='jcst';
+    function mkb(t,d,l){var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=t;b.setAttribute('aria-label',l);
+      b.addEventListener('click',function(e){e.preventDefault();inp.value=String(Math.max(+inp.min,Math.min(+inp.max,(+inp.value)+d*(+inp.step||1))));inp.dispatchEvent(new Event('input',{bubbles:true}))});return b}
+    out.parentNode.insertBefore(wrap,out);
+    wrap.appendChild(mkb('\u2212',-1,'Decrease'));wrap.appendChild(out);wrap.appendChild(mkb('+',1,'Increase'));
+  });
   $('#jcDone').addEventListener('click',function(){$('#jcDlg').hidden=true;jcItem=null});
   /* ---- Export / import layout ---- */
   function lxShow(mode){
