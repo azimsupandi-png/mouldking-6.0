@@ -1111,6 +1111,15 @@ html,body{overflow-anchor:none}
 /* the pulse is a separate ring so it is not blocked by the button's own box-shadow or the reduced-motion rule */
 :root:not(#a) .bar .estop[aria-pressed="true"]::after{content:"";position:absolute;inset:0;border-radius:50%;z-index:-1;background:#ff3b22;opacity:0;pointer-events:none;animation:esRing 1.1s ease-out infinite!important}
 @keyframes esRing{from{transform:scale(1);opacity:.85}to{transform:scale(4.6);opacity:0}}
+/* Joystick layout: smaller stick. Channel slider: bigger thumb. */
+:root .cols.joy .pad{width:min(100%,250px)}
+:root .track,:root[data-skin="studs"] .track{height:58px;border-radius:29px}
+:root .track .pwr,:root[data-skin="studs"] .track .pwr{height:58px}
+:root .track .pwr::-webkit-slider-runnable-track,:root[data-skin="studs"] .track .pwr::-webkit-slider-runnable-track{height:58px}
+:root .track .pwr::-webkit-slider-thumb,:root[data-skin="studs"] .track .pwr::-webkit-slider-thumb{width:54px;height:54px;margin-top:2px}
+:root .track .pwr::-moz-range-thumb,:root[data-skin="studs"] .track .pwr::-moz-range-thumb{width:54px;height:54px}
+:root[data-skin="studs"] .track .fill{top:22px;bottom:22px}
+:root .track .pwr{width:calc(100% - 76px);margin-left:38px}
 </style>
 </head>
 <body>
