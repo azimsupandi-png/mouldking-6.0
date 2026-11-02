@@ -912,6 +912,12 @@ html,body{overflow-anchor:none}
 .bdw-h{position:relative}
 .bdw-h .bdw-lbl{position:absolute;left:0;right:0;top:-2px;z-index:9;height:36px;min-height:36px;padding:0 12px;font-size:14px;border-radius:18px;box-sizing:border-box}
 :root.dash .dw .bdw-h .bdw-lbl{left:-4px;right:-4px;top:-2px}
+.bdw .sesst{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%;min-height:46px;border-radius:14px;border:2px solid #0d1015;background:linear-gradient(#444c5c,#2a303b 50%,#1b2028);color:#aeb6c2;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer}
+.bdw .sesst b{font-size:26px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.bdw .sesst small{font-size:10px;letter-spacing:.05em;opacity:.8}
+.bdw .sesst.run b{color:#6ee787}
+.bdw .sesst.over b{color:#ff5a5a}
+.bdw .tgdir.gear .tgd i{font-size:18px;font-weight:800}
 .bdw .recw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .bdw .recw .tgd{height:44px}
 .bdw .recw .tgd.rec i{color:#d41414}
@@ -1241,6 +1247,9 @@ html,body{overflow-anchor:none}
           <button class="btn" id="bdTL" type="button" aria-pressed="false">Light</button>
           <button class="btn" id="bdTT" type="button" aria-pressed="false">Toggle</button>
           <button class="btn" id="bdTB" type="button" aria-pressed="false">Turbo</button>
+          <button class="btn" id="bdTU" type="button" aria-pressed="false">Nudge</button>
+          <button class="btn" id="bdTG" type="button" aria-pressed="false">Gear</button>
+          <button class="btn" id="bdTZ" type="button" aria-pressed="false">Session timer</button>
           <button class="btn" id="bdTQ" type="button" aria-pressed="false">Sequence</button>
           <button class="btn" id="bdTE" type="button" aria-pressed="false">E-Stop</button>
           <button class="btn" id="bdTR" type="button" aria-pressed="false">Record</button>
@@ -1569,7 +1578,7 @@ html,body{overflow-anchor:none}
     if(!g.every(function(q){return isFinite(q)})||g[0]<0||g[1]<0||g[2]<mn[0]||g[3]<mn[1]||g[0]+g[2]>gx||g[1]+g[3]>gy) return null;
     return g;
   }
-  var DMIN={p:[12,9],r:[12,6],s:[12,6],h:[10,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],q:[6,6],e:[6,6]};
+  var DMIN={p:[12,9],r:[12,6],s:[12,6],h:[10,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],q:[6,6],e:[6,6],u:[8,6],g:[12,6],z:[8,6]};
   function ci(v,lo,hi,def){v=Math.round(+v);return (v>=lo&&v<=hi)?v:def}
   function cleanJc(j){
     if(!j||typeof j!=='object') return null;
@@ -1615,6 +1624,15 @@ html,body{overflow-anchor:none}
         if(tcn>=0&&tcn<NMAX) out.push({k:'t',c:tcn,w:x.y==='dir'?2:w,y:['led','latch','dir'].indexOf(x.y)>=0?x.y:'led',p:[25,50,75,100].indexOf(tp)>=0?tp:100});
       }else if(x.k==='q'&&typeof x.c==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(x.c)){
         out.push({k:'q',c:x.c,w:w});
+      }else if(x.k==='u'){
+        var ucn=Math.round(+x.c), up0=Math.round(+x.p);
+        if(ucn>=0&&ucn<NMAX) out.push({k:'u',c:ucn,w:w,p:[25,50,75,100].indexOf(up0)>=0?up0:50});
+      }else if(x.k==='g'){
+        var gcn=Math.round(+x.c);
+        if(gcn>=0&&gcn<NMAX) out.push({k:'g',c:gcn,w:w});
+      }else if(x.k==='z'){
+        var za=Math.round(+x.a);
+        out.push({k:'z',w:w,a:[0,5,10,15,20,30].indexOf(za)>=0?za:15});
       }else if(x.k==='e'){
         out.push({k:'e',w:1});
       }
@@ -1786,6 +1804,19 @@ html,body{overflow-anchor:none}
   /* ---------- Channels ---------- */
   var refs=[], groups=[], wrap=$('#channels'), cols=$('#cols');
   var runBlk=[], runSince=[];
+  var GEARS=[['R',-50],['N',0],['1',35],['2',65],['3',100]];
+  var SESS={ms:0,last:0,warned:false};
+  function fmtSess(ms){var t=Math.floor(ms/1000),h=Math.floor(t/3600),m=Math.floor(t/60)%60,sc=t%60,z=function(n){return n<10?'0'+n:''+n};return (h?h+':':'')+z(m)+':'+z(sc)}
+  function sessReset(){SESS.ms=0;SESS.warned=false;SESS.last=performance.now()}
+  function sessTick(){
+    var now=performance.now(), dt=now-(SESS.last||now);SESS.last=now;
+    if(!S.connected) return;
+    SESS.ms+=Math.min(dt,2000);
+    var al=0;(C.board||[]).forEach(function(o){if(o.k==='z'&&o.a) al=al?Math.min(al,o.a):o.a});
+    if(al&&!SESS.warned&&SESS.ms>=al*60000){SESS.warned=true;toast('Session '+al+' min. Check motors and battery.',6000);feedback('warn')}
+    if(typeof paintBoard==='function'&&C.board&&C.board.some(function(o){return o.k==='z'})) paintBoard();
+  }
+  setInterval(sessTick,500);
   function setT(i,v,fromUI,force){
     if(runBlk&&runBlk[i]&&!force){ if(v===0||S.estop) runBlk[i]=false; else return }
     if(S.estop) v=0; else if(S.play&&!force) return;
@@ -3086,7 +3117,7 @@ html,body{overflow-anchor:none}
   var bdSel=[$('#bdTarget'),$('#bdTarget2'),$('#bdTarget3'),$('#bdTarget4')];
   var bdFields=[$('#bdF1'),$('#bdF2'),$('#bdF3'),$('#bdF4')], bdLbl=[$('#bdL1'),$('#bdL2'),$('#bdL3'),$('#bdL4')];
   var bdModeF=$('#bdFM'), bdMode=$('#bdMode'), bdWideChk=$('#bdWideChk'), bdSpring=$('#bdSpring'), bdSpringL=$('#bdSpringL');
-  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['q',$('#bdTQ')],['e',$('#bdTE')],['r',$('#bdTR')],['p',$('#bdTP')]];
+  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['u',$('#bdTU')],['g',$('#bdTG')],['z',$('#bdTZ')],['q',$('#bdTQ')],['e',$('#bdTE')],['r',$('#bdTR')],['p',$('#bdTP')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
   var bdK='s', bdEditing=false, bdW=[], dashAdd=false;
@@ -3099,8 +3130,8 @@ html,body{overflow-anchor:none}
   function bdFill(){
     if(!bdSel[0]) return;
     var chans=activeIdx(), tank=bdMode.value==='tank';
-    var n=(bdK==='e'||bdK==='r'||bdK==='p')?0:bdK==='j'?2:(bdK==='d'||bdK==='m'?4:1);
-    var L=bdK==='q'?['Sequence']:(bdK==='l'||bdK==='t'||bdK==='b')?[bdK==='l'?'Light channel':'Channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s'||bdK==='h')?['Channel']:
+    var n=(bdK==='e'||bdK==='r'||bdK==='p'||bdK==='z')?0:bdK==='j'?2:(bdK==='d'||bdK==='m'?4:1);
+    var L=bdK==='q'?['Sequence']:(bdK==='l'||bdK==='t'||bdK==='b'||bdK==='u'||bdK==='g')?[bdK==='l'?'Light channel':'Channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s'||bdK==='h')?['Channel']:
       (bdK==='j'?(tank?['Left motor','Right motor']:['Drive','Steer']):
       (tank?['Left stick: Left motor','Left stick: Right motor','Right stick: Left motor','Right stick: Right motor']:
             ['Left stick: Drive','Left stick: Steer','Right stick: Drive','Right stick: Steer'])));
@@ -3121,7 +3152,8 @@ html,body{overflow-anchor:none}
     bdSpringL.hidden=!(bdK==='s'||bdK==='j'||bdK==='d'||bdK==='m');
     bdMixRow.hidden=bdK!=='m';
     $('#bdLightRow').hidden=bdK!=='l';
-    $('#bdTgRow').hidden=bdK!=='t';
+    $('#bdTgRow').hidden=bdK!=='t'&&bdK!=='u';
+    $('#bdTgStyle').hidden=bdK==='u';
     bdRat.forEach(function(sel,q){sel.hidden=q>=n||bdK!=='m'});
   }
   function bdSetKind(k){
@@ -3240,6 +3272,9 @@ html,body{overflow-anchor:none}
     if(k==='h') return L?(wd?[20,6]:[14,6]):[24,6];
     if(k==='t') return it.y==='dir'?(L?[18,6]:[24,6]):(L?(wd?[12,6]:[8,6]):[12,6]);
     if(k==='e') return [8,8];
+    if(k==='u') return L?[12,6]:[24,6];
+    if(k==='g') return L?[24,6]:[24,7];
+    if(k==='z') return L?[10,6]:[16,6];
     if(k==='r') return L?[16,6]:[24,6];
     if(k==='p') return L?[16,9]:[24,9];
     return L?[8,6]:[12,6];
@@ -3604,6 +3639,64 @@ html,body{overflow-anchor:none}
         ['pointerup','pointercancel','lostpointercapture','blur'].forEach(function(ev){tbn.addEventListener(ev,tlift)});
         tbn.addEventListener('contextmenu',function(e){e.preventDefault()});
         el.appendChild(tbn);
+      }else if(it.k==='u'){
+        var uc=it.c;
+        if(!isActive(uc)) return;
+        w.out=bdHead(el,'Nudge \u00b7 '+tagOf(uc)+' \u00b7 '+C.ch[uc].name,it,true);
+        var ur=document.createElement('div');ur.className='tgdir nudge';ur.style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
+        var ubs=[];
+        [['Reverse',-1,'\u25C0'],['Forward',1,'\u25B6']].forEach(function(d){
+          var b=document.createElement('button');b.type='button';b.className='tgd';b.setAttribute('data-d',String(d[1]));
+          var ic=document.createElement('i');ic.textContent=d[2];ic.setAttribute('aria-hidden','true');
+          var tx=document.createElement('span');tx.textContent=d[0];b.appendChild(ic);b.appendChild(tx);
+          var down=0, t0=0, tm=0;
+          var go=function(e){
+            e.preventDefault();
+            if(down||S.estop||S.play) return;
+            down=1;t0=performance.now();noteInput();try{b.setPointerCapture(e.pointerId)}catch(_){}
+            b.classList.add('on');setT(uc,d[1]*(it.p||50),false);
+          };
+          var end=function(){
+            if(!down) return;
+            var wait=Math.max(0,260-(performance.now()-t0));
+            down=0;clearTimeout(tm);
+            tm=setTimeout(function(){b.classList.remove('on');if(!down&&sameDir(d[1])) setT(uc,0,false)},wait);
+          };
+          var sameDir=function(dv){return dv>0?rt.t[uc]>0:rt.t[uc]<0};
+          b.addEventListener('pointerdown',go);
+          ['pointerup','pointercancel','lostpointercapture','blur'].forEach(function(ev){b.addEventListener(ev,end)});
+          b.addEventListener('contextmenu',function(e){e.preventDefault()});
+          ur.appendChild(b);ubs.push(b);
+        });
+        el.appendChild(ur);w.nud={c:uc,bs:ubs};
+      }else if(it.k==='g'){
+        var gc=it.c;
+        if(!isActive(gc)) return;
+        w.out=bdHead(el,'Gear \u00b7 '+tagOf(gc)+' \u00b7 '+C.ch[gc].name,it,true);
+        var gr=document.createElement('div');gr.className='tgdir gear';gr.style.gridTemplateColumns='repeat(5,minmax(0,1fr))';
+        var gbs=[];
+        GEARS.forEach(function(gd,gi){
+          var b=document.createElement('button');b.type='button';b.className='tgd';b.setAttribute('data-g',String(gi));
+          var ic=document.createElement('i');ic.textContent=gd[0];b.appendChild(ic);
+          b.addEventListener('click',function(){noteInput();if(S.estop||S.play) return;setT(gc,gd[1],false)});
+          gr.appendChild(b);gbs.push(b);
+        });
+        el.appendChild(gr);w.gear={c:gc,bs:gbs};
+      }else if(it.k==='z'){
+        var zh=bdHead(el,'Session timer',it,false);
+        var zd=document.createElement('button');zd.type='button';zd.className='sesst';
+        var zt=document.createElement('b');zt.textContent='00:00';
+        var zs=document.createElement('small');
+        zd.appendChild(zt);zd.appendChild(zs);
+        var zlp=0, zdone=false;
+        zd.addEventListener('pointerdown',function(){zdone=false;clearTimeout(zlp);zlp=setTimeout(function(){zdone=true;sessReset();toast('Session timer reset.');feedback('ok');paintBoard()},800)});
+        ['pointerup','pointercancel','pointerleave'].forEach(function(ev){zd.addEventListener(ev,function(){clearTimeout(zlp)})});
+        zd.addEventListener('click',function(){
+          if(zdone){zdone=false;return}
+          var o=[0,5,10,15,20,30];it.a=o[(o.indexOf(it.a)+1)%o.length];SESS.warned=false;save();paintBoard();
+        });
+        zd.addEventListener('contextmenu',function(e){e.preventDefault()});
+        el.appendChild(zd);w.sess={t:zt,s:zs,b:zd,it:it};
       }else if(it.k==='t'){
         var tc=it.c;
         if(!isActive(tc)) return;
@@ -3741,6 +3834,23 @@ html,body{overflow-anchor:none}
         if(w.lvl) [].forEach.call(w.lvl.children,function(q,i){q.classList.toggle('on',lmd>0&&i<lmd)});
         w.lb.disabled=S.estop||!!S.play;
         if(w.out){var lpt=lv?Math.round(rt.t[w.it.c])+'%':'0%';if(w.out.textContent!==lpt) w.out.textContent=lpt}
+      }else if(w.nud){
+        var nv=rt.t[w.nud.c];
+        if(w.out) w.out.textContent=fmt(nv);
+        w.nud.bs.forEach(function(b){b.disabled=S.estop||!!S.play;if(nv===0||S.estop) b.classList.remove('on')});
+      }else if(w.gear){
+        var gv=rt.t[w.gear.c], gi0=-1, gbest=1e9;
+        GEARS.forEach(function(gd,gi){var dd=Math.abs(gd[1]-gv);if(dd<gbest){gbest=dd;gi0=gi}});
+        if(gbest>8) gi0=-1;
+        if(w.out) w.out.textContent=fmt(gv);
+        w.gear.bs.forEach(function(b,i){b.classList.toggle('on',i===gi0);b.disabled=S.estop||!!S.play});
+      }else if(w.sess){
+        var sm=SESS.ms, tx0=fmtSess(sm), aMs=(w.it.a||0)*60000;
+        if(w.sess.t.textContent!==tx0) w.sess.t.textContent=tx0;
+        var st=(w.it.a?'Alert '+w.it.a+' min':'No alert')+' \u00b7 hold to reset';
+        if(w.sess.s.textContent!==st) w.sess.s.textContent=st;
+        w.sess.b.classList.toggle('run',!!S.connected);
+        w.sess.b.classList.toggle('over',!!aMs&&sm>=aMs);
       }else if(w.tg){
         var tv=rt.t[w.it.c], ton=tv!==0;
         if(w.out) w.out.textContent=fmt(tv);
@@ -3990,7 +4100,7 @@ html,body{overflow-anchor:none}
   $('#bdAdd').addEventListener('click',function(){
     if(C.board.length>=16){bdNote.textContent='The board is full (16 controls).';return}
     var v=bdSel.map(function(s){return s.value});
-    if(!v[0]&&bdK!=='e'&&bdK!=='r'&&bdK!=='p'){bdNote.textContent='Nothing to add. Make a sequence first.';return}
+    if(!v[0]&&bdK!=='e'&&bdK!=='r'&&bdK!=='p'&&bdK!=='z'){bdNote.textContent='Nothing to add. Make a sequence first.';return}
     var ww=bdWideChk.checked?2:1, m=bdMode.value==='tank'?'tank':'axis', n=v.map(function(x){return Math.round(+x)});
     var hd=!bdSpring.checked;
     if(bdK==='q') C.board.push({k:'q',c:v[0],w:ww});
@@ -3998,6 +4108,9 @@ html,body{overflow-anchor:none}
     else if(bdK==='r') C.board.push({k:'r',w:ww});
     else if(bdK==='p') C.board.push({k:'p',w:ww});
     else if(bdK==='b') C.board.push({k:'b',c:n[0],w:ww});
+    else if(bdK==='u') C.board.push({k:'u',c:n[0],w:ww,p:Math.round(+$('#bdTgPow').value)||50});
+    else if(bdK==='g') C.board.push({k:'g',c:n[0],w:ww});
+    else if(bdK==='z') C.board.push({k:'z',w:ww,a:15});
     else if(bdK==='t'){
       var tsy=$('#bdTgStyle').value;
       C.board.push({k:'t',c:n[0],w:tsy==='dir'?2:ww,y:tsy,p:Math.round(+$('#bdTgPow').value)||100});
