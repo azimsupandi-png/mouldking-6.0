@@ -925,6 +925,8 @@ html,body{overflow-anchor:none}
 .bdw .cklock:disabled{opacity:.45}
 .bdw .dialw{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
 .bdw .dialk{position:relative;height:100%;max-height:100%;aspect-ratio:1;max-width:100%;border-radius:50%;border:3px solid #0d1015;background:radial-gradient(circle at 35% 25%,#5a6376,#2a303b 55%,#14181f);box-shadow:0 6px 10px rgba(0,0,0,.7),inset 0 2px 3px rgba(255,255,255,.2);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+:root:not(.dash) .bdw .dialw{flex:none;height:120px}
+:root:not(.dash) .bdw .dialk{height:120px;width:120px}
 .bdw .dialk i{position:absolute;inset:0;display:block;transition:none}
 .bdw .dialk i::after{content:"";position:absolute;left:50%;top:7%;width:10%;height:26%;min-width:5px;transform:translateX(-50%);border-radius:4px;background:#aeb6c2}
 .bdw .dialk.on i::after{background:#ffd84a;box-shadow:0 0 8px rgba(255,200,40,.8)}
