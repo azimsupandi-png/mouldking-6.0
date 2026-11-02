@@ -1049,8 +1049,9 @@ html,body{overflow-anchor:none}
 :root:not(#a) .bar .estop,:root:not(#a) .bar .estop[aria-pressed="false"]{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='6' width='12' height='12' rx='2.2' fill='white'/%3E%3C/svg%3E") center/52% no-repeat,radial-gradient(circle at 38% 30%,#ff6a6a,#d40000 70%)!important;box-shadow:0 2px 0 #7a0d0d!important}
 :root:not(#a) .bar .estop[aria-pressed="true"]{outline:0!important;animation:none!important;box-shadow:0 2px 0 #7a0d0d!important}
 /* the pulse is a separate ring so it is not blocked by the button's own box-shadow or the reduced-motion rule */
-:root:not(#a) .bar .estop[aria-pressed="true"]::after{content:"";position:absolute;inset:0;border-radius:50%;border:3px solid #ff2a14;pointer-events:none;animation:esRing .9s ease-out infinite!important}
-@keyframes esRing{0%{transform:scale(1);opacity:1}100%{transform:scale(2.1);opacity:0}}
+:root:not(#a) .bar .estop[aria-pressed="true"]::after{content:"";position:absolute;inset:0;border-radius:50%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='6' width='12' height='12' rx='2.2' fill='white'/%3E%3C/svg%3E") center/52% no-repeat,radial-gradient(circle at 38% 30%,#ffd0c8,#ff3b22 60%,#b80000);pointer-events:none;animation:esRing .8s ease-in-out infinite alternate!important}
+:root:not(#a) .bar .estop[aria-pressed="true"]::before{z-index:0}
+@keyframes esRing{0%{opacity:0}100%{opacity:.95}}
 </style>
 </head>
 <body>
