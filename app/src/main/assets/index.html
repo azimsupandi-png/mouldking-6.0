@@ -1732,14 +1732,15 @@ html,body{overflow-anchor:none}
   }
   var SPD={slow:0.4,normal:0.7,fast:1};
   /* The hub only picks up a new broadcast about every 100-200 ms, so blinking is kept slow and
-     pulsing moves in coarse steps. Brightness uses a gamma curve so the LED looks evenly dimmed. */
+     pulsing moves in coarse steps. Brightness is mapped above the LED start threshold. */
   function blinkF(mode,now){
     if(mode==='slow') return (Math.floor(now/1000)%2)?0:1;
     if(mode==='fast') return (Math.floor(now/400)%2)?0:1;
     if(mode==='pulse') return 0.5+0.5*Math.cos(Math.floor(now/200)*200/3000*2*Math.PI+Math.PI);
     return 1;
   }
-  function ledOut(b){return b<=0?0:Math.max(3,100*Math.pow(Math.min(b,100)/100,2))}
+  /* The LEDs only light from about 40% hub power, so any brightness above 0 is mapped into 40..100%. */
+  function ledOut(b){return b<=0?0:40+60*Math.pow(Math.min(b,100)/100,1.5)}
   function goalOf(i){
     if(C.ch[i].kind==='light'){var lt=rt.t[i];return lt>0?Math.round(ledOut(lt*blinkF(C.ch[i].blink,performance.now()))):0}
     var t=rt.t[i], m=powerFor(Math.abs(t),C.ch[i]);
