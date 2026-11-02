@@ -63,3 +63,9 @@ The hub only listens, so the app cannot show battery level or motor state.
   It only protects this personal app. Keep the repo private if you do not want others signing look-alike builds.
 - The screen is a web page in `app/src/main/assets/index.html`; the Bluetooth part is in `Mk6Advertiser.java` and `Mk6Crypt.java`.
 - Protocol credit: J0EK3R (MIT), see `NOTICE`.
+
+## Regression test
+
+`python3 tests/widgets_test.py` loads the app in headless Chromium and checks every board
+widget kind (render, settings popup, behaviour, reload) in landscape and portrait. It needs
+Python with `playwright` and Chromium installed. Run it before each commit.

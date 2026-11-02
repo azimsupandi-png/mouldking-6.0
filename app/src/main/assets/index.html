@@ -4528,6 +4528,7 @@ html,body{overflow-anchor:none}
     bdNote.textContent='';save();syncBoard();
   });
   bdSetKind('s');
+  if(/[?&]mk6test\b/.test(location.search)) window.__t={C:C,S:S,rt:rt,store:store,cleanBoard:cleanBoard,save:save,syncBoard:syncBoard,paintBoard:paintBoard,WSPEC:WSPEC,wsEdit:wsEdit};
   var sfIdle=$('#sfIdle'), sfWarn=$('#sfWarn');
   function syncSafety(){if(!sfIdle) return;sfIdle.value=String(C.safety.idle);sfWarn.value=String(C.safety.warn);if(sfRun)sfRun.value=String(C.safety.run)}
   sfIdle.addEventListener('change',function(){C.safety.idle=pickOf(sfIdle.value,[0,10,30,60,120],60);save()});
