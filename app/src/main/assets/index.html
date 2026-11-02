@@ -459,6 +459,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 
 /* ---- Header tidy-up: equal round buttons, centred row, status under the title ---- */
 .hubstat{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+.hubstat .hbat{font-style:normal;font-family:var(--f-mono);font-weight:600;opacity:.85}.hubstat .hbat.low{color:var(--danger);opacity:1}
+.lpmenu{position:fixed;z-index:70;background:#16181d;border:2px solid #2b2f36;border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:4px;box-shadow:0 12px 30px rgba(0,0,0,.6);max-height:calc(100vh - 12px);overflow:auto}.lpmenu .btn{min-height:36px;height:36px;font-size:13px;padding:0 16px;justify-content:center}
 .hubstat i{display:block;width:9px;height:9px;border-radius:50%;background:var(--c)}
 .hubstat[data-st=on]{--c:#3ddc5a;color:#8fe9a1}.hubstat[data-st=off]{--c:#f05252;color:#f39a9a}.hubstat[data-st=busy]{--c:#f6c23a;color:#f6d77a}
 .bar .hubbtn{width:auto;gap:0;flex:none}
@@ -1044,7 +1046,7 @@ html,body{overflow-anchor:none}
     <div class="brand">
       <h1><b>MK6</b> <span class="bw">Console</span></h1>
       <div class="cap">Mould King 6.0 · up to 3 hubs<span class="bat" id="bat" hidden></span></div>
-      <div class="hubstat" id="hubStat" data-st="on"><i></i><span></span></div>
+      <div class="hubstat" id="hubStat" data-st="on"><i></i><span></span><em class="hbat" id="hbat" hidden></em></div>
     </div>
     <svg class="exc-ico" viewBox="0 0 64 36" aria-hidden="true"><path d="M2 30h36a3 3 0 0 1 0 6H5a3 3 0 0 1-3-3z" fill="currentColor"/><path d="M8 27h26v-8h-6l-3-5H12l-4 5z" fill="currentColor"/><path d="M26 17 40 4l6 3-9 11z M40 4l8 14h4l-8-16z" fill="currentColor"/><path d="M46 17l10 3-3 9-9-4z" fill="currentColor"/></svg>
     <span class="lamps" aria-hidden="true"><i class="lg" id="lampG"></i><i class="lr" id="lampR"></i></span>
@@ -2488,7 +2490,7 @@ html,body{overflow-anchor:none}
     paintLamps();
     var t=NB?(hubMsg||(S.connected?'Hub active':'Connect hub')):(S.connected?'Simulation on':'Simulation off');
     $('#linkText').textContent=t;
-    var hs=$('#hubStat');if(hs){hs.setAttribute('data-st',!S.connected?'off':(hubMsg==='Pairing…'?'busy':'on'));hs.lastChild.textContent=t}
+    var hs=$('#hubStat');if(hs){hs.setAttribute('data-st',!S.connected?'off':(hubMsg==='Pairing…'?'busy':'on'));hs.querySelector('span').textContent=t}
     link.setAttribute('data-st',!S.connected?'off':(hubMsg==='Pairing…'?'busy':'on'));
     link.setAttribute('aria-label',S.connected?'Disconnect hub':'Connect hub');paintBt();
     // While the hub is active, the dashboard's Edit / Reset / model picker are locked so they cannot be hit by accident
@@ -2943,6 +2945,7 @@ html,body{overflow-anchor:none}
     var p=-1;try{p=+NB.battery()}catch(e){}
     if(!(p>=0&&p<=100)){batEl.hidden=true;return}
     batEl.hidden=false;batEl.textContent='Phone '+p+'%';batEl.classList.toggle('low',p<=15);
+    var hb=$('#hbat');if(hb){hb.hidden=false;hb.textContent='\u00b7 \ud83d\udd0b '+p+'%';hb.classList.toggle('low',p<=15)}
     if(p<=15&&!batWarned){batWarned=true;toast('Phone battery is low ('+p+'%). Charge it before driving.',6000);feedback('warn')}
     if(p>20) batWarned=false;
   }
@@ -3516,6 +3519,34 @@ html,body{overflow-anchor:none}
           if(C.ch[lc].blink!==bl){C.ch[lc].blink=bl;if(refs[lc]&&refs[lc].ltBl) refs[lc].ltBl.value=bl;save()}
           setT(lc,L.v,false);
         });
+        (function(){
+          var lt=0,lpDone=false;
+          function lpClose(){var m=document.getElementById('lpMenu');if(m)m.remove()}
+          function lpOpen(){
+            lpClose();lpDone=true;
+            var m=document.createElement('div');m.id='lpMenu';m.className='lpmenu';
+            [['Off',0,'off'],['Low',30,'off'],['Mid',60,'off'],['Full',100,'off'],['Slow blink',100,'slow'],['Fast blink',100,'fast'],['Pulse',100,'pulse']].forEach(function(o){
+              var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=o[0];
+              b.addEventListener('click',function(){
+                if(S.estop||S.play){lpClose();return}
+                if(C.ch[lc].kind!=='light'){C.ch[lc].kind='light';syncChannel(lc)}
+                C.ch[lc].blink=o[2];if(refs[lc]&&refs[lc].ltBl) refs[lc].ltBl.value=o[2];save();
+                setT(lc,o[1],false);lpClose();feedback('ok');
+              });
+              m.appendChild(b);
+            });
+            var r=lb.getBoundingClientRect();
+            document.body.appendChild(m);
+            var mh=m.offsetHeight,mw=m.offsetWidth;
+            m.style.left=Math.max(6,Math.min(innerWidth-mw-6,r.left+r.width/2-mw/2))+'px';
+            m.style.top=Math.max(6,Math.min(innerHeight-mh-6,r.top))+'px';
+            setTimeout(function(){document.addEventListener('pointerdown',function f(e){if(!m.contains(e.target)){lpClose();document.removeEventListener('pointerdown',f,true)}},true)},0);
+          }
+          lb.addEventListener('pointerdown',function(){lpDone=false;clearTimeout(lt);lt=setTimeout(lpOpen,500)});
+          ['pointerup','pointercancel','pointerleave'].forEach(function(ev){lb.addEventListener(ev,function(){clearTimeout(lt)})});
+          lb.addEventListener('contextmenu',function(e){e.preventDefault()});
+          lb.addEventListener('click',function(e){if(lpDone){e.stopImmediatePropagation();lpDone=false}},true);
+        })();
         el.appendChild(lb);w.btn=null;w.lb=lb;
         var lvl=document.createElement('div');lvl.className='lvl';lvl.setAttribute('aria-hidden','true');
         for(var li=0;li<4;li++){var lq=document.createElement('i');lvl.appendChild(lq)}
