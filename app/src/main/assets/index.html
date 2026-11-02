@@ -3318,7 +3318,7 @@ html,body{overflow-anchor:none}
     dashCell();
     var hdr=document.querySelector('header'), htop=hdr?hdr.getBoundingClientRect().bottom:51;
     var bt0=$('#btBtn'), dbar=$('#dashBar');
-    if(dbar){var bq=bt0?bt0.getBoundingClientRect():null;if(DG.k==='gp') dbar.style.top=''; else dbar.style.top=(bq&&bq.height?Math.round(bq.top+bq.height/2-19):Math.max(0,Math.round((htop-5-38)/2)))+'px'}
+    if(dbar){var bq=bt0?bt0.getBoundingClientRect():null;if(DG.k==='gp') dbar.style.top=''; else dbar.style.top=(bq&&bq.height?Math.round(bq.top+bq.height/2-16):Math.max(0,Math.round((htop-3-32)/2)))+'px'}
     bdGrid.style.width=DCELL.pw+'px';bdGrid.style.height=DCELL.ph+'px';bdGrid.style.margin='0';
     bdGrid.style.backgroundSize=DCELL.w+'px '+DCELL.h+'px';
     bdW.forEach(function(w){if(w.el&&w.it&&w.it[DG.k]) dashStyle(w.el,w.it[DG.k])});
