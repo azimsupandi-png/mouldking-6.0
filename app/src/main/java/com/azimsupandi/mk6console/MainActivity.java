@@ -555,6 +555,7 @@ public class MainActivity extends Activity {
             else if ("warn".equals(kind)) p = new long[] {0, 200, 100, 200, 100, 200};
             else if ("lost".equals(kind)) p = new long[] {0, 300};
             else if ("ok".equals(kind)) p = new long[] {0, 40};
+            else if ("dial".equals(kind)) p = new long[] {0, 8};
             else p = new long[] {0, 15};
             final long[] pattern = p;
             runOnUiThread(() -> buzz(pattern));

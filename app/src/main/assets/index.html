@@ -1949,8 +1949,8 @@ html,body{overflow-anchor:none}
   // Short vibration for each 5% step of a dial (follows the Vibration setting)
   function dialBuzz(){
     if(!store.prefs.haptic) return;
-    if(NB&&NB.haptic){try{NB.haptic('tick')}catch(e){}}
-    else if(navigator.vibrate){try{navigator.vibrate(12)}catch(e){}}
+    if(NB&&NB.haptic){try{NB.haptic('dial')}catch(e){}}
+    else if(navigator.vibrate){try{navigator.vibrate(6)}catch(e){}}
   }
   function wOut(it,v){return Math.round((it.inv?-v:v)*(it.cap||100)/100)}
   function wIn(it,t){return Math.max(-100,Math.min(100,Math.round((it.inv?-t:t)*100/(it.cap||100))))}
