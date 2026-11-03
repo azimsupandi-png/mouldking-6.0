@@ -723,6 +723,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash .dw.moving{opacity:.85;z-index:5}
 :root.dash .dw.sel{outline:3px solid #f4b800;z-index:3}
 :root.dash .dw .bdw-ed.empty{display:none}
+:root.dash .dw.sel .bdw-ed{animation:edIn .45s steps(1,end)}
+@keyframes edIn{from{pointer-events:none;opacity:.35}to{pointer-events:auto;opacity:1}}
 :root.dash .dw.bad{outline-color:#ff4d4d;background:rgba(255,60,60,.28)}
 .dw-rs{position:absolute;right:0;bottom:0;width:44px;height:44px;touch-action:none;background:linear-gradient(135deg,transparent 56%,#f4b800 56%);z-index:4}
 :root.dash .dw .bdw-ed{position:absolute;right:3px;top:3px;display:flex;gap:3px;z-index:6;margin:0}
@@ -3398,7 +3400,7 @@ html,body{overflow-anchor:none}
   var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['w',$('#bdTW')],['a',$('#bdTA')],['y',$('#bdTY')],['v',$('#bdTV')],['o',$('#bdTO')],['x',$('#bdTX')],['c',$('#bdTC')],['n',$('#bdTN')],['u',$('#bdTU')],['g',$('#bdTG')],['z',$('#bdTZ')],['q',$('#bdTQ')],['e',$('#bdTE')],['r',$('#bdTR')],['p',$('#bdTP')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
-  var bdK='s', bdEditing=false, bdPick=null, bdW=[], dashAdd=false;
+  var bdK='s', bdEditing=false, bdPick=null, bdPickAt=0, bdW=[], dashAdd=false;
   function prefillBoard(){
     var n=0;
     activeIdx().forEach(function(i){if(n<4){C.board.push({k:C.ch[i].kind==='hold'?'h':'s',c:i,w:C.ch[i].kind==='hold'?2:1});n++}});
@@ -3716,7 +3718,8 @@ html,body{overflow-anchor:none}
         el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);
         el.classList.remove('moving','bad');
         dashGuides(null);
-        if(tap&&ev.type==='pointerup'){bdPick=(bdPick===it&&mode==='mv')?null:it;syncBoard();return}
+        if(tap&&ev.type==='pointerup'){bdPick=(bdPick===it&&mode==='mv')?null:it;bdPickAt=Date.now();syncBoard();return}
+        if(bdPick!==it) bdPickAt=Date.now();
         bdPick=it;
         if(dashHits(it,g1)){dashStyle(el,g0)}else if(g1.join()!==g0.join()){
           var snap=JSON.parse(JSON.stringify(C.board));snap[C.board.indexOf(it)][DG.k]=g0.slice();
@@ -3766,7 +3769,7 @@ html,body{overflow-anchor:none}
     defs.forEach(function(d){
       var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=d[0];b.setAttribute('aria-label',d[1]);
       if(d.length>3) b.setAttribute('aria-pressed',String(d[3]));
-      b.addEventListener('click',d[2]);ed.appendChild(b);
+      b.addEventListener('click',function(e){if(dashOn()&&Date.now()-bdPickAt<450){e.preventDefault();return}d[2](e)});ed.appendChild(b);
     });
     return ed;
   }

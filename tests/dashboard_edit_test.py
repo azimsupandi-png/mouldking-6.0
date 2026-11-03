@@ -28,6 +28,14 @@ with sync_playwright() as p:
     h = pg.query_selector_all('.dw-rs')[1].bounding_box(); x = h['x']+h['width']*.7; y = h['y']+h['height']*.7
     pg.mouse.move(x, y); pg.mouse.down(); pg.mouse.move(x+30, y+25, steps=8); pg.mouse.up(); pg.wait_for_timeout(200)
     chk('resize handle resizes', G()[1][3] > g1[1][3])
+    # a tap that selects must not click the toolbar button that appears under the finger
+    pg.click('#dbEdit'); pg.click('#dbEdit'); pg.wait_for_timeout(300)
+    pg.evaluate("window.__c=0;__t.C.board.forEach(o=>{})")
+    e = pg.query_selector_all('.dw')[2].bounding_box()
+    n0 = pg.evaluate("__t.C.board.length")
+    pg.mouse.move(e['x']+e['width']-12, e['y']+12); pg.mouse.down(); pg.mouse.up(); pg.wait_for_timeout(120)
+    pg.mouse.down(); pg.mouse.up(); pg.wait_for_timeout(100)
+    chk('tap on future button spot does not trigger it', pg.evaluate("__t.C.board.length")==n0)
     chk('no script errors', not errs)
     b.close()
 sys.exit(1 if fails else 0)
