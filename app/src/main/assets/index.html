@@ -3936,7 +3936,7 @@ html,body{overflow-anchor:none}
         var sp=document.createElement('div');sp.className='spdt';
         var la=document.createElement('span');la.className='spl a';la.textContent=tagOf(wc)+'\n'+C.ch[wc].name;
         var lb2=document.createElement('span');lb2.className='spl b';lb2.textContent=tagOf(wd)+'\n'+C.ch[wd].name;
-        var sw=document.createElement('button');sw.type='button';sw.className='spsw';sw.setAttribute('role','switch');sw.setAttribute('aria-label','Switch '+tagOf(wc)+' or '+tagOf(wd));
+        var sw=document.createElement('button');sw.type='button';sw.className='spsw';sw.setAttribute('role','switch');if(it.ret){sw.style.touchAction='none';sw.style.userSelect='none';sw.style.webkitUserSelect='none'}sw.setAttribute('aria-label','Switch '+tagOf(wc)+' or '+tagOf(wd));
         var kn=document.createElement('i');sw.appendChild(kn);
         var spSet=function(pos){
           noteInput();if(S.estop||S.play) return;
