@@ -28,6 +28,7 @@ GROUP_A = [
     {'k': 'g', 'c': 1, 'w': 1},
     {'k': 'c', 'c': 2, 'w': 1},
     {'k': 'n', 'c': 3, 'w': 1},
+    {'k': 'k', 'c': 0, 'w': 1},
 ]
 GROUP_B = [
     {'k': 'a', 'c': 0, 'w': 1, 's': 10},
@@ -41,6 +42,8 @@ GROUP_B = [
     {'k': 'p', 'w': 1},
     {'k': 'q', 'c': 'sqT', 'w': 1},
     {'k': 'w', 'c': 2, 'd': 3, 'w': 1, 'p': 80},
+    {'k': 'f', 'c': 0, 'w': 1},
+    {'k': 'i', 'c': 1, 'w': 1},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
 EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w']
@@ -153,6 +156,22 @@ def run_behaviour(b, group):
         pg.mouse.click(r[0] + r[2] * 0.85, r[1] + r[3] / 2); pg.wait_for_timeout(150)
         check(L + 'centre-off: tapping the active side turns both off', T(2) == 0 and T(3) == 0, (T(2), T(3)))
         ev("__t.rt.t[2]=0;__t.rt.t[3]=0")
+    if group == 'B':
+        ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)
+        arc = ev("document.querySelector('.bdw .mtr text[font-size=\"28\"]').textContent")
+        check(L + 'arc meter shows +60', arc == '+60', arc)
+        lit = ev("[...document.querySelectorAll('.mtr')][1].querySelectorAll('rect').length")
+        check(L + 'LED meter drawn (20 segments)', lit >= 20, lit)
+        led = ev("[...document.querySelectorAll('.mtr text')].map(t=>t.textContent).filter(t=>/\\u221240%/.test(t)).length")
+        check(L + 'LED meter shows -40%', led == 1, led)
+        ev("__t.rt.t[1]=0;__t.rt.t[0]=0")
+    if group == 'A':
+        ev("__t.rt.t[0]=70"); pg.wait_for_timeout(500)
+        pts = ev("document.querySelector('.mtr polyline').getAttribute('points').split(' ').length")
+        cy = ev("+document.querySelector('.mtr circle').getAttribute('cy')")
+        check(L + 'scope draws 100 points', pts == 100, pts)
+        check(L + 'scope dot follows output (+70 -> y=28)', abs(cy - 28) < 0.6, cy)
+        ev("__t.rt.t[0]=0")
     check(L + 'no script errors', not errs, errs)
     pg.close()
 
