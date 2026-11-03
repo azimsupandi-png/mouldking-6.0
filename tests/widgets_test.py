@@ -98,16 +98,19 @@ def run_behaviour(b, group):
         check(L + 'gear 3 sends 100 to B', T(1) == 100, T(1))
         ev("document.querySelector('.gear .tgd[data-g=\"1\"]').click()"); pg.wait_for_timeout(150)
         check(L + 'gear N stops B', T(1) == 0, T(1))
-        ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect();
-          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:2,clientX:r.right-4,clientY:r.top+r.height/2}))})()""")
-        check(L + 'dial right edge is positive', T(3) > 40, T(3))
+        ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.right-4,y=r.top+r.height/2;
+          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:2,clientX:x,clientY:y}));
+          k.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:2,clientX:x,clientY:y+10}));
+          k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:2,clientX:x,clientY:y+10}))})()""")
+        check(L + 'dial touch and drag sets a positive value', T(3) > 40, T(3))
         ev("__t.rt.t[3]=0")
-        ev("document.querySelector('.dialc').click()"); pg.wait_for_timeout(100)
-        v0 = T(3)
-        ev("document.querySelector('.dialc').click()"); pg.wait_for_timeout(100)
-        v1 = T(3)
-        ev("document.querySelector('.dialc').click()"); pg.wait_for_timeout(100)
-        check(L + 'dial centre button: on, off, on again', v0 == 50 and v1 == 0 and T(3) == 50, (v0, v1, T(3)))
+        hold = lambda: ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:5,clientX:x,clientY:y}));
+          return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:5,clientX:x,clientY:y}));res(1)},700))})()""")
+        hold(); v0 = T(3)
+        hold(); v1 = T(3)
+        hold()
+        check(L + 'dial long press: on, off, on again', v0 == 50 and v1 == 0 and T(3) == 50, (v0, v1, T(3)))
         ev("__t.rt.t[3]=0")
         ev("""(()=>{const b=document.querySelector('.turbo');['pointerdown','pointerup'].forEach(n=>b.dispatchEvent(new PointerEvent(n,{bubbles:true,pointerId:4})))})()""")
         check(L + 'turbo returns to previous value on release', T(3) == 0, T(3))
