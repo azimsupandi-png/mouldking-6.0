@@ -107,6 +107,10 @@ def run_behaviour(b, group):
         hold = lambda: ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:5,clientX:x,clientY:y}));
           return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:5,clientX:x,clientY:y}));res(1)},700))})()""")
+        ev("__t.C.board.find(o=>o.k==='n').rt=0;__t.syncBoard()"); pg.wait_for_timeout(300)
+        hold(); i0 = T(3); hold(); i1 = T(3)
+        check(L + 'dial ramp time 0 switches instantly', i0 == 50 and i1 == 0, (i0, i1))
+        ev("delete __t.C.board.find(o=>o.k==='n').rt;__t.syncBoard()"); pg.wait_for_timeout(300)
         hold(); pg.wait_for_timeout(1000); vm = T(3); pg.wait_for_timeout(2400); v0 = T(3)
         check(L + 'dial on ramps up over 3 s (no jump)', 0 < vm < 50, vm)
         hold(); pg.wait_for_timeout(3400); v1 = T(3)
