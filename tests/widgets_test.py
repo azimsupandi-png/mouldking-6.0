@@ -40,9 +40,10 @@ GROUP_B = [
     {'k': 'r', 'w': 1},
     {'k': 'p', 'w': 1},
     {'k': 'q', 'c': 'sqT', 'w': 1},
+    {'k': 'w', 'c': 2, 'd': 3, 'w': 1, 'p': 80},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q']
+EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w']
 
 fails = []
 def check(name, cond, extra=''):
@@ -139,6 +140,19 @@ def run_behaviour(b, group):
         pg.wait_for_timeout(300)
         check(L + 'position counter integrates', ev("[...document.querySelectorAll('.sesst')].some(e=>/[+\u2212]0\\.[1-9]/.test(e.textContent))"))
         ev("__t.rt.t[0]=0")
+        # SPDT switch: left side -> output A only, right side -> output B only
+        r = ev("(()=>{const e=document.querySelector('.spsw');e.scrollIntoView();const r=e.getBoundingClientRect();return [r.left,r.top,r.width,r.height]})()")
+        pg.mouse.click(r[0] + r[2] * 0.15, r[1] + r[3] / 2); pg.wait_for_timeout(150)
+        check(L + 'switch left: C=80, D=0', T(2) == 80 and T(3) == 0, (T(2), T(3)))
+        pg.mouse.click(r[0] + r[2] * 0.85, r[1] + r[3] / 2); pg.wait_for_timeout(150)
+        check(L + 'switch right: C=0, D=80', T(2) == 0 and T(3) == 80, (T(2), T(3)))
+        pg.mouse.click(r[0] + r[2] * 0.85, r[1] + r[3] / 2); pg.wait_for_timeout(150)
+        check(L + 'switch right again stays on B (2-position)', T(3) == 80, T(3))
+        ev("__t.C.board.find(o=>o.k==='w').mid=1;__t.syncBoard()"); pg.wait_for_timeout(300)
+        r = ev("(()=>{const r=document.querySelector('.spsw').getBoundingClientRect();return [r.left,r.top,r.width,r.height]})()")
+        pg.mouse.click(r[0] + r[2] * 0.85, r[1] + r[3] / 2); pg.wait_for_timeout(150)
+        check(L + 'centre-off: tapping the active side turns both off', T(2) == 0 and T(3) == 0, (T(2), T(3)))
+        ev("__t.rt.t[2]=0;__t.rt.t[3]=0")
     check(L + 'no script errors', not errs, errs)
     pg.close()
 
