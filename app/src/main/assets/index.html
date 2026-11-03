@@ -723,7 +723,7 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash .dw.moving{opacity:.85;z-index:5}
 :root.dash .dw.sel{outline:3px solid #f4b800;z-index:3}
 :root.dash .dw .bdw-ed.empty{display:none}
-:root.dash .dw.sel .bdw-ed{animation:edIn .45s steps(1,end)}
+:root.dash .dw.sel .bdw-ed{animation:edIn .25s steps(1,end)}
 @keyframes edIn{from{pointer-events:none;opacity:.35}to{pointer-events:auto;opacity:1}}
 :root.dash .dw.bad{outline-color:#ff4d4d;background:rgba(255,60,60,.28)}
 .dw-rs{position:absolute;right:0;bottom:0;width:44px;height:44px;touch-action:none;background:linear-gradient(135deg,transparent 56%,#f4b800 56%);z-index:4}
@@ -3769,7 +3769,7 @@ html,body{overflow-anchor:none}
     defs.forEach(function(d){
       var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=d[0];b.setAttribute('aria-label',d[1]);
       if(d.length>3) b.setAttribute('aria-pressed',String(d[3]));
-      b.addEventListener('click',function(e){if(dashOn()&&Date.now()-bdPickAt<450){e.preventDefault();return}d[2](e)});ed.appendChild(b);
+      b.addEventListener('click',function(e){if(dashOn()&&Date.now()-bdPickAt<250){e.preventDefault();return}d[2](e)});ed.appendChild(b);
     });
     return ed;
   }
