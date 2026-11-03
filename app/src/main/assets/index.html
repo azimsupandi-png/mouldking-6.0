@@ -1950,7 +1950,7 @@ html,body{overflow-anchor:none}
   function dialBuzz(){
     if(!store.prefs.haptic) return;
     if(NB&&NB.haptic){try{NB.haptic('dial')}catch(e){}}
-    else if(navigator.vibrate){try{navigator.vibrate(11)}catch(e){}}
+    else if(navigator.vibrate){try{navigator.vibrate(13)}catch(e){}}
   }
   function wOut(it,v){return Math.round((it.inv?-v:v)*(it.cap||100)/100)}
   function wIn(it,t){return Math.max(-100,Math.min(100,Math.round((it.inv?-t:t)*100/(it.cap||100))))}
@@ -5071,7 +5071,7 @@ html,body{overflow-anchor:none}
     var hp=true;try{hp=JSON.parse(localStorage.getItem('mk6v2')||'{}').prefs.haptic!==false}catch(_){}
     if(!hp) return;
     var nb=window.MK6Bridge;
-    if(nb&&nb.haptic){try{nb.haptic('tick')}catch(_){}}else if(navigator.vibrate){try{navigator.vibrate(12)}catch(_){}}
+    if(nb&&nb.haptic){try{nb.haptic('tick')}catch(_){}}else if(navigator.vibrate){try{navigator.vibrate(13)}catch(_){}}
   }
   document.addEventListener('input',function(e){
     var t=e.target;if(!(t&&t.matches&&t.matches(SEL))) return;
