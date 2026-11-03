@@ -32,7 +32,7 @@ GROUP_A = [
 ]
 GROUP_B = [
     {'k': 'a', 'c': 0, 'w': 1, 's': 10},
-    {'k': 'y', 'c': 1, 'w': 1, 'p': 75, 'd': 2},
+    {'k': 'y', 'c': 1, 'w': 1, 'p': 75, 'd': 2, 'sc': 1},
     {'k': 'v', 'c': 2, 'w': 1, 'p': 50, 'd': 0.5},
     {'k': 'o', 'c': 0, 'w': 1},
     {'k': 'x', 'w': 1, 'sc': {'0': 30, '1': -40}},
@@ -160,17 +160,19 @@ def run_behaviour(b, group):
         ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)
         arc = ev("document.querySelector('.bdw .mtr text[font-size=\"28\"]').textContent")
         check(L + 'arc meter shows +60', arc == '+60', arc)
-        lit = ev("[...document.querySelectorAll('.mtr')][1].querySelectorAll('rect').length")
+        lit = ev("Math.max(...[...document.querySelectorAll('.mtr')].map(s=>s.querySelectorAll('rect').length))")
         check(L + 'LED meter drawn (20 segments)', lit >= 20, lit)
         led = ev("[...document.querySelectorAll('.mtr text')].map(t=>t.textContent).filter(t=>/\\u221240%/.test(t)).length")
-        check(L + 'LED meter shows -40%', led == 1, led)
+        check(L + 'LED meter and ramp scope show -40%', led >= 2, led)
         ev("__t.rt.t[1]=0;__t.rt.t[0]=0")
     if group == 'A':
         ev("__t.rt.t[0]=70"); pg.wait_for_timeout(500)
         pts = ev("document.querySelector('.mtr polyline').getAttribute('points').split(' ').length")
         cy = ev("+document.querySelector('.mtr circle').getAttribute('cy')")
         check(L + 'scope draws 100 points', pts == 100, pts)
-        check(L + 'scope dot follows output (+70 -> y=28)', abs(cy - 28) < 0.6, cy)
+        ly = ev("+document.querySelector('.mtr polyline').getAttribute('points').split(' ').pop().split(',')[1]")
+        zy = ev("+document.querySelector('.mtr line[stroke-width=\"1.5\"]').getAttribute('y1')")
+        check(L + 'scope dot follows output (above zero line, on the trace)', cy < zy and abs(cy - ly) < 0.6, (cy, ly, zy))
         ev("__t.rt.t[0]=0")
     check(L + 'no script errors', not errs, errs)
     pg.close()
