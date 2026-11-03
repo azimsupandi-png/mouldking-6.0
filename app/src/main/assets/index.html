@@ -724,8 +724,10 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash .dw.sel{outline:3px solid #f4b800;z-index:3}
 :root.dash .dw .bdw-ed.empty{display:none}
 .mtr-ctl{display:flex;gap:6px;justify-content:center;flex:none;margin-top:2px}
-.mtr-ctl .btn{min-width:46px;height:28px;min-height:28px;padding:0 8px;font-size:13px}
+.mtr-ctl .btn{min-width:44px;height:28px;min-height:28px;padding:0 6px;display:flex;align-items:center;justify-content:center}
+.mtr-ctl .btn svg{width:16px;height:16px;flex:none;display:block}
 .mtr-ctl .btn[aria-pressed=true]{background:#EF9F27;color:#412402}
+.mtr-ctl .btn[aria-pressed=true] svg circle{fill:#B3261E}
 .bdw .mtr{display:block;width:100%;height:150px;max-height:170px}
 :root.dash .bdw .mtr{flex:1 1 auto;min-height:0;height:100%;max-height:none}
 :root.dash .dw.sel .bdw-ed{animation:edIn .15s steps(1,end)}
@@ -1918,7 +1920,7 @@ html,body{overflow-anchor:none}
   /* ---------- Channels ---------- */
   var refs=[], groups=[], wrap=$('#channels'), cols=$('#cols');
   var runBlk=[], runSince=[];
-  var AUTOT={}, RAMP={}, STEPT={}, POS={}, POSL=0, HIST={}, HCNT={}, MPK={};
+  var AUTOT={}, RAMP={}, STEPT={}, POS={}, POSL=0, HIST={}, HCNT={}, RECS={}, MPK={};
   function autoTick(){
     var now=performance.now(), dt=POSL?now-POSL:0;POSL=now;
     (C.board||[]).forEach(function(it){
@@ -1939,7 +1941,7 @@ html,body{overflow-anchor:none}
       if(f>=1) delete RAMP[k];
     });
     var mtr=false;
-    (C.board||[]).forEach(function(o){if(o.k==='k'||(o.k==='y'&&o.sc)){var hh=HIST[o.c]||(HIST[o.c]=[]);hh.push(S.estop?0:(rt.t[o.c]||0));HCNT[o.c]=(HCNT[o.c]||0)+1;if(hh.length>600) hh.shift();mtr=true}else if(o.k==='f'||o.k==='i') mtr=true});
+    (C.board||[]).forEach(function(o){if(o.k==='k'||(o.k==='y'&&o.sc)){var hh=HIST[o.c]||(HIST[o.c]=[]);var rs0=RECS[o.c]||'live';if(rs0==='rec'&&hh.length>=600) RECS[o.c]='done';else if(rs0!=='done'){hh.push(S.estop?0:(rt.t[o.c]||0));HCNT[o.c]=(HCNT[o.c]||0)+1;if(hh.length>600) hh.shift()}mtr=true}else if(o.k==='f'||o.k==='i') mtr=true});
     if(C.board&&(mtr||C.board.some(function(o){return o.k==='a'||o.k==='o'}))&&typeof paintBoard==='function') paintBoard();
   }
   setInterval(autoTick,100);
@@ -1952,7 +1954,7 @@ html,body{overflow-anchor:none}
   var MSEQ=0;
   function meterBuild(el,it){
     var k=it.k, c=it.c, svg=sv('svg',{'class':'mtr','viewBox':k==='i'?'-10 0 130 150':'0 0 200 134','preserveAspectRatio':'xMidYMid meet','role':'img','aria-label':'Power meter'}), i;
-    var TXT='var(--fg,#e8e8ea)',MUT='var(--muted,#8a93a0)',TRK='rgba(150,160,175,.32)';
+    var TXT='var(--fg,#e8e8ea)',MUT='var(--muted,#8a93a0)',MUT_=MUT,TRK='rgba(150,160,175,.32)';
     var m={c:c,k:k};
     if(k==='f'){
       m.seg=[];
@@ -2016,13 +2018,20 @@ html,body{overflow-anchor:none}
     el.appendChild(svg);
     if(k==='k'){
       var bar=document.createElement('div');bar.className='mtr-ctl';
-      var mk=function(t,lbl,fn){var b=document.createElement('button');b.type='button';b.className='btn';b.textContent=t;b.setAttribute('aria-label',lbl);b.addEventListener('click',function(e){e.preventDefault();fn();m.upd()});bar.appendChild(b);return b};
+      var ICO={
+        back:'<path d="M12 2.5 4 8l8 5.5z"/>',
+        rec:'<circle cx="8" cy="8" r="5.5" fill="#E24B4A"/>',
+        stop:'<rect x="3" y="3" width="10" height="10" rx="1.5"/>',
+        pause:'<rect x="3.5" y="2.5" width="3.3" height="11" rx="1"/><rect x="9.2" y="2.5" width="3.3" height="11" rx="1"/>',
+        play:'<path d="M4 2.5 12 8l-8 5.5z"/>'};
+      var mk=function(ic,lbl,fn){var b=document.createElement('button');b.type='button';b.className='btn';b.innerHTML='<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">'+ICO[ic]+'</svg>';b.setAttribute('aria-label',lbl);b.addEventListener('click',function(e){e.preventDefault();fn();m.upd()});bar.appendChild(b);return b};
       var cnt=function(){return HCNT[c]||0},first=function(){return cnt()-(HIST[c]||[]).length};
       var step=function(d){var n=m.n;if(!m.pause){m.pause=true;m.endAbs=cnt()}m.endAbs=Math.max(first()+Math.min(n,(HIST[c]||[]).length),Math.min(cnt(),m.endAbs+d*Math.round(n/2)));if(d>0&&m.endAbs>=cnt()) m.pause=false};
-      mk('\u25C0','Back in time',function(){step(-1)});
-      mk('\u25A0','Stop and clear',function(){HIST[c]=[];m.pause=false});
-      m.bp=mk('\u275A\u275A','Pause',function(){if(m.pause){m.pause=false}else{m.pause=true;m.endAbs=cnt()}});
-      mk('\u25B6','Forward or live',function(){if(m.pause) step(1)});
+      mk('back','Back in time',function(){step(-1)});
+      m.br=mk('rec','Record up to 60 s',function(){HIST[c]=[];RECS[c]='rec';m.pause=false});
+      mk('stop','Stop',function(){var st=RECS[c]||'live';if(st==='rec'){RECS[c]='done';m.pause=true;m.endAbs=cnt()}else{HIST[c]=[];RECS[c]='live';m.pause=false}});
+      m.bp=mk('pause','Pause',function(){if(m.pause){m.pause=false}else{m.pause=true;m.endAbs=cnt()}});
+      mk('play','Forward or live',function(){if(m.pause) step(1)});
       el.appendChild(bar);
     }
     m.upd=function(){
@@ -2040,10 +2049,15 @@ html,body{overflow-anchor:none}
         if(m.pause&&h.length>=n&&m.endAbs<tot-h.length+n){m.endAbs=tot-h.length+n;off=tot-m.endAbs}
         for(j=0;j<n;j++){var hi=h.length-off-n+j,hv=hi>=0&&hi<h.length?h[hi]:0;pts.push((10+j*(W-20)/(n-1)).toFixed(1)+','+(md-hv*sc).toFixed(1))}
         var last=h.length-off-1;v=(last>=0&&last<h.length)?h[last]:v;
-        var tl=m.pause?('\u275A\u275A \u2212'+(off/10).toFixed(1)+' s'):(n/10)+' s';
+        var rst=RECS[c]||'live', tl;
+        if(rst==='rec') tl='\u25CF REC '+(h.length/10).toFixed(1)+' / 60 s';
+        else if(rst==='done') tl='\u25A0 '+(h.length/10).toFixed(1)+' s'+(m.pause&&off>0?' \u00b7 \u2212'+(off/10).toFixed(1)+' s':'');
+        else tl=m.pause?('\u275A\u275A \u2212'+(off/10).toFixed(1)+' s'):(n/10)+' s';
+        m.t3.setAttribute('fill',rst==='rec'?'#E24B4A':MUT_);
         if(m.t3.textContent!==tl) m.t3.textContent=tl;
         tx=(v>0?'+':v<0?'\u2212':'')+Math.abs(Math.round(v))+'%';if(m.val.textContent!==tx) m.val.textContent=tx;
         if(m.bp) m.bp.setAttribute('aria-pressed',String(!!m.pause));
+        if(m.br) m.br.setAttribute('aria-pressed',String(rst==='rec'));
         var ps=pts.join(' ');
         if(m.ps!==ps){m.ps=ps;m.up.setAttribute('points',ps);m.dn.setAttribute('points',ps)}
         m.dot.setAttribute('cy',(md-v*sc).toFixed(1));m.dot.setAttribute('fill',v<0?'#D85A30':'#1D9E75');
