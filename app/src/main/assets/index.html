@@ -1313,7 +1313,6 @@ html,body{overflow-anchor:none}
       <div id="bdEditor" class="bd-panel" hidden>
         <div class="seg bd-types" role="group" aria-label="Control type">
           <button class="btn" id="bdTS" type="button" aria-pressed="true">Slider</button>
-          <button class="btn" id="bdTH" type="button" aria-pressed="false">Hold</button>
           <button class="btn" id="bdTJ" type="button" aria-pressed="false">Joystick</button>
           <button class="btn" id="bdTD" type="button" aria-pressed="false">Double joystick</button>
           <button class="btn" id="bdTM" type="button" aria-pressed="false">Mix</button>
@@ -1324,22 +1323,14 @@ html,body{overflow-anchor:none}
           <button class="btn" id="bdTA" type="button" aria-pressed="false">Auto-stop</button>
           <button class="btn" id="bdTY" type="button" aria-pressed="false">Ramp</button>
           <button class="btn" id="bdTV" type="button" aria-pressed="false">Step move</button>
-          <button class="btn" id="bdTO" type="button" aria-pressed="false">Position</button>
           <button class="btn" id="bdTF" type="button" aria-pressed="false">Arc meter</button>
           <button class="btn" id="bdTI" type="button" aria-pressed="false">LED meter</button>
           <button class="btn" id="bdTK" type="button" aria-pressed="false">Scope</button>
-          <button class="btn" id="bdTAC" type="button" aria-pressed="false">All channels</button>
-          <button class="btn" id="bdTPB" type="button" aria-pressed="false">Phone battery</button>
-          <button class="btn" id="bdTX" type="button" aria-pressed="false">Scene</button>
-          <button class="btn" id="bdTC" type="button" aria-pressed="false">Cruise lock</button>
           <button class="btn" id="bdTN" type="button" aria-pressed="false">Dial</button>
           <button class="btn" id="bdTU" type="button" aria-pressed="false">Nudge</button>
           <button class="btn" id="bdTG" type="button" aria-pressed="false">Gear</button>
           <button class="btn" id="bdTZ" type="button" aria-pressed="false">Session timer</button>
-          <button class="btn" id="bdTQ" type="button" aria-pressed="false">Sequence</button>
           <button class="btn" id="bdTE" type="button" aria-pressed="false">E-Stop</button>
-          <button class="btn" id="bdTR" type="button" aria-pressed="false">Record</button>
-          <button class="btn" id="bdTP" type="button" aria-pressed="false">Speed &amp; power</button>
         </div>
         <div class="bd-fields">
           <label id="bdF1"><span id="bdL1">Channel</span><select id="bdTarget"></select></label>
@@ -1671,11 +1662,13 @@ html,body{overflow-anchor:none}
     var o={dz:ci(j.dz,0,40,0),sn:ci(j.sn,50,150,100),lm:ci(j.lm,20,100,100),ax:(j.ax==='x'||j.ax==='y')?j.ax:'f'};
     return (o.dz===0&&o.sn===100&&o.lm===100&&o.ax==='f')?null:o;
   }
+  var GONE=['h','o','pb','x','c','q','r','ac','p'];
   function cleanBoard(b){
     var out=[];
     if(!Array.isArray(b)) return out;
     b.slice(0,16).forEach(function(x){
       if(!x||typeof x!=='object') return;
+      if(GONE.indexOf(x.k)>=0) return;
       var n0=out.length;
       var w=x.w===2?2:1;
       if(x.k==='s'||x.k==='h'){
@@ -3653,14 +3646,13 @@ html,body{overflow-anchor:none}
   var bdSel=[$('#bdTarget'),$('#bdTarget2'),$('#bdTarget3'),$('#bdTarget4')];
   var bdFields=[$('#bdF1'),$('#bdF2'),$('#bdF3'),$('#bdF4')], bdLbl=[$('#bdL1'),$('#bdL2'),$('#bdL3'),$('#bdL4')];
   var bdModeF=$('#bdFM'), bdMode=$('#bdMode'), bdWideChk=$('#bdWideChk'), bdSpring=$('#bdSpring'), bdSpringL=$('#bdSpringL');
-  var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['w',$('#bdTW')],['a',$('#bdTA')],['y',$('#bdTY')],['v',$('#bdTV')],['o',$('#bdTO')],['f',$('#bdTF')],['i',$('#bdTI')],['k',$('#bdTK')],['ac',$('#bdTAC')],['pb',$('#bdTPB')],['x',$('#bdTX')],['c',$('#bdTC')],['n',$('#bdTN')],['u',$('#bdTU')],['g',$('#bdTG')],['z',$('#bdTZ')],['q',$('#bdTQ')],['e',$('#bdTE')],['r',$('#bdTR')],['p',$('#bdTP')]];
+  var bdTypes=[['s',$('#bdTS')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['w',$('#bdTW')],['a',$('#bdTA')],['y',$('#bdTY')],['v',$('#bdTV')],['f',$('#bdTF')],['i',$('#bdTI')],['k',$('#bdTK')],['n',$('#bdTN')],['u',$('#bdTU')],['g',$('#bdTG')],['z',$('#bdTZ')],['e',$('#bdTE')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
   var bdK='s', bdEditing=false, bdPick=null, bdPickAt=0, bdW=[], dashAdd=false;
   function prefillBoard(){
     var n=0;
-    activeIdx().forEach(function(i){if(n<4){C.board.push({k:C.ch[i].kind==='hold'?'h':'s',c:i,w:C.ch[i].kind==='hold'?2:1});n++}});
-    C.seq.slice(0,4).forEach(function(sq){C.board.push({k:'q',c:sq.id,w:1})});
+    activeIdx().forEach(function(i){if(n<4){C.board.push({k:'s',c:i,w:C.ch[i].kind==='hold'?2:1,hold:C.ch[i].kind==='hold'});n++}});
   }
   function bdOpt(sel,v,t){var o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}
   function bdFill(){

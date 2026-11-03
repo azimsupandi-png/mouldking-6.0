@@ -17,7 +17,6 @@ URL = 'file://' + os.path.join(HERE, '..', 'app', 'src', 'main', 'assets', 'inde
 # so the kinds are split over two boards (GROUPS) that are tested one after the other.
 GROUP_A = [
     {'k': 's', 'c': 0, 'w': 1, 'hold': True},
-    {'k': 'h', 'c': 1, 'w': 2},
     {'k': 'j', 'c': 0, 'd': 1, 'm': 'axis', 'w': 1},
     {'k': 'd', 'c': 0, 'd': 1, 'e': 2, 'f': 3, 'm': 'axis', 'w': 2},
     {'k': 'm', 't': [{'c': 0, 'r': 100}, {'c': 1, 'r': -50}], 'w': 1, 'hold': True},
@@ -26,7 +25,6 @@ GROUP_A = [
     {'k': 'b', 'c': 3, 'w': 1, 'p': 80},
     {'k': 'u', 'c': 0, 'w': 1, 'p': 50},
     {'k': 'g', 'c': 1, 'w': 1},
-    {'k': 'c', 'c': 2, 'w': 1},
     {'k': 'n', 'c': 3, 'w': 1},
     {'k': 'k', 'c': 0, 'w': 1},
 ]
@@ -34,21 +32,14 @@ GROUP_B = [
     {'k': 'a', 'c': 0, 'w': 1, 's': 10},
     {'k': 'y', 'c': 1, 'w': 1, 'p': 75, 'd': 2, 'sc': 1},
     {'k': 'v', 'c': 2, 'w': 1, 'p': 50, 'd': 0.5},
-    {'k': 'o', 'c': 0, 'w': 1},
-    {'k': 'x', 'w': 1, 'sc': {'0': 30, '1': -40}},
     {'k': 'z', 'w': 1, 'a': 15},
     {'k': 'e', 'w': 1},
-    {'k': 'r', 'w': 1},
-    {'k': 'p', 'w': 1},
-    {'k': 'q', 'c': 'sqT', 'w': 1},
     {'k': 'w', 'c': 2, 'd': 3, 'w': 1, 'p': 80},
     {'k': 'f', 'c': 0, 'w': 1},
     {'k': 'i', 'c': 1, 'w': 1},
-    {'k': 'ac', 'w': 1},
-    {'k': 'pb', 'w': 1},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w', 'k', 'f', 'i', 'ac']
+EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'w', 'k', 'f', 'i']
 
 fails = []
 def check(name, cond, extra=''):
@@ -109,11 +100,6 @@ def run_behaviour(b, group):
         check(L + 'gear 3 sends 100 to B', T(1) == 100, T(1))
         ev("document.querySelector('.gear .tgd[data-g=\"1\"]').click()"); pg.wait_for_timeout(150)
         check(L + 'gear N stops B', T(1) == 0, T(1))
-        ev("""(()=>{const r=document.querySelector('.cruise input');r.value=40;r.dispatchEvent(new Event('input',{bubbles:true}))})()""")
-        check(L + 'cruise sets C', T(2) == 40, T(2))
-        ev("document.querySelector('.cklock').click()")
-        check(L + 'cruise lock disables its slider', ev("document.querySelector('.cruise input').disabled"))
-        ev("document.querySelector('.cklock').click()")
         ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect();
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:2,clientX:r.right-4,clientY:r.top+r.height/2}))})()""")
         check(L + 'dial right edge is positive', T(3) > 40, T(3))
@@ -133,18 +119,12 @@ def run_behaviour(b, group):
         pg.mouse.up(); pg.wait_for_timeout(250)
         check(L + 'joystick returns to 0 on release', T(1) == 0, T(1))
     else:
-        ev("[...document.querySelectorAll('.sesst')].find(e=>e.textContent.startsWith('APPLY')).click()")
-        check(L + 'scene applies A=30,B=-40', T(0) == 30 and T(1) == -40, (T(0), T(1)))
         ev("__t.rt.t[0]=0;__t.rt.t[1]=0")
         ev("[...document.querySelectorAll('.tgdir')].find(r=>r.querySelector('[data-d=\"0\"]')).querySelector('[data-d=\"1\"]').click()")
         pg.wait_for_timeout(300)
         check(L + 'ramp starts moving B', T(1) != 0, T(1))
         ev("[...document.querySelectorAll('.tgdir')].find(r=>r.querySelector('[data-d=\"0\"]')).querySelector('[data-d=\"0\"]').click()")
         check(L + 'ramp stop returns B to 0', T(1) == 0, T(1))
-        ev("__t.rt.t[0]=60")
-        pg.wait_for_timeout(300)
-        check(L + 'position counter integrates', ev("[...document.querySelectorAll('.sesst')].some(e=>/[+\u2212]0\\.[1-9]/.test(e.textContent))"))
-        ev("__t.rt.t[0]=0")
         # SPDT switch: left side -> output A only, right side -> output B only
         r = ev("(()=>{const e=document.querySelector('.spsw');e.scrollIntoView();const r=e.getBoundingClientRect();return [r.left,r.top,r.width,r.height]})()")
         pg.mouse.click(r[0] + r[2] * 0.15, r[1] + r[3] / 2); pg.wait_for_timeout(150)
@@ -170,10 +150,6 @@ def run_behaviour(b, group):
         ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)
         arc = ev("document.querySelector('.mtr[data-k=f] .mv').textContent")
         check(L + 'arc meter shows +60', arc == '+60', arc)
-        rows = ev("document.querySelectorAll('.mtr[data-k=ac] .mv').length")
-        check(L + 'all-channels meter has a row per channel', rows >= 2, rows)
-        pbt = ev("document.querySelector('.mtr[data-k=pb] .mv').textContent")
-        check(L + 'phone battery shows a value or dash', pbt == '\u2014' or pbt.endswith('%'), pbt)
         lit = ev("Math.max(...[...document.querySelectorAll('.mtr')].map(s=>s.querySelectorAll('rect').length))")
         check(L + 'LED meter drawn (20 segments)', lit >= 20, lit)
         led = ev("[...document.querySelectorAll('.mtr text')].map(t=>t.textContent).filter(t=>/\\u221240%/.test(t)).length")
