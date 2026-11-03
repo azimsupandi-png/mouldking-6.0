@@ -23,7 +23,6 @@ GROUP_A = [
     {'k': 'l', 'c': 4, 'w': 1},
     {'k': 't', 'c': 2, 'y': 'led', 'p': 80, 'w': 1},
     {'k': 'b', 'c': 3, 'w': 1, 'p': 80},
-    {'k': 'u', 'c': 0, 'w': 1, 'p': 50},
     {'k': 'g', 'c': 1, 'w': 1},
     {'k': 'n', 'c': 3, 'w': 1},
     {'k': 'k', 'c': 0, 'w': 1},
@@ -31,7 +30,6 @@ GROUP_A = [
 GROUP_B = [
     {'k': 'a', 'c': 0, 'w': 1, 's': 10},
     {'k': 'y', 'c': 1, 'w': 1, 'p': 75, 'd': 2, 'sc': 1},
-    {'k': 'v', 'c': 2, 'w': 1, 'p': 50, 'd': 0.5},
     {'k': 'z', 'w': 1, 'a': 15},
     {'k': 'e', 'w': 1},
     {'k': 'w', 'c': 2, 'd': 3, 'w': 1, 'p': 80},
@@ -39,7 +37,7 @@ GROUP_B = [
     {'k': 'i', 'c': 1, 'w': 1},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'w', 'k', 'f', 'i']
+EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 't', 'y', 'a', 'z', 'w', 'k', 'f', 'i']
 
 fails = []
 def check(name, cond, extra=''):
@@ -104,12 +102,6 @@ def run_behaviour(b, group):
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:2,clientX:r.right-4,clientY:r.top+r.height/2}))})()""")
         check(L + 'dial right edge is positive', T(3) > 40, T(3))
         ev("__t.rt.t[3]=0")
-        ev("""(()=>{const b=document.querySelector('.nudge .tgd[data-d="1"]');
-          b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:3}));
-          b.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:3}))})()""")
-        check(L + 'nudge pushes A', T(0) == 50, T(0))
-        pg.wait_for_timeout(450)
-        check(L + 'nudge returns A to 0', T(0) == 0, T(0))
         ev("""(()=>{const b=document.querySelector('.turbo');['pointerdown','pointerup'].forEach(n=>b.dispatchEvent(new PointerEvent(n,{bubbles:true,pointerId:4})))})()""")
         check(L + 'turbo returns to previous value on release', T(3) == 0, T(3))
         # joystick drives B, slider on the same channel follows

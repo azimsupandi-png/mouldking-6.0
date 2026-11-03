@@ -1303,12 +1303,10 @@ html,body{overflow-anchor:none}
           <button class="btn" id="bdTW" type="button" aria-pressed="false">Switch (SPDT)</button>
           <button class="btn" id="bdTA" type="button" aria-pressed="false">Auto-stop</button>
           <button class="btn" id="bdTY" type="button" aria-pressed="false">Ramp</button>
-          <button class="btn" id="bdTV" type="button" aria-pressed="false">Step move</button>
           <button class="btn" id="bdTF" type="button" aria-pressed="false">Arc meter</button>
           <button class="btn" id="bdTI" type="button" aria-pressed="false">LED meter</button>
           <button class="btn" id="bdTK" type="button" aria-pressed="false">Scope</button>
           <button class="btn" id="bdTN" type="button" aria-pressed="false">Dial</button>
-          <button class="btn" id="bdTU" type="button" aria-pressed="false">Nudge</button>
           <button class="btn" id="bdTG" type="button" aria-pressed="false">Gear</button>
           <button class="btn" id="bdTZ" type="button" aria-pressed="false">Session timer</button>
           <button class="btn" id="bdTE" type="button" aria-pressed="false">E-Stop</button>
@@ -1636,7 +1634,7 @@ html,body{overflow-anchor:none}
     if(!g.every(function(q){return isFinite(q)})||g[0]<0||g[1]<0||g[2]<mn[0]||g[3]<mn[1]||g[0]+g[2]>gx||g[1]+g[3]>gy) return null;
     return g;
   }
-  var DMIN={s:[12,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],e:[6,6],u:[8,6],g:[12,6],z:[8,6],n:[8,8],w:[12,6],a:[10,6],y:[12,6],v:[12,6],f:[10,8],i:[6,10],k:[12,8]};
+  var DMIN={s:[12,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],e:[6,6],g:[12,6],z:[8,6],n:[8,8],w:[12,6],a:[10,6],y:[12,6],f:[10,8],i:[6,10],k:[12,8]};
   function ci(v,lo,hi,def){v=Math.round(+v);return (v>=lo&&v<=hi)?v:def}
   function cleanJc(j){
     if(!j||typeof j!=='object') return null;
@@ -1688,18 +1686,15 @@ html,body{overflow-anchor:none}
       }else if(x.k==='a'){
         var acn=Math.round(+x.c), as0=Math.round(+x.s);
         if(acn>=0&&acn<NMAX) out.push({k:'a',c:acn,w:w,s:(as0>=1&&as0<=300)?as0:20});
-      }else if(x.k==='y'||x.k==='v'){
-        var ycn=Math.round(+x.c), yp=Math.round(+x.p), yd=Math.round(+x.d*10)/10, ymx=x.k==='y'?30:10, ymn=x.k==='y'?1:0.1;
-        if(ycn>=0&&ycn<NMAX) {out.push({k:x.k,c:ycn,w:w,p:(yp>=5&&yp<=100)?yp:50,d:(yd>=ymn&&yd<=ymx)?yd:(x.k==='y'?4:1)});if(x.k==='y'&&(x.sc===1||x.sc===true)) out[out.length-1].sc=1}
+      }else if(x.k==='y'){
+        var ycn=Math.round(+x.c), yp=Math.round(+x.p), yd=Math.round(+x.d*10)/10;
+        if(ycn>=0&&ycn<NMAX) {out.push({k:'y',c:ycn,w:w,p:(yp>=5&&yp<=100)?yp:50,d:(yd>=1&&yd<=30)?yd:4});if(x.sc===1||x.sc===true) out[out.length-1].sc=1}
       }else if(x.k==='f'||x.k==='i'||x.k==='k'){
         var ocn=Math.round(+x.c);
         if(ocn>=0&&ocn<NMAX){out.push({k:x.k,c:ocn,w:w});if(x.k==='k'&&(+x.ws===30||+x.ws===60)) out[out.length-1].ws=+x.ws;if(x.k==='k'&&(x.tg===1||x.tg===true)){out[out.length-1].tg=1;var tvv=Math.round(+x.tv);out[out.length-1].tv=isFinite(tvv)?Math.max(-100,Math.min(100,tvv)):80}if((x.k==='f'||x.k==='i')&&(+x.th===1||+x.th===2)) out[out.length-1].th=+x.th;if((x.k==='f'||x.k==='i')&&(x.sh===1||x.sh===true)) out[out.length-1].sh=1}
       }else if(x.k==='n'){
         var kcn=Math.round(+x.c);
         if(kcn>=0&&kcn<NMAX) out.push({k:x.k,c:kcn,w:w});
-      }else if(x.k==='u'){
-        var ucn=Math.round(+x.c), up0=Math.round(+x.p);
-        if(ucn>=0&&ucn<NMAX) out.push({k:'u',c:ucn,w:w,p:(up0>=5&&up0<=100)?up0:50});
       }else if(x.k==='g'){
         var gcn=Math.round(+x.c);
         if(gcn>=0&&gcn<NMAX){
@@ -1888,7 +1883,7 @@ html,body{overflow-anchor:none}
   /* ---------- Channels ---------- */
   var refs=[], groups=[], wrap=$('#channels'), cols=$('#cols');
   var runBlk=[], runSince=[];
-  var AUTOT={}, RAMP={}, STEPT={}, HIST={}, HCNT={}, RECS={}, MPK={}, RAMPLAST={};
+  var AUTOT={}, RAMP={}, HIST={}, HCNT={}, RECS={}, MPK={}, RAMPLAST={};
   function autoTick(){
     var now=performance.now();
     (C.board||[]).forEach(function(it){
@@ -2128,13 +2123,11 @@ html,body{overflow-anchor:none}
     l:{t:'Light settings',f:[
       {k:'br',l:'Brightness',u:'%',ch:[25,50,75,100],only:true,def:100,g:function(it){return C.ch[it.c].bright||100},s:function(it,v){C.ch[it.c].bright=v;syncChannel(it.c)}},
       {k:'bl',l:'Blink',ch:[0,1,2,3],lab:['Steady','Slow','Fast','Pulse'],only:true,def:0,g:function(it){return Math.max(0,['off','slow','fast','pulse'].indexOf(C.ch[it.c].blink||'off'))},s:function(it,v){C.ch[it.c].kind='light';C.ch[it.c].blink=['off','slow','fast','pulse'][v];syncChannel(it.c)}}]},
-    u:{t:'Nudge settings',f:[{k:'p',l:'Power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100]},F_INV,F_CAP]},
     t:{t:'Toggle settings',f:[{k:'p',l:'Power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100]},F_INV,F_CAP]},
     f:{t:'Meter settings',f:[F_SH,F_TH]},
     i:{t:'Meter settings',f:[F_SH,F_TH]},
     k:{t:'Scope settings',f:[{k:'ws',l:'Time window',ch:[10,30,60],lab:['10 s','30 s','60 s'],only:true,def:10},{k:'tg',l:'Target line',ch:[0,1],lab:['Off','On'],only:true,def:0},{k:'tv',l:'Target value',u:'%',min:-100,max:100,st:5,ch:[-80,-50,50,80,100],def:80}]},
     y:{t:'Ramp settings',f:[{k:'p',l:'Target power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100]},{k:'d',l:'Ramp time',u:'s',min:1,max:30,st:1,ch:[2,4,6,10]},{k:'sc',l:'Show scope',ch:[0,1],lab:['Off','On'],only:true,def:0},F_INV,F_CAP]},
-    v:{t:'Step settings',f:[{k:'p',l:'Power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100]},{k:'d',l:'Move time',u:'s',min:0.1,max:10,st:0.1,ch:[0.5,1,2,3,5]},F_INV,F_CAP]},
     w:{t:'Switch settings',f:[{k:'p',l:'Power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100],def:100},
       {k:'mid',l:'Centre off position',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.mid?1:0},s:function(it,v){if(v) it.mid=1; else delete it.mid}},
       {k:'ra',l:'Reverse output A',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.ra?1:0},s:function(it,v){if(v) it.ra=1; else delete it.ra}},
@@ -3554,7 +3547,7 @@ html,body{overflow-anchor:none}
   var bdSel=[$('#bdTarget'),$('#bdTarget2'),$('#bdTarget3'),$('#bdTarget4')];
   var bdFields=[$('#bdF1'),$('#bdF2'),$('#bdF3'),$('#bdF4')], bdLbl=[$('#bdL1'),$('#bdL2'),$('#bdL3'),$('#bdL4')];
   var bdModeF=$('#bdFM'), bdMode=$('#bdMode'), bdWideChk=$('#bdWideChk'), bdSpring=$('#bdSpring'), bdSpringL=$('#bdSpringL');
-  var bdTypes=[['s',$('#bdTS')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['w',$('#bdTW')],['a',$('#bdTA')],['y',$('#bdTY')],['v',$('#bdTV')],['f',$('#bdTF')],['i',$('#bdTI')],['k',$('#bdTK')],['n',$('#bdTN')],['u',$('#bdTU')],['g',$('#bdTG')],['z',$('#bdTZ')],['e',$('#bdTE')]];
+  var bdTypes=[['s',$('#bdTS')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['w',$('#bdTW')],['a',$('#bdTA')],['y',$('#bdTY')],['f',$('#bdTF')],['i',$('#bdTI')],['k',$('#bdTK')],['n',$('#bdTN')],['g',$('#bdTG')],['z',$('#bdTZ')],['e',$('#bdTE')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
   var bdK='s', bdEditing=false, bdPick=null, bdPickAt=0, bdW=[], dashAdd=false;
@@ -3567,7 +3560,7 @@ html,body{overflow-anchor:none}
     if(!bdSel[0]) return;
     var chans=activeIdx(), tank=bdMode.value==='tank';
     var n=(bdK==='e'||bdK==='z')?0:(bdK==='j'||bdK==='w')?2:(bdK==='d'||bdK==='m'?4:1);
-    var L=bdK==='w'?['Output A','Output B']:(bdK==='l'||bdK==='t'||bdK==='b'||bdK==='u'||bdK==='g'||bdK==='n'||bdK==='a'||bdK==='y'||bdK==='v'||bdK==='f'||bdK==='i'||bdK==='k')?[bdK==='l'?'Light channel':'Channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s')?['Channel']:
+    var L=bdK==='w'?['Output A','Output B']:(bdK==='l'||bdK==='t'||bdK==='b'||bdK==='g'||bdK==='n'||bdK==='a'||bdK==='y'||bdK==='f'||bdK==='i'||bdK==='k')?[bdK==='l'?'Light channel':'Channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s')?['Channel']:
       (bdK==='j'?(tank?['Left motor','Right motor']:['Drive','Steer']):
       (tank?['Left stick: Left motor','Left stick: Right motor','Right stick: Left motor','Right stick: Right motor']:
             ['Left stick: Drive','Left stick: Steer','Right stick: Drive','Right stick: Steer'])));
@@ -3587,8 +3580,8 @@ html,body{overflow-anchor:none}
     bdSpringL.hidden=!(bdK==='s'||bdK==='j'||bdK==='d'||bdK==='m');
     bdMixRow.hidden=bdK!=='m';
     $('#bdLightRow').hidden=bdK!=='l';
-    $('#bdTgRow').hidden=bdK!=='t'&&bdK!=='u'&&bdK!=='y'&&bdK!=='v';
-    $('#bdTgStyle').hidden=bdK==='u'||bdK==='y'||bdK==='v';
+    $('#bdTgRow').hidden=bdK!=='t'&&bdK!=='y';
+    $('#bdTgStyle').hidden=bdK==='y';
     bdRat.forEach(function(sel,q){sel.hidden=q>=n||bdK!=='m'});
   }
   function bdSetKind(k){
@@ -3708,12 +3701,11 @@ html,body{overflow-anchor:none}
     if(k==='e') return [8,8];
     if(k==='w') return L?[18,7]:[24,7];
     if(k==='a') return L?[14,6]:[24,6];
-    if(k==='y'||k==='v') return (k==='y'&&it.sc)?(L?[18,12]:[24,12]):(L?[18,6]:[24,6]);
+    if(k==='y') return it.sc?(L?[18,12]:[24,12]):(L?[18,6]:[24,6]);
     if(k==='f') return L?[14,10]:[18,10];
     if(k==='i') return L?[8,14]:[10,14];
     if(k==='k') return L?[20,12]:[24,12];
     if(k==='n') return L?[10,12]:[14,12];
-    if(k==='u') return L?[12,6]:[24,6];
     if(k==='g') return L?[24,6]:[24,7];
     if(k==='z') return L?[10,6]:[16,6];
     return L?[8,6]:[12,6];
@@ -4100,18 +4092,17 @@ html,body{overflow-anchor:none}
         var at=document.createElement('b');var as=document.createElement('small');ab.appendChild(at);ab.appendChild(as);
         ab.addEventListener('click',function(){var o=[5,10,20,30,60];it.s=o[(o.indexOf(it.s)+1)%o.length];AUTOT[ac]=0;save();paintBoard()});
         el.appendChild(ab);w.auto={t:at,s:as,it:it};
-      }else if(it.k==='y'||it.k==='v'){
-        var yc=it.c, yv=it.k==='v';
+      }else if(it.k==='y'){
+        var yc=it.c;
         if(!isActive(yc)) return;
-        w.out=bdHead(el,(yv?'Step \u00b7 ':'Ramp \u00b7 ')+tagOf(yc)+' \u00b7 '+C.ch[yc].name+' \u00b7 '+(it.p||50)+'% \u00b7 '+it.d+'s',it,true);
+        w.out=bdHead(el,'Ramp \u00b7 '+tagOf(yc)+' \u00b7 '+C.ch[yc].name+' \u00b7 '+(it.p||50)+'% \u00b7 '+it.d+'s',it,true);
         var ybs=dirRow(el,w,it,function(dir){
-          clearTimeout(STEPT[yc]);delete RAMP[yc];
+          delete RAMP[yc];
           if(dir===0){delete RAMPLAST[yc];setT(yc,0,false);return}
-          if(yv){setT(yc,wOut(it,dir*(it.p||50)),false);STEPT[yc]=setTimeout(function(){setT(yc,0,false)},it.d*1000)}
-          else{RAMP[yc]={t0:performance.now(),from:rt.t[yc],to:wOut(it,dir*(it.p||50)),d:it.d};RAMPLAST[yc]={to:RAMP[yc].to,d:it.d,s:HCNT[yc]||0}}
+          RAMP[yc]={t0:performance.now(),from:rt.t[yc],to:wOut(it,dir*(it.p||50)),d:it.d};RAMPLAST[yc]={to:RAMP[yc].to,d:it.d,s:HCNT[yc]||0};
         });
         w.yr={c:yc,bs:ybs,it:it};
-        if(it.k==='y'&&it.sc) w.yr.m=meterBuild(el,{k:'k',c:yc});
+        if(it.sc) w.yr.m=meterBuild(el,{k:'k',c:yc});
       }else if(it.k==='f'||it.k==='i'||it.k==='k'){
         var mtc=it.c;
         if(!isActive(mtc)) return;
@@ -4144,36 +4135,6 @@ html,body{overflow-anchor:none}
         nk.addEventListener('dblclick',function(){if(!S.estop&&!S.play) setT(nc,0,false)});
         nk.addEventListener('contextmenu',function(e){e.preventDefault()});
         nw.appendChild(nk);el.appendChild(nw);w.dial={c:nc,k:nk,i:ni};
-      }else if(it.k==='u'){
-        var uc=it.c;
-        if(!isActive(uc)) return;
-        w.out=bdHead(el,'Nudge \u00b7 '+tagOf(uc)+' \u00b7 '+C.ch[uc].name+' \u00b7 '+(it.p||50)+'%',it,true);
-        var ur=document.createElement('div');ur.className='tgdir nudge';ur.style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
-        var ubs=[];
-        [['Reverse',-1,'\u25C0'],['Forward',1,'\u25B6']].forEach(function(d){
-          var b=document.createElement('button');b.type='button';b.className='tgd';b.setAttribute('data-d',String(d[1]));
-          var ic=document.createElement('i');ic.textContent=d[2];ic.setAttribute('aria-hidden','true');
-          var tx=document.createElement('span');tx.textContent=d[0];b.appendChild(ic);b.appendChild(tx);
-          var down=0, t0=0, tm=0;
-          var go=function(e){
-            e.preventDefault();
-            if(down||S.estop||S.play) return;
-            down=1;t0=performance.now();noteInput();try{b.setPointerCapture(e.pointerId)}catch(_){}
-            b.classList.add('on');setT(uc,wOut(it,d[1]*(it.p||50)),false);
-          };
-          var end=function(){
-            if(!down) return;
-            var wait=Math.max(0,260-(performance.now()-t0));
-            down=0;clearTimeout(tm);
-            tm=setTimeout(function(){b.classList.remove('on');if(!down&&sameDir(d[1])) setT(uc,0,false)},wait);
-          };
-          var sameDir=function(dv){var o=wOut(it,dv);return o>0?rt.t[uc]>0:rt.t[uc]<0};
-          b.addEventListener('pointerdown',go);
-          ['pointerup','pointercancel','lostpointercapture','blur'].forEach(function(ev){b.addEventListener(ev,end)});
-          b.addEventListener('contextmenu',function(e){e.preventDefault()});
-          ur.appendChild(b);ubs.push(b);
-        });
-        el.appendChild(ur);w.nud={c:uc,bs:ubs};
       }else if(it.k==='g'){
         var gc=it.c;
         if(!isActive(gc)) return;
@@ -4349,10 +4310,6 @@ html,body{overflow-anchor:none}
         w.dial.i.style.transform='rotate('+(dv/100*135)+'deg)';
         w.dial.k.setAttribute('aria-valuenow',String(dv));
         w.dial.k.classList.toggle('on',dv!==0);
-      }else if(w.nud){
-        var nv=rt.t[w.nud.c];
-        if(w.out) w.out.textContent=fmt(nv);
-        w.nud.bs.forEach(function(b){b.disabled=S.estop||!!S.play;if(nv===0||S.estop) b.classList.remove('on')});
       }else if(w.gear){
         var gv=wIn(w.it,rt.t[w.gear.c]), gi0=-1, gbest=1e9;
         w.gear.list.forEach(function(gd,gi){var dd=Math.abs(gd[1]-gv);if(dd<gbest){gbest=dd;gi0=gi}});
@@ -4853,7 +4810,7 @@ html,body{overflow-anchor:none}
     'Channel A drives and channel B steers. Use the Joystick layout: up and down drives, left and right steers.':'Saluran A memandu dan saluran B mengemudi. Guna susun atur Joystick: atas dan bawah memandu, kiri dan kanan mengemudi.',
     'Channels A and B drive the tracks, C, D and E move the arm, bucket and swing. Uses the Dual stick layout.':'Saluran A dan B menggerakkan track, C, D dan E menggerakkan lengan, baldi dan putaran. Guna susun atur Dua stick.',
     'Model created. Rename the channels or change the layout any time.':'Model dicipta. Anda boleh namakan semula saluran atau tukar susun atur bila-bila masa.',
-'Nudge':'Tolak','Switch (SPDT)':'Suis (SPDT)','Switch settings':'Tetapan suis','Output A':'Output A','Output B':'Output B','Centre off position':'Kedudukan tengah mati','Reverse output A':'Songsang output A','Reverse output B':'Songsang output B','Pick two different channels.':'Pilih dua saluran berbeza.','Slider settings':'Tetapan slider','Mix settings':'Tetapan campuran','Dial settings':'Tetapan dail','Turbo settings':'Tetapan turbo','Direction & limit':'Arah & had','Reverse direction':'Songsang arah','Power limit':'Had kuasa','Snap to':'Lekat pada','Turbo power':'Kuasa turbo','Tap to lock on':'Ketik untuk kunci hidup','Brightness':'Kecerahan','Blink':'Kelip','Repeat':'Ulang','Speed':'Laju','Loop':'Gelung','On':'Hidup','Steady':'Tetap','Slow':'Perlahan','Fast':'Laju','Nudge settings':'Tetapan tolak','Toggle settings':'Tetapan togol','Ramp settings':'Tetapan naik perlahan','Step settings':'Tetapan langkah','Auto-stop settings':'Tetapan henti auto','Timer settings':'Tetapan pemasa','Widget settings':'Tetapan widget','Power':'Kuasa','Target power':'Kuasa sasaran','Ramp time':'Masa naik','Move time':'Masa gerak','Stop after':'Henti selepas','Alert after (0 = off)':'Amaran selepas (0 = mati)','Off':'Mati','Decrease':'Kurang','Increase':'Tambah','Auto-stop':'Henti auto','Ramp':'Naik perlahan','Step move':'Langkah tetap','Arc meter':'Meter arka','Meter settings':'Tetapan meter','Target line':'Garisan sasaran','Target value':'Nilai sasaran','Monitor':'Pemantau','4 motors + driver':'4 motor + pemandu','LED and arc meter, slider, scope and ramp for one channel':'Meter LED dan arka, slider, scope dan ramp untuk satu saluran','Four arc meters on top, joystick and scope below':'Empat meter arka di atas, joystick dan scope di bawah','Main value':'Nilai utama','Widget':'Widget','Hub output':'Output hab','Colour theme':'Tema warna','Blue-orange':'Biru-oren','Mono':'Mono','Time window':'Tetingkap masa','LED meter':'Meter LED','Scope':'Osiloskop','Duration':'Tempoh','ON':'AKTIF','Gear':'Gear','Gear settings':'Tetapan gear','Nudge power':'Kuasa tolak','Session timer':'Pemasa sesi','Dial':'Dail','R (reverse)':'R (undur)','Add gear':'Tambah gear','Remove gear':'Buang gear','Save':'Simpan','Cancel':'Batal','Session timer reset.':'Pemasa sesi ditetapkan semula.','No alert \u00b7 hold to reset':'Tiada amaran \u00b7 tahan untuk set semula','Light settings':'Tetapan lampu','Test hub':'Uji hab','Kid':'Kanak-kanak','Full':'Penuh','Power profile':'Profil kuasa','Save current limit as profile':'Simpan had semasa sebagai profil','Save profile':'Simpan profil','Profile saved.':'Profil disimpan.','Stick range (maximum output)':'Julat stick (output maksimum)','Hub names (optional)':'Nama hab (pilihan)','Hub 1 name':'Nama hab 1','Hub 2 name':'Nama hab 2','Hub 3 name':'Nama hab 3','Turbo':'Turbo','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
+'Switch (SPDT)':'Suis (SPDT)','Switch settings':'Tetapan suis','Output A':'Output A','Output B':'Output B','Centre off position':'Kedudukan tengah mati','Reverse output A':'Songsang output A','Reverse output B':'Songsang output B','Pick two different channels.':'Pilih dua saluran berbeza.','Slider settings':'Tetapan slider','Mix settings':'Tetapan campuran','Dial settings':'Tetapan dail','Turbo settings':'Tetapan turbo','Direction & limit':'Arah & had','Reverse direction':'Songsang arah','Power limit':'Had kuasa','Snap to':'Lekat pada','Turbo power':'Kuasa turbo','Tap to lock on':'Ketik untuk kunci hidup','Brightness':'Kecerahan','Blink':'Kelip','Repeat':'Ulang','Speed':'Laju','Loop':'Gelung','On':'Hidup','Steady':'Tetap','Slow':'Perlahan','Fast':'Laju','Toggle settings':'Tetapan togol','Ramp settings':'Tetapan naik perlahan','Auto-stop settings':'Tetapan henti auto','Timer settings':'Tetapan pemasa','Widget settings':'Tetapan widget','Power':'Kuasa','Target power':'Kuasa sasaran','Ramp time':'Masa naik','Stop after':'Henti selepas','Alert after (0 = off)':'Amaran selepas (0 = mati)','Off':'Mati','Decrease':'Kurang','Increase':'Tambah','Auto-stop':'Henti auto','Ramp':'Naik perlahan','Arc meter':'Meter arka','Meter settings':'Tetapan meter','Target line':'Garisan sasaran','Target value':'Nilai sasaran','Monitor':'Pemantau','4 motors + driver':'4 motor + pemandu','LED and arc meter, slider, scope and ramp for one channel':'Meter LED dan arka, slider, scope dan ramp untuk satu saluran','Four arc meters on top, joystick and scope below':'Empat meter arka di atas, joystick dan scope di bawah','Main value':'Nilai utama','Widget':'Widget','Hub output':'Output hab','Colour theme':'Tema warna','Blue-orange':'Biru-oren','Mono':'Mono','Time window':'Tetingkap masa','LED meter':'Meter LED','Scope':'Osiloskop','Duration':'Tempoh','ON':'AKTIF','Gear':'Gear','Gear settings':'Tetapan gear','Session timer':'Pemasa sesi','Dial':'Dail','R (reverse)':'R (undur)','Add gear':'Tambah gear','Remove gear':'Buang gear','Save':'Simpan','Cancel':'Batal','Session timer reset.':'Pemasa sesi ditetapkan semula.','No alert \u00b7 hold to reset':'Tiada amaran \u00b7 tahan untuk set semula','Light settings':'Tetapan lampu','Test hub':'Uji hab','Kid':'Kanak-kanak','Full':'Penuh','Power profile':'Profil kuasa','Save current limit as profile':'Simpan had semasa sebagai profil','Save profile':'Simpan profil','Profile saved.':'Profil disimpan.','Stick range (maximum output)':'Julat stick (output maksimum)','Hub names (optional)':'Nama hab (pilihan)','Hub 1 name':'Nama hab 1','Hub 2 name':'Nama hab 2','Hub 3 name':'Nama hab 3','Turbo':'Turbo','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
     'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
     'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
     'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',
@@ -4936,7 +4893,7 @@ html,body{overflow-anchor:none}
     [/^of (\u2212?\d+)$/,function(m){return 'dari '+m[1]}],
     [/^hub (\u2212?\d+)$/,function(m){return 'hab '+m[1]}],
     [/^Target ([+\u2212]?\d+)$/,function(m){return 'Sasaran '+m[1]}],
-    [/^(Nudge|Gear|Dial|Ramp|Step|Auto-stop|Switch|Arc meter|LED meter|Scope) \u00b7 (.+)$/,function(m){return ({'Arc meter':'Meter arka','LED meter':'Meter LED',Scope:'Osiloskop',Switch:'Suis',Nudge:'Tolak',Gear:'Gear',Dial:'Dail',Cruise:'Pelayaran',Ramp:'Naik perlahan',Step:'Langkah','Auto-stop':'Henti auto',Position:'Kedudukan'})[m[1]]+' \u00b7 '+m[2]}],
+    [/^(Gear|Dial|Ramp|Auto-stop|Switch|Arc meter|LED meter|Scope) \u00b7 (.+)$/,function(m){return ({'Arc meter':'Meter arka','LED meter':'Meter LED',Scope:'Osiloskop',Switch:'Suis',Nudge:'Tolak',Gear:'Gear',Dial:'Dail',Cruise:'Pelayaran',Ramp:'Naik perlahan',Step:'Langkah','Auto-stop':'Henti auto',Position:'Kedudukan'})[m[1]]+' \u00b7 '+m[2]}],
     [/^(\d+) s limit \u00b7 tap to change$/,function(m){return 'Had '+m[1]+' s \u00b7 ketik untuk tukar'}],
     [/^Auto-stop: channel (\S+) stopped after (\d+) s\.$/,function(m){return 'Henti auto: saluran '+m[1]+' dihentikan selepas '+m[2]+' s.'}],
     [/^Gear (\d)$/,function(m){return 'Gear '+m[1]}],
