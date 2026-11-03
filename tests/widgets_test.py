@@ -153,6 +153,16 @@ def run_behaviour(b, group):
         pg.mouse.click(r[0] + r[2] * 0.85, r[1] + r[3] / 2); pg.wait_for_timeout(150)
         check(L + 'centre-off: tapping the active side turns both off', T(2) == 0 and T(3) == 0, (T(2), T(3)))
         ev("__t.rt.t[2]=0;__t.rt.t[3]=0")
+        # return-to-centre: holds while pressed, follows the finger across, stops on release
+        ev("(()=>{const o=__t.C.board.find(o=>o.k==='w');o.ret=1;delete o.mid;__t.syncBoard()})()"); pg.wait_for_timeout(300)
+        r = ev("(()=>{const r=document.querySelector('.spsw').getBoundingClientRect();return [r.left,r.top,r.width,r.height]})()")
+        y = r[1] + r[3] / 2
+        pg.mouse.move(r[0] + r[2] * 0.15, y); pg.mouse.down(); pg.wait_for_timeout(100)
+        check(L + 'return-to-centre: held left drives C only', T(2) == 80 and T(3) == 0, (T(2), T(3)))
+        pg.mouse.move(r[0] + r[2] * 0.85, y, steps=4); pg.wait_for_timeout(100)
+        check(L + 'return-to-centre: sliding right moves to D', T(2) == 0 and T(3) == 80, (T(2), T(3)))
+        pg.mouse.up(); pg.wait_for_timeout(100)
+        check(L + 'return-to-centre: release stops both', T(2) == 0 and T(3) == 0, (T(2), T(3)))
     check(L + 'no script errors', not errs, errs)
     pg.close()
 
