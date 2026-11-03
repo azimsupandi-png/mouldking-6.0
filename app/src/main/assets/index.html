@@ -946,13 +946,15 @@ html,body{overflow-anchor:none}
 .gbox .wsc .btn{min-height:36px;padding:0 12px;font-size:14px}
 .gbox .wsc .btn[aria-pressed="true"]{background:var(--acc,#f4b800);color:#2a1c00;border-color:transparent}
 .bdw .sesst small{text-align:center}
-.bdw .spdt{display:grid;grid-template-columns:minmax(0,1fr) minmax(96px,1.3fr) minmax(0,1fr);align-items:center;gap:8px}
-.bdw .spl{font-size:12px;line-height:1.15;opacity:.65;text-align:center;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.bdw .spdt{display:grid;grid-template-columns:minmax(0,1fr) minmax(84px,1.15fr) minmax(0,1fr);align-items:center;gap:6px}
+:root.dash .bdw .spdt{flex:1 1 auto;min-height:0}
+.bdw .spl{font-size:11px;line-height:1.15;opacity:.65;text-align:center;white-space:pre-line;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
 .bdw .spl.on{opacity:1;color:#6ee787;font-weight:700}
-.bdw .spsw{position:relative;height:50px;width:100%;border-radius:25px;border:2px solid #0d1015;background:linear-gradient(180deg,#030405,#14171c 50%,#030405);box-shadow:inset 0 5px 10px #000,0 1px 0 rgba(255,255,255,.12);padding:0;touch-action:manipulation}
-.bdw .spsw i{position:absolute;top:2px;left:calc(50% - 22px);width:44px;height:44px;border-radius:50%;box-sizing:border-box;border:2px solid #4b525e;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.65) 0,transparent 32%),linear-gradient(#8a93a1,#454c58);box-shadow:0 4px 7px rgba(0,0,0,.7);transition:left .14s ease-out}
-.bdw .spsw[data-pos="a"] i{left:3px;border-color:#6b4600;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.8) 0,transparent 32%),linear-gradient(#ffd84a,#c68700)}
-.bdw .spsw[data-pos="b"] i{left:calc(100% - 47px);border-color:#6b4600;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.8) 0,transparent 32%),linear-gradient(#ffd84a,#c68700)}
+.bdw .spsw{position:relative;height:46px;width:100%;border-radius:999px;border:2px solid #0d1015;background:linear-gradient(180deg,#030405,#14171c 50%,#030405);box-shadow:inset 0 5px 10px #000,0 1px 0 rgba(255,255,255,.12);padding:0;touch-action:manipulation;box-sizing:border-box}
+:root.dash .bdw .spsw{height:100%;max-height:50px}
+.bdw .spsw i{position:absolute;top:2px;bottom:2px;left:50%;transform:translateX(-50%);aspect-ratio:1;border-radius:50%;box-sizing:border-box;border:2px solid #4b525e;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.65) 0,transparent 32%),linear-gradient(#8a93a1,#454c58);box-shadow:0 3px 6px rgba(0,0,0,.7);transition:left .14s ease-out,transform .14s ease-out}
+.bdw .spsw[data-pos="a"] i{left:2px;transform:none;border-color:#6b4600;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.8) 0,transparent 32%),linear-gradient(#ffd84a,#c68700)}
+.bdw .spsw[data-pos="b"] i{left:calc(100% - 2px);transform:translateX(-100%);border-color:#6b4600;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.8) 0,transparent 32%),linear-gradient(#ffd84a,#c68700)}
 .bdw .spsw:disabled{opacity:.5}
 .bdw .recw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .bdw .recw .tgd{height:44px}
@@ -3924,8 +3926,8 @@ html,body{overflow-anchor:none}
         if(!isActive(wc)||!isActive(wd)) return;
         bdHead(el,'Switch \u00b7 '+tagOf(wc)+' / '+tagOf(wd),it,false);
         var sp=document.createElement('div');sp.className='spdt';
-        var la=document.createElement('span');la.className='spl a';la.textContent=tagOf(wc)+' \u00b7 '+C.ch[wc].name;
-        var lb2=document.createElement('span');lb2.className='spl b';lb2.textContent=tagOf(wd)+' \u00b7 '+C.ch[wd].name;
+        var la=document.createElement('span');la.className='spl a';la.textContent=tagOf(wc)+'\n'+C.ch[wc].name;
+        var lb2=document.createElement('span');lb2.className='spl b';lb2.textContent=tagOf(wd)+'\n'+C.ch[wd].name;
         var sw=document.createElement('button');sw.type='button';sw.className='spsw';sw.setAttribute('role','switch');sw.setAttribute('aria-label','Switch '+tagOf(wc)+' or '+tagOf(wd));
         var kn=document.createElement('i');sw.appendChild(kn);
         var spSet=function(pos){
