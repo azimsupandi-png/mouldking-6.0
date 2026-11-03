@@ -46,7 +46,7 @@ GROUP_B = [
     {'k': 'i', 'c': 1, 'w': 1},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w', 'k']
+EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w', 'k', 'f', 'i']
 
 fails = []
 def check(name, cond, extra=''):
@@ -158,13 +158,34 @@ def run_behaviour(b, group):
         ev("__t.rt.t[2]=0;__t.rt.t[3]=0")
     if group == 'B':
         ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)
-        arc = ev("document.querySelector('.bdw .mtr text[font-size=\"28\"]').textContent")
+        arc = ev("document.querySelector('.mtr[data-k=f] .mv').textContent")
         check(L + 'arc meter shows +60', arc == '+60', arc)
         lit = ev("Math.max(...[...document.querySelectorAll('.mtr')].map(s=>s.querySelectorAll('rect').length))")
         check(L + 'LED meter drawn (20 segments)', lit >= 20, lit)
         led = ev("[...document.querySelectorAll('.mtr text')].map(t=>t.textContent).filter(t=>/\\u221240%/.test(t)).length")
         check(L + 'LED meter and ramp scope show -40%', led >= 2, led)
         ev("__t.rt.t[1]=0;__t.rt.t[0]=0")
+        ev("__t.C.limit=70;__t.rt.t[0]=100"); pg.wait_for_timeout(350)
+        arc = ev("document.querySelector('.mtr[data-k=f] .mv').textContent")
+        sub = ev("[...document.querySelectorAll('.mtr[data-k=f] text')].map(t=>t.textContent).join('|')")
+        check(L + 'arc meter shows the output after the power limit', arc == '+70' and 'of 100' in sub, (arc, sub))
+        ev("__t.C.limit=100;__t.rt.t[0]=0")
+        ev("window.__v=0;navigator.vibrate=function(){window.__v++;return true};__t.rt.t[0]=50"); pg.wait_for_timeout(350)
+        v0 = ev("window.__v"); ev("__t.rt.t[0]=90"); pg.wait_for_timeout(350)
+        v1 = ev("window.__v"); ev("__t.rt.t[0]=95"); pg.wait_for_timeout(350)
+        check(L + 'entering the red zone vibrates once', v1 - v0 >= 1 and ev("window.__v") == v1, (v0, v1))
+        ev("__t.rt.t[0]=0")
+        c0 = ev("__t.C.board.find(o=>o.k==='i').c")
+        ev("""(()=>{const s=document.querySelector('.mtr[data-k=i]'),r=s.getBoundingClientRect();
+          s.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:7,clientX:r.right-10,clientY:r.top+20}));
+          s.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:7,clientX:r.left+10,clientY:r.top+22}))})()""")
+        pg.wait_for_timeout(300)
+        check(L + 'swipe changes the meter channel', ev("__t.C.board.find(o=>o.k==='i').c") != c0)
+        ev("__t.C.board.find(o=>o.k==='f').th=1;__t.syncBoard()"); pg.wait_for_timeout(300)
+        ev("__t.rt.t[0]=40"); pg.wait_for_timeout(300)
+        col = ev("[...document.querySelectorAll('.mtr[data-k=f] path')].map(p=>p.getAttribute('stroke')).find(c=>c&&c[0]==='#')")
+        check(L + 'colour theme applies', col == '#378ADD', col)
+        ev("__t.rt.t[0]=0")
     if group == 'A':
         ev("__t.rt.t[0]=70"); pg.wait_for_timeout(500)
         pts = ev("document.querySelector('.mtr polyline').getAttribute('points').split(' ').length")
