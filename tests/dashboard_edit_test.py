@@ -36,6 +36,14 @@ with sync_playwright() as p:
     pg.mouse.move(e['x']+e['width']-12, e['y']+12); pg.mouse.down(); pg.mouse.up(); pg.wait_for_timeout(120)
     pg.mouse.down(); pg.mouse.up(); pg.wait_for_timeout(100)
     chk('tap on future button spot does not trigger it', pg.evaluate("__t.C.board.length")==n0)
+    for tp, n in (('mon', 5), ('four', 6)):
+        pg.click('#dbEdit') if not pg.evaluate("__t.C.dash&&document.querySelector('#dbTpl')&&!document.querySelector('#dbTpl').hidden") else None
+        pg.wait_for_timeout(200)
+        pg.click('#dbTpl'); pg.wait_for_timeout(200)
+        pg.click('[data-tpl=%s]' % tp); pg.wait_for_timeout(500)
+        g = pg.evaluate("__t.C.board.map(o=>o.g)")
+        ov = any(a is not b and a[0] < b[0]+b[2] and b[0] < a[0]+a[2] and a[1] < b[1]+b[3] and b[1] < a[1]+a[3] for a in g for b in g)
+        chk('template %s: %d widgets, no overlap' % (tp, n), len(g) == n and not ov)
     chk('no script errors', not errs)
     b.close()
 sys.exit(1 if fails else 0)

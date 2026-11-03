@@ -44,9 +44,11 @@ GROUP_B = [
     {'k': 'w', 'c': 2, 'd': 3, 'w': 1, 'p': 80},
     {'k': 'f', 'c': 0, 'w': 1},
     {'k': 'i', 'c': 1, 'w': 1},
+    {'k': 'ac', 'w': 1},
+    {'k': 'pb', 'w': 1},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w', 'k', 'f', 'i']
+EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w', 'k', 'f', 'i', 'ac']
 
 fails = []
 def check(name, cond, extra=''):
@@ -160,6 +162,10 @@ def run_behaviour(b, group):
         ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)
         arc = ev("document.querySelector('.mtr[data-k=f] .mv').textContent")
         check(L + 'arc meter shows +60', arc == '+60', arc)
+        rows = ev("document.querySelectorAll('.mtr[data-k=ac] .mv').length")
+        check(L + 'all-channels meter has a row per channel', rows >= 2, rows)
+        pbt = ev("document.querySelector('.mtr[data-k=pb] .mv').textContent")
+        check(L + 'phone battery shows a value or dash', pbt == '\u2014' or pbt.endswith('%'), pbt)
         lit = ev("Math.max(...[...document.querySelectorAll('.mtr')].map(s=>s.querySelectorAll('rect').length))")
         check(L + 'LED meter drawn (20 segments)', lit >= 20, lit)
         led = ev("[...document.querySelectorAll('.mtr text')].map(t=>t.textContent).filter(t=>/\\u221240%/.test(t)).length")
