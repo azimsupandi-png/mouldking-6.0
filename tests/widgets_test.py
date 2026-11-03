@@ -107,9 +107,10 @@ def run_behaviour(b, group):
         hold = lambda: ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:5,clientX:x,clientY:y}));
           return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:5,clientX:x,clientY:y}));res(1)},700))})()""")
-        hold(); v0 = T(3)
-        hold(); v1 = T(3)
-        hold()
+        hold(); pg.wait_for_timeout(1000); vm = T(3); pg.wait_for_timeout(2400); v0 = T(3)
+        check(L + 'dial on ramps up over 3 s (no jump)', 0 < vm < 50, vm)
+        hold(); pg.wait_for_timeout(3400); v1 = T(3)
+        hold(); pg.wait_for_timeout(3400)
         check(L + 'dial long press: on, off, on again', v0 == 50 and v1 == 0 and T(3) == 50, (v0, v1, T(3)))
         ev("__t.rt.t[3]=0")
         ev("""(()=>{const b=document.querySelector('.turbo');['pointerdown','pointerup'].forEach(n=>b.dispatchEvent(new PointerEvent(n,{bubbles:true,pointerId:4})))})()""")

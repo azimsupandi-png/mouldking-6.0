@@ -4133,7 +4133,7 @@ html,body{overflow-anchor:none}
           var cur=wIn(it,rt.t[nc]);
           if(Math.abs(a)>135) a=(cur>=0?(cur<50&&a<0?-135:135):-135);
           a=Math.max(-135,Math.min(135,a));
-          noteInput();
+          noteInput();delete RAMP[nc];
           var dstep=Math.round(a/135*20)*5;
           if(dstep!==w.dlast){w.dlast=dstep;dialBuzz()}
           setT(nc,wOut(it,dstep),false);
@@ -4146,8 +4146,9 @@ html,body{overflow-anchor:none}
           nT=setTimeout(function(){
             if(!nPend) return;
             nPend=false;nLong=true;noteInput();
-            var cv=wIn(it,rt.t[nc]);
-            if(cv!==0){w.dlv=cv;setT(nc,0,false)}else setT(nc,wOut(it,w.dlv||50),false);
+            var rp=RAMP[nc],cv=wIn(it,rt.t[nc]),off=rp?rp.to!==0:cv!==0;
+            if(off){if(!rp&&cv!==0) w.dlv=cv;RAMP[nc]={t0:performance.now(),from:rt.t[nc],to:0,d:3}}
+            else RAMP[nc]={t0:performance.now(),from:rt.t[nc],to:wOut(it,w.dlv||50),d:3};
             feedback('ok');if(!(NB&&NB.haptic)&&navigator.vibrate){try{navigator.vibrate(30)}catch(_){}}
           },550);
         });
