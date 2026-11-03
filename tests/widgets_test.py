@@ -102,6 +102,13 @@ def run_behaviour(b, group):
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:2,clientX:r.right-4,clientY:r.top+r.height/2}))})()""")
         check(L + 'dial right edge is positive', T(3) > 40, T(3))
         ev("__t.rt.t[3]=0")
+        ev("document.querySelector('.dialc').click()"); pg.wait_for_timeout(100)
+        v0 = T(3)
+        ev("document.querySelector('.dialc').click()"); pg.wait_for_timeout(100)
+        v1 = T(3)
+        ev("document.querySelector('.dialc').click()"); pg.wait_for_timeout(100)
+        check(L + 'dial centre button: on, off, on again', v0 == 50 and v1 == 0 and T(3) == 50, (v0, v1, T(3)))
+        ev("__t.rt.t[3]=0")
         ev("""(()=>{const b=document.querySelector('.turbo');['pointerdown','pointerup'].forEach(n=>b.dispatchEvent(new PointerEvent(n,{bubbles:true,pointerId:4})))})()""")
         check(L + 'turbo returns to previous value on release', T(3) == 0, T(3))
         # joystick drives B, slider on the same channel follows
