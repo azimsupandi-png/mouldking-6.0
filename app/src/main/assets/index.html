@@ -721,6 +721,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash .dw.dw-ed{cursor:grab;touch-action:none;outline:2px dashed rgba(244,184,0,.85);outline-offset:-3px}
 :root.dash .dw.dw-ed>*:not(.bdw-h):not(.dw-rs):not(.bdw-ed){pointer-events:none}
 :root.dash .dw.moving{opacity:.85;z-index:5}
+:root.dash .dw.sel{outline:3px solid #f4b800;z-index:3}
+:root.dash .dw .bdw-ed.empty{display:none}
 :root.dash .dw.bad{outline-color:#ff4d4d;background:rgba(255,60,60,.28)}
 .dw-rs{position:absolute;right:0;bottom:0;width:44px;height:44px;touch-action:none;background:linear-gradient(135deg,transparent 56%,#f4b800 56%);z-index:4}
 :root.dash .dw .bdw-ed{position:absolute;right:3px;top:3px;display:flex;gap:3px;z-index:6;margin:0}
@@ -3396,7 +3398,7 @@ html,body{overflow-anchor:none}
   var bdTypes=[['s',$('#bdTS')],['h',$('#bdTH')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['w',$('#bdTW')],['a',$('#bdTA')],['y',$('#bdTY')],['v',$('#bdTV')],['o',$('#bdTO')],['x',$('#bdTX')],['c',$('#bdTC')],['n',$('#bdTN')],['u',$('#bdTU')],['g',$('#bdTG')],['z',$('#bdTZ')],['q',$('#bdTQ')],['e',$('#bdTE')],['r',$('#bdTR')],['p',$('#bdTP')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
-  var bdK='s', bdEditing=false, bdW=[], dashAdd=false;
+  var bdK='s', bdEditing=false, bdPick=null, bdW=[], dashAdd=false;
   function prefillBoard(){
     var n=0;
     activeIdx().forEach(function(i){if(n<4){C.board.push({k:C.ch[i].kind==='hold'?'h':'s',c:i,w:C.ch[i].kind==='hold'?2:1});n++}});
@@ -3641,6 +3643,7 @@ html,body{overflow-anchor:none}
     bdW.forEach(function(w){if(w.el&&w.it&&w.it[DG.k]) dashStyle(w.el,w.it[DG.k])});
     if(typeof bdGrid.querySelectorAll!=='function') return;
     [].slice.call(bdGrid.querySelectorAll('.dw')).forEach(function(el){
+      if(el.__rsz) el.__rsz();
       var hh=0, hd2=el.querySelector('.bdw-h');
       if(hd2) hh=hd2.offsetHeight+3;
       var aw=el.clientWidth-14, ah=el.clientHeight-10-hh;
@@ -3700,13 +3703,21 @@ html,body{overflow-anchor:none}
         var dx=Math.round((ev.clientX-sx)/cw), dy=Math.round((ev.clientY-sy)/ch), n=g0.slice();
         if(mode==='mv'){n[0]=clamp(g0[0]+dx,0,DG.x-g0[2]);n[1]=clamp(g0[1]+dy,0,DG.y-g0[3])}
         else{n[2]=clamp(g0[2]+dx,mn[0],DG.x-g0[0]);n[3]=clamp(g0[3]+dy,mn[1],DG.y-g0[1])}
-        g1=n;dashStyle(el,n);el.classList.toggle('bad',dashHits(it,n));dashGuides(it,n);
+        if(dashHits(it,n)){
+          var nx=n.slice();nx[1]=g1[1];nx[3]=g1[3];
+          var ny=n.slice();ny[0]=g1[0];ny[2]=g1[2];
+          if(!dashHits(it,nx)) n=nx; else if(!dashHits(it,ny)) n=ny; else n=g1.slice();
+        }
+        g1=n;dashStyle(el,n);dashGuides(it,n);
       };
       var up=function(ev){
         if(ev.pointerId!==pid) return;
+        var tap=Math.hypot(ev.clientX-sx,ev.clientY-sy)<6;
         el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);
         el.classList.remove('moving','bad');
         dashGuides(null);
+        if(tap&&ev.type==='pointerup'){bdPick=(bdPick===it&&mode==='mv')?null:it;syncBoard();return}
+        bdPick=it;
         if(dashHits(it,g1)){dashStyle(el,g0)}else if(g1.join()!==g0.join()){
           var snap=JSON.parse(JSON.stringify(C.board));snap[C.board.indexOf(it)][DG.k]=g0.slice();
           BD_UNDO.push({board:snap,msg:mode==='mv'?'Move undone.':'Size undone.'});if(BD_UNDO.length>20)BD_UNDO.shift();
@@ -3723,8 +3734,10 @@ html,body{overflow-anchor:none}
     dashStyle(el,it[DG.k]);
     if(it.col>0&&it.k!=='e') el.style.filter='hue-rotate('+DHUE[it.col]+'deg)';
     if(bdEditing){
-      el.classList.add('dw-ed');
+      el.classList.add('dw-ed');if(it===bdPick) el.classList.add('sel');
       var rs=document.createElement('div');rs.className='dw-rs';rs.setAttribute('aria-hidden','true');el.appendChild(rs);
+      var rsz=function(){var m=Math.floor(Math.min(el.clientWidth,el.clientHeight)*0.42);rs.style.width=rs.style.height=Math.max(18,Math.min(44,m))+'px'};
+      rsz();if(window.requestAnimationFrame) requestAnimationFrame(rsz);el.__rsz=rsz;
       dashDrag(el,it);
     }
   }
@@ -3735,6 +3748,7 @@ html,body{overflow-anchor:none}
   function bdToolbar(it){
     var ed=document.createElement('div');ed.className='bdw-ed';
     var dash=dashOn();
+    if(dash&&it!==bdPick){ed.classList.add('empty');return ed}
     var defs=dash?[]:[['◀','Move earlier',function(){bdMove(it,-1)}],['▶','Move later',function(){bdMove(it,1)}]];
     if(!dash&&it.k!=='d') defs.push(['↔','Wide or normal',function(){it.w=it.w===2?1:2;save();syncBoard()}]);
     if(dash&&it.k!=='e') defs.push(['●','Colour',function(){it.col=((it.col||0)+1)%DHUE.length;save();syncBoard()}]);
@@ -3794,6 +3808,7 @@ html,body{overflow-anchor:none}
     $('#dbTpl').hidden=!bdEditing;
     var dm=$('#dbModel');if(dm){dm.hidden=bdEditing;dm.innerHTML='';store.profiles.forEach(function(p){var o=document.createElement('option');o.value=p.id;o.textContent=p.label||p.name;dm.appendChild(o)});dm.value=store.active}
     $('#dbAdd').setAttribute('aria-pressed',String(dashAdd&&bdEditing));
+    if(!bdEditing) bdPick=null;
     bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
     bdEditBtn.textContent=bdEditing?'Done editing':'Edit board';
     var dash=dashOn();
