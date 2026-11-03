@@ -158,6 +158,14 @@ def run_behaviour(b, group):
         pg.mouse.click(r[0] + r[2] * 0.85, r[1] + r[3] / 2); pg.wait_for_timeout(150)
         check(L + 'centre-off: tapping the active side turns both off', T(2) == 0 and T(3) == 0, (T(2), T(3)))
         ev("__t.rt.t[2]=0;__t.rt.t[3]=0")
+    if group == 'A':
+        tx = lambda: ev("[...document.querySelectorAll('.mtr[data-k=k] text')].map(e=>e.textContent).filter(x=>/^Target/.test(x))")
+        vis = lambda: ev("[...document.querySelectorAll('.mtr[data-k=k] line')].some(e=>e.getAttribute('stroke-dasharray')&&e.getAttribute('visibility')==='visible')")
+        pg.wait_for_timeout(300)
+        check(L + 'scope target line is off by default', not vis(), tx())
+        ev("(()=>{const o=__t.C.board.find(o=>o.k==='k');o.tg=1;o.tv=-50;__t.syncBoard()})()"); pg.wait_for_timeout(400)
+        check(L + 'scope target line on shows the set value', vis() and any('50' in x for x in tx()), tx())
+        ev("(()=>{const o=__t.C.board.find(o=>o.k==='k');delete o.tg;delete o.tv;__t.syncBoard()})()"); pg.wait_for_timeout(300)
     if group == 'B':
         ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)
         arc = ev("document.querySelector('.mtr[data-k=f] .mv').textContent")
