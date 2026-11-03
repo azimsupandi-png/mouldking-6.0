@@ -46,7 +46,7 @@ GROUP_B = [
     {'k': 'i', 'c': 1, 'w': 1},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w']
+EXPECT_SETTINGS = ['s', 'h', 'm', 'c', 'n', 'g', 'b', 'l', 'u', 't', 'y', 'v', 'a', 'z', 'q', 'w', 'k']
 
 fails = []
 def check(name, cond, extra=''):
@@ -173,6 +173,20 @@ def run_behaviour(b, group):
         ly = ev("+document.querySelector('.mtr polyline').getAttribute('points').split(' ').pop().split(',')[1]")
         zy = ev("+document.querySelector('.mtr line[stroke-width=\"1.5\"]').getAttribute('y1')")
         check(L + 'scope dot follows output (above zero line, on the trace)', cy < zy and abs(cy - ly) < 0.6, (cy, ly, zy))
+        ev("__t.rt.t[0]=0"); pg.wait_for_timeout(1300)
+        btns = "document.querySelector('.mtr-ctl').querySelectorAll('button')"
+        check(L + 'scope has 4 control buttons', ev(btns + ".length") == 4)
+        ev(btns + "[0].click()"); pg.wait_for_timeout(250)
+        lab = ev("[...document.querySelector('.mtr').querySelectorAll('text')].map(t=>t.textContent).join('|')")
+        check(L + 'back button pauses and shows time offset', '\u275a\u275a' in lab, lab)
+        pts1 = ev("document.querySelector('.mtr polyline').getAttribute('points')"); pg.wait_for_timeout(400)
+        pts2 = ev("document.querySelector('.mtr polyline').getAttribute('points')")
+        check(L + 'paused trace is frozen', pts1 == pts2)
+        ev(btns + "[2].click()"); pg.wait_for_timeout(250)
+        check(L + 'pause button resumes live', ev("document.querySelector('.mtr-ctl .btn[aria-pressed=true]')") is None)
+        ev("__t.rt.t[0]=50"); pg.wait_for_timeout(400); ev(btns + "[1].click()"); pg.wait_for_timeout(50)
+        off = ev('''(()=>{const sv=document.querySelector('.mtr'),z=+sv.querySelector('line[stroke-width="1.5"]').getAttribute('y1');return sv.querySelector('polyline').getAttribute('points').split(' ').filter(p=>Math.abs(+p.split(',')[1]-z)>0.5).length})()''')
+        check(L + 'stop clears the capture', off <= 2, off)
         ev("__t.rt.t[0]=0")
     check(L + 'no script errors', not errs, errs)
     pg.close()
