@@ -116,6 +116,20 @@ def run_behaviour(b, group):
         hold(); pg.wait_for_timeout(3400); v1 = T(3)
         hold(); pg.wait_for_timeout(3400)
         check(L + 'dial long press: on, off, on again', v0 == 50 and v1 == 0 and T(3) == 50, (v0, v1, T(3)))
+        ev("__t.rt.t[3]=0;__t.C.board.find(o=>o.k==='n').ow=1;__t.C.board.find(o=>o.k==='n').th=1;__t.syncBoard()"); pg.wait_for_timeout(300)
+        drag_to = lambda dx: ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,dx=%s;
+          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:7,clientX:x,clientY:y}));
+          k.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:7,clientX:x+dx*r.width/2*.9,clientY:y}));
+          k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:7,clientX:x+dx*r.width/2*.9,clientY:y}))})()""" % dx)
+        drag_to(1); pg.wait_for_timeout(300); ow1 = T(3)
+        lit = ev("[...document.querySelectorAll('.dialbox svg path')].filter(p=>p.getAttribute('fill').startsWith('#')).length")
+        col = ev("(()=>{const l=[...document.querySelectorAll('.dialbox svg path')].filter(p=>p.getAttribute('fill').startsWith('#'));return l.length?l[0].getAttribute('fill'):''})()")
+        drag_to(-1); pg.wait_for_timeout(300); ow0 = T(3)
+        check(L + 'dial forward-only: right = high, left = low, never negative', 70 <= ow1 <= 100 and 0 <= ow0 <= 30, (ow1, ow0))
+        check(L + 'dial forward-only LED ring lights from the start', lit >= 15, lit)
+        check(L + 'dial colour theme applies', col.lower() == '#378add', col)
+        ev("(()=>{const o=__t.C.board.find(o=>o.k==='n');delete o.ow;delete o.th;__t.syncBoard()})()"); pg.wait_for_timeout(300)
+        ev("__t.rt.t[3]=0")
         ev("__t.rt.t[3]=0")
         ev("""(()=>{const b=document.querySelector('.turbo');['pointerdown','pointerup'].forEach(n=>b.dispatchEvent(new PointerEvent(n,{bubbles:true,pointerId:4})))})()""")
         check(L + 'turbo returns to previous value on release', T(3) == 0, T(3))
