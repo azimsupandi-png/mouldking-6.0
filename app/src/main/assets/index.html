@@ -2031,7 +2031,7 @@ html,body{overflow-anchor:none}
         m.cx=cx;m.cy=cy;m.R2=R2;
         for(var j=0;j<24;j++){m.seg[j].setAttribute('d',mArc(cx,cy,r,mAg(-100+j*200/24)-.8,mAg(-100+(j+1)*200/24)+.8));m.seg[j].setAttribute('stroke-width',w.toFixed(1))}
         m.zt.setAttribute('x1',cx);m.zt.setAttribute('x2',cx);m.zt.setAttribute('y1',cy-R2-5);m.zt.setAttribute('y2',cy-r+w/2);
-        var fs=Math.max(9,Math.min(60,r*(R2<26?.36:.55)));
+        var fs=Math.max(8,Math.min(60,r*.55,(r-w/2)*2*.86/2.75));
         m.val.setAttribute('font-size',fs.toFixed(0));m.val.setAttribute('x',cx);m.val.setAttribute('y',(cy+fs*.3).toFixed(1));
         m.sub.setAttribute('display',R2<28?'none':'inline');m.sub.setAttribute('x',cx);m.sub.setAttribute('y',(cy+fs*.3+15).toFixed(1));
         var lx=R2*.707,ly=cy+R2*.707+w/2+14;
