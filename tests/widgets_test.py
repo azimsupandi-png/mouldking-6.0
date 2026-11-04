@@ -35,9 +35,10 @@ GROUP_B = [
     {'k': 'w', 'c': 2, 'd': 3, 'w': 1, 'p': 80},
     {'k': 'f', 'c': 0, 'w': 1},
     {'k': 'i', 'c': 1, 'w': 1},
+    {'k': 'rs', 'w': 1, 'p': 100, 'ns': 6, 's': 0, 'rt': 0},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 't', 'y', 'a', 'z', 'w', 'k', 'f', 'i']
+EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 't', 'y', 'a', 'z', 'w', 'k', 'f', 'i', 'rs']
 
 fails = []
 def check(name, cond, extra=''):
@@ -168,6 +169,32 @@ def run_behaviour(b, group):
         check(L + 'scope target line on shows the set value', vis() and any('50' in x for x in tx()), tx())
         ev("(()=>{const o=__t.C.board.find(o=>o.k==='k');delete o.tg;delete o.tv;__t.syncBoard()})()"); pg.wait_for_timeout(300)
     if group == 'B':
+        rsdrag = lambda ang: ev("""(()=>{const k=document.querySelector('.dialk[aria-valuemax="6"]'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,a=%s*Math.PI/180;
+          const X=x+Math.sin(a)*r.width/2*.9,Y=y-Math.cos(a)*r.width/2*.9;
+          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:9,clientX:x,clientY:y}));
+          k.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:9,clientX:X,clientY:Y}));
+          k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:9,clientX:X,clientY:Y}))})()""" % ang)
+        rshold = lambda: ev("""(()=>{const k=document.querySelector('.dialk[aria-valuemax="6"]'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:10,clientX:x,clientY:y}));
+          return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:10,clientX:x,clientY:y}));res(1)},700))})()""")
+        rsel = lambda: ev("__t.C.board.find(o=>o.k==='rs').s")
+        rsdrag(-27); pg.wait_for_timeout(200)
+        check(L + 'selector: drag selects position C without output', rsel() == 2 and T(2) == 0, (rsel(), T(2)))
+        rshold(); pg.wait_for_timeout(200)
+        check(L + 'selector: long press switches C on', T(2) == 100, T(2))
+        dots = ev("[...document.querySelectorAll('.dialbox svg g')].map(g=>g.children[1].getAttribute('fill'))")
+        check(L + 'selector: 5 red LEDs and 1 green', dots.count('#E24B4A') == 5 and dots.count('#1D9E75') == 1, dots)
+        rsdrag(130); pg.wait_for_timeout(200)
+        check(L + 'selector: changing position switches the old output off', rsel() == 5 and T(2) == 0 and T(5) == 0, (rsel(), T(2), T(5)))
+        rshold(); pg.wait_for_timeout(200)
+        check(L + 'selector: F on', T(5) == 100, T(5))
+        rshold(); pg.wait_for_timeout(200)
+        check(L + 'selector: long press again switches off', T(5) == 0, T(5))
+        ev("__t.C.board.find(o=>o.k==='rs').rv=1;__t.syncBoard()"); pg.wait_for_timeout(300)
+        rshold(); pg.wait_for_timeout(200)
+        check(L + 'selector: F to A order maps position 6 to output A', T(0) == 100 and T(5) == 0, (T(0), T(5)))
+        rshold(); pg.wait_for_timeout(200)
+        ev("(()=>{const o=__t.C.board.find(o=>o.k==='rs');delete o.rv;__t.syncBoard()})()")
         ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)
         arc = ev("document.querySelector('.mtr[data-k=f] .mv').textContent")
         check(L + 'arc meter shows +60', arc == '+60', arc)
