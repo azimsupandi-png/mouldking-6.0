@@ -30,15 +30,17 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 - **Models:** every model stores channel names, reverse, limits, stick mapping, layout and recordings. Two examples are included.
 - **Look:** one brick-style theme (dark panels, studs, hazard stripes, yellow accent), power rings on every channel and stick, and a status line under the title.
 - **Header:** a Bluetooth button (green tick / red cross, follows the phone's Bluetooth and opens its settings), a hub button (play to connect, pause to disconnect, pulses while active) and a stop button for **E-Stop**.
-- **Layouts:** Standard, Joystick, Dual stick and a free **Board** (sliders, hold buttons, sticks, double sticks, sequence buttons, lights and mixers; vertical sliders; tilt steering).
+- **Layouts:** Standard, Joystick, Dual stick and a free **Board** (sliders with an optional hold mode, sticks, double sticks, lights, mixers, toggles, turbo, ramps, gears, dials, meters and a session timer; vertical sliders; tilt steering).
 - **Lights:** set a channel to *Light* for on/off, brightness (gamma-corrected so dimming looks even) and slow/fast/pulse blinking. Blinking is slow on purpose because the hub only catches an update every 100 to 200 ms.
 - **Mixer:** one Board slider that drives up to four channels, each with its own ratio and direction.
+- **Dial and Dial selector:** the Dial sets a channel by touch and drag, with an LED ring around it (colour theme, optional forward-only 0 to 100). Press and hold until it vibrates to switch the output on or off; it ramps over a time you set (default 3 s) to avoid jerking. The Dial selector chooses one of 4 or 6 outputs per hub with six small marker dots; the chosen output stays off until you press and hold, and changing position switches the old output off.
+- **Meters and Scope:** Arc meter, LED meter and a Scope (10, 30 or 60 s, record, pause, step back and forward, optional target line). A Ramp widget can show its own scope with the target and rise time.
 - **Toggles and Turbo:** Board toggles (LED button, latch switch, forward/stop/reverse) and a hold-to-boost Turbo button that lifts a channel to full power while pressed (it still respects Player mode limits).
 - **Power profiles:** Kid, Normal and Full presets (power limit and smoothing) switch with one tap; save the current limit into any of them.
 - **Stick range:** cap how much output a stick can give (25 to 100%).
 - **Hub names:** give each hub a short name, shown in the channel list.
 - **Test hub and Calibration:** move each active channel at the **Test power** set in the Calibration card (default 60%, per model). It ignores Limit and Speed, so raise it until the motor just moves.
-- **Dashboard (landscape, 3D joystick and slider, Back puts the last removed widget back; layout templates: Car / Truck, Excavator, Dual stick, plus up to 10 of your own saved layouts that work in every model and are kept in backups):** in Board layout, tick "Dashboard when the phone is sideways". The board becomes a full-screen canvas. Tap Edit to drag and resize widgets (snapped to a fine 48x24 grid, no overlaps), change each widget colour, and Add widget. An E-Stop widget can be added or removed (the header E-Stop button is always there). The layout is saved per model.
+- **Dashboard (landscape, 3D joystick and slider, Back puts the last removed widget back; layout templates: Car / Truck, Excavator, Dual stick, Monitor, 4 motors + driver, plus up to 10 of your own saved layouts that work in every model and are kept in backups):** in Board layout, tick "Dashboard when the phone is sideways". The board becomes a full-screen canvas. Tap Edit to drag and resize widgets (snapped to a fine 48x24 grid, no overlaps), change each widget colour, and Add widget. An E-Stop widget can be added or removed (the header E-Stop button is always there). The layout is saved per model.
 - **Joystick tuning:** in Dashboard edit mode, the gear button on a joystick sets its deadzone, sensitivity, power limit and axis lock (free, left/right only or up/down only). Each joystick is tuned separately and the settings are saved with the layout.
 - **Slider shortcut:** tap the number at the top right of a Board slider to send it back to 0.
 - **Export / import layouts:** Template > Export layout gives a text you can copy; Import layout pastes one back (Back undoes it).
@@ -69,3 +71,5 @@ The hub only listens, so the app cannot show battery level or motor state.
 `python3 tests/widgets_test.py` loads the app in headless Chromium and checks every board
 widget kind (render, settings popup, behaviour, reload) in landscape and portrait. It needs
 Python with `playwright` and Chromium installed. Run it before each commit.
+
+`python3 tests/dashboard_edit_test.py` checks Dashboard editing in landscape (drag, select, resize, templates).

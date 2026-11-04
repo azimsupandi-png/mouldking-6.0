@@ -112,6 +112,14 @@ def run_behaviour(b, group):
         hold(); i0 = T(3); hold(); i1 = T(3)
         check(L + 'dial ramp time 0 switches instantly', i0 == 50 and i1 == 0, (i0, i1))
         ev("delete __t.C.board.find(o=>o.k==='n').rt;__t.syncBoard()"); pg.wait_for_timeout(300)
+        ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect();window.__hc=[];
+          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:11,clientX:r.left+r.width/2,clientY:r.top+r.height/2}));
+          window.__hc.push(k.classList.contains('holding'));
+          k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:11,clientX:r.left+r.width/2,clientY:r.top+r.height/2}));
+          window.__hc.push(k.classList.contains('holding'))})()""")
+        hc = ev("window.__hc")
+        check(L + 'dial shows a hold cue while pressed and clears it on release', hc == [True, False], hc)
+        ev("__t.rt.t[3]=0")
         hold(); pg.wait_for_timeout(1000); vm = T(3); pg.wait_for_timeout(2400); v0 = T(3)
         check(L + 'dial on ramps up over 3 s (no jump)', 0 < vm < 50, vm)
         hold(); pg.wait_for_timeout(3400); v1 = T(3)
