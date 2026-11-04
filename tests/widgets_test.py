@@ -26,6 +26,8 @@ GROUP_A = [
     {'k': 'g', 'c': 1, 'w': 1},
     {'k': 'n', 'c': 3, 'w': 1},
     {'k': 'k', 'c': 0, 'w': 1},
+    {'k': 'st', 'c': 4, 'w': 1},
+    {'k': 'lv', 'c': 5, 'w': 1},
 ]
 GROUP_B = [
     {'k': 'a', 'c': 0, 'w': 1, 's': 10},
@@ -36,9 +38,10 @@ GROUP_B = [
     {'k': 'f', 'c': 0, 'w': 1},
     {'k': 'i', 'c': 1, 'w': 1},
     {'k': 'rs', 'w': 1, 'p': 100, 'ns': 6, 's': 0, 'rt': 0},
+    {'k': 'dp', 'c': 3, 'd': 4, 'w': 1, 'm': 'tank', 'p': 70, 'rt': 0},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 't', 'y', 'a', 'z', 'w', 'k', 'f', 'i', 'rs']
+EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 't', 'y', 'a', 'z', 'w', 'k', 'f', 'i', 'rs', 'st', 'lv', 'dp']
 
 fails = []
 def check(name, cond, extra=''):
@@ -176,6 +179,34 @@ def run_behaviour(b, group):
         ev("(()=>{const o=__t.C.board.find(o=>o.k==='k');o.tg=1;o.tv=-50;__t.syncBoard()})()"); pg.wait_for_timeout(400)
         check(L + 'scope target line on shows the set value', vis() and any('50' in x for x in tx()), tx())
         ev("(()=>{const o=__t.C.board.find(o=>o.k==='k');delete o.tg;delete o.tv;__t.syncBoard()})()"); pg.wait_for_timeout(300)
+    if group == 'A':
+        # steering wheel: grab the top marker, turn to the right (90 deg = full lock at 180 total), release springs back
+        wheel = lambda pid, ax, ay, bx, by, wait: ev("""(()=>{const k=document.querySelector('.stk'),r=k.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,R=r.width/2*.8;
+          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:%d,clientX:cx+R*%s,clientY:cy+R*%s}));
+          k.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:%d,clientX:cx+R*%s,clientY:cy+R*%s}));
+          return new Promise(res=>setTimeout(()=>{res(__t.rt.t[4])},%d))})()""" % (pid, ax, ay, pid, bx, by, wait))
+        v_r = wheel(21, 0, -1, 1, 0, 50)
+        ang = ev("document.querySelector('.stk').style.transform")
+        ev("document.querySelector('.stk').dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:21}))")
+        pg.wait_for_timeout(700)
+        check(L + 'wheel: turn right sends about +100 and the wheel rotates', v_r >= 90 and 'rotate' in ang, (v_r, ang))
+        check(L + 'wheel: springs back to 0 on release', T(4) == 0, T(4))
+        v_l = wheel(22, 0, -1, -1, 0, 50)
+        ev("document.querySelector('.stk').dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:22}))")
+        pg.wait_for_timeout(700)
+        check(L + 'wheel: turn left sends about -100', v_l <= -90, v_l)
+        # gear lever: tap positions top (3), N and bottom (R)
+        lever = lambda i: ev("""(()=>{const t=document.querySelector('.lvt'),r=t.getBoundingClientRect(),y=r.top+r.height*(8+%d/4*84)/100,x=r.left+r.width*.6;
+          t.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:31,clientX:x,clientY:y}));
+          t.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:31,clientX:x,clientY:y}))})()""" % i)
+        lever(0); pg.wait_for_timeout(300); g3 = T(5)
+        lever(2); pg.wait_for_timeout(300); g1 = T(5)
+        lever(3); pg.wait_for_timeout(300); gn = T(5)
+        lever(4); pg.wait_for_timeout(300); gr = T(5)
+        check(L + 'lever: 3, 1, N, R send 100, 35, 0, -50', (g3, g1, gn, gr) == (100, 35, 0, -50), (g3, g1, gn, gr))
+        lab = ev("[...document.querySelectorAll('.lvd b')].map(b=>b.textContent).join('')")
+        check(L + 'lever: labels top to bottom 3 2 1 N R', lab == '321NR', lab)
+        ev("__t.rt.t[4]=0;__t.rt.t[5]=0")
     if group == 'B':
         rsdrag = lambda ang: ev("""(()=>{const k=document.querySelector('.dialk[aria-valuemax="6"]'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,a=%s*Math.PI/180;
           const X=x+Math.sin(a)*r.width/2*.9,Y=y-Math.cos(a)*r.width/2*.9;
@@ -270,6 +301,44 @@ def run_behaviour(b, group):
         check(L + 'second stop returns to live', '10 s' in lab, lab)
         ev("__t.rt.t[0]=0")
         ev("__t.rt.t[0]=0")
+    if group == 'B':
+        # D-pad (tank): hold up = both forward, + left = pivot, release stops
+        press = lambda d, pid: ev("document.querySelector('.dpb.%s').dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:%d}))" % (d, pid))
+        lift = lambda d, pid: ev("document.querySelector('.dpb.%s').dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:%d}))" % (d, pid))
+        press('u', 41); up = (T(3), T(4))
+        press('l', 42); pv = (T(3), T(4))
+        lift('l', 42); lift('u', 41); st0 = (T(3), T(4))
+        check(L + 'dpad tank: up drives both at 70%', up == (70, 70), up)
+        check(L + 'dpad tank: up + left pivots (left 0, right 70)', pv == (0, 70), pv)
+        check(L + 'dpad: release stops both', st0 == (0, 0), st0)
+        press('d', 43); dn = (T(3), T(4)); lift('d', 43)
+        check(L + 'dpad tank: down reverses both', dn == (-70, -70), dn)
+        ev("(()=>{const o=__t.C.board.find(o=>o.k==='dp');o.m='car';__t.syncBoard()})()"); pg.wait_for_timeout(300)
+        press('u', 44); c1 = (T(3), T(4)); press('r', 45); c2 = (T(3), T(4)); lift('r', 45); lift('u', 44)
+        check(L + 'dpad car: up drives, right steers', c1 == (70, 0) and c2 == (70, 70), (c1, c2))
+        ev("(()=>{const o=__t.C.board.find(o=>o.k==='dp');o.tg=1;o.m='tank';__t.syncBoard()})()"); pg.wait_for_timeout(300)
+        press('u', 46); lift('u', 46); t1 = (T(3), T(4))
+        press('u', 47); lift('u', 47); t2 = (T(3), T(4))
+        check(L + 'dpad tap-to-toggle: on then off', t1 == (70, 70) and t2 == (0, 0), (t1, t2))
+        ev("(()=>{const o=__t.C.board.find(o=>o.k==='dp');delete o.tg;o.rt=1;__t.syncBoard()})()"); pg.wait_for_timeout(300)
+        press('u', 48); pg.wait_for_timeout(300); mid = T(3)
+        lift('u', 48); pg.wait_for_timeout(1300)
+        check(L + 'dpad ramp: partway after 0.3 s, back to 0 after release', 0 < mid < 70 and T(3) == 0, (mid, T(3)))
+        # gamepad -> dial selector: LB/RB move, A toggles on/off
+        ev("""(()=>{window.__fp={connected:true,id:'test pad',axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false,value:0}))};
+          navigator.getGamepads=()=>[window.__fp];__t.C.pad.on=true;__t.C.pad.map={4:'rp',5:'rn',0:'rg'};__t.save()})()""")
+        pg.wait_for_timeout(200)
+        tap = lambda i: (ev("window.__fp.buttons[%d].pressed=true" % i), pg.wait_for_timeout(120), ev("window.__fp.buttons[%d].pressed=false" % i), pg.wait_for_timeout(120))
+        ev("__t.C.board.find(o=>o.k==='rs').s=0;__t.syncBoard()"); pg.wait_for_timeout(300)
+        tap(5); tap(5); s2 = rsel()
+        tap(4); s1 = rsel()
+        check(L + 'gamepad: RB, RB, LB moves the dial selector 0 -> 2 -> 1', (s2, s1) == (2, 1), (s2, s1))
+        tap(0); on1 = T(1)
+        tap(5); moved = (rsel(), T(1), T(2))
+        tap(0); tap(0)
+        check(L + 'gamepad: A switches the selected output on', on1 == 100, on1)
+        check(L + 'gamepad: changing position switches the old output off', moved[0] == 2 and moved[1] == 0, moved)
+        ev("__t.C.pad.map={};__t.rt.t[1]=0;__t.rt.t[2]=0")
     check(L + 'no script errors', not errs, errs)
     pg.close()
 
