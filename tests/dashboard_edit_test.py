@@ -57,7 +57,7 @@ with sync_playwright() as p:
     pg.click('#gEdit .gact button:nth-child(1)'); pg.wait_for_timeout(300)
     hc = pg.evaluate("__t.C.board[0].hc")
     chk('colour pad stores the chosen colour', hc == '#2f6bff')
-    chk('widget uses a hue-rotate filter for it', pg.evaluate("document.querySelectorAll('.dw')[0].style.filter.includes('hue-rotate')"))
+    chk('widget gets the exact colour as a CSS variable', pg.evaluate("document.querySelectorAll('.dw')[0].style.getPropertyValue('--hc')") == '#2f6bff')
     pg.mouse.click(e['x'] + e['width']/2, e['y'] + e['height']/2); pg.wait_for_timeout(400)
     pg.click('.dw.sel button[aria-label="Colour"]'); pg.wait_for_timeout(300)
     pg.fill('.clrhex', '#ff3300'); pg.click('#gEdit .gact button:nth-child(2)'); pg.wait_for_timeout(300)
