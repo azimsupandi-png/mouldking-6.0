@@ -973,15 +973,6 @@ html,body{overflow-anchor:none}
 .gbox .grow{display:grid;grid-template-columns:minmax(0,1fr) 40px 76px auto 40px;align-items:center;gap:6px}
 .gbox .grow .wsb{height:40px;font-size:22px}
 .gbox .grow input{height:38px;text-align:center}
-.gbox .clrsv{position:relative;height:150px;border-radius:10px;touch-action:none;cursor:crosshair}
-.gbox .clrk{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #000,inset 0 0 0 1px #000;pointer-events:none}
-.gbox .clrhue{width:100%;height:22px;-webkit-appearance:none;appearance:none;border-radius:11px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);margin:4px 0}
-.gbox .clrhue::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:26px;border-radius:8px;background:#fff;border:2px solid #000}
-.gbox .clrrow{display:grid;grid-template-columns:56px 1fr;gap:8px;align-items:center}
-.gbox .clrprev{height:38px;border-radius:8px;border:1px solid #2b2f36}
-.gbox .clrhex{text-transform:lowercase}
-.gbox .clrsw{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
-.gbox .clrs{height:28px;border-radius:50%;border:1px solid #2b2f36;padding:0}
 .gbox .gact{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .gbox .wsf{display:grid;gap:6px;padding:2px 0 6px}
 .gbox .wsl{font-size:13px;opacity:.8}
@@ -1693,9 +1684,7 @@ html,body{overflow-anchor:none}
     });
     return out;
   }
-  // Widgets without the colour option (E-Stop, and sliders whose image thumb cannot take an exact colour)
-  var NOCLR=['e','s','m'];
-  var DG={x:48,y:24,k:'g'}, DHUE=[0,-45,-20,75,135,190,235,290];
+  var DG={x:48,y:24,k:'g'};
   function dashLand(){return window.innerWidth>window.innerHeight}
   function dashSetMode(){var l=dashLand();DG.x=l?48:24;DG.y=l?24:48;DG.k=l?'g':'gp';return l}
   function dmin(it){if((it.k==='s'||it.k==='m')&&it.v) return [6,12];if(it.k==='y'&&it.sc) return [14,10];return DMIN[it.k]||[3,3]}
@@ -1807,9 +1796,6 @@ html,body{overflow-anchor:none}
           if(it0.k==='s'){var sn0=Math.round(+x.snap);if([5,10,25].indexOf(sn0)>=0) it0.snap=sn0}
           if(it0.k==='b'){var bp0=Math.round(+x.p);it0.p=(bp0>=30&&bp0<=100)?bp0:100;if(x.lock===true) it0.lock=true}
         }
-        var cl=Math.round(+x.col);
-        if(cl>0&&cl<DHUE.length&&NOCLR.indexOf(it0.k)<0) it0.col=cl;
-        if(typeof x.hc==='string'&&/^#[0-9a-f]{6}$/i.test(x.hc)&&NOCLR.indexOf(it0.k)<0) it0.hc=x.hc.toLowerCase();
         if(typeof x.lbl==='string'&&it0.k!=='e'){var lb0=x.lbl.replace(/\s+/g,' ').trim().slice(0,20);if(lb0) it0.lbl=lb0}
       }
     });
@@ -3987,8 +3973,6 @@ html,body{overflow-anchor:none}
     el.classList.add('dw');
     if(it.k==='e') el.classList.add('estopw');
     dashStyle(el,it[DG.k]);
-    if(it.hc&&NOCLR.indexOf(it.k)<0) clrVars(el,it.hc);
-    else if(it.col>0&&NOCLR.indexOf(it.k)<0) el.style.filter='hue-rotate('+DHUE[it.col]+'deg)';
     if(bdEditing){
       el.classList.add('dw-ed');if(it===bdPick) el.classList.add('sel');
       var rs=document.createElement('div');rs.className='dw-rs';rs.setAttribute('aria-hidden','true');el.appendChild(rs);
@@ -4001,81 +3985,12 @@ html,body{overflow-anchor:none}
     var n=C.board.indexOf(it), m=n+d;if(n<0||m<0||m>=C.board.length) return;
     var t=C.board[n];C.board[n]=C.board[m];C.board[m]=t;save();syncBoard();
   }
-  function clrHex(h,sv,v){
-    var c=v*sv,x=c*(1-Math.abs((h/60)%2-1)),m=v-c,r=0,g=0,b=0;
-    if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}
-    return '#'+[r,g,b].map(function(q){var n=Math.round((q+m)*255);return (n<16?'0':'')+n.toString(16)}).join('');
-  }
-  function clrHsv(hex){
-    var r=parseInt(hex.substr(1,2),16)/255,g=parseInt(hex.substr(3,2),16)/255,b=parseInt(hex.substr(5,2),16)/255;
-    var mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,h=0;
-    if(d){if(mx===r) h=60*(((g-b)/d)%6);else if(mx===g) h=60*((b-r)/d+2);else h=60*((r-g)/d+4)}
-    if(h<0) h+=360;
-    return {h:h,s:mx?d/mx:0,v:mx};
-  }
-  // Exact colour: set CSS variables on the widget (main, light, dark shades, text colour)
-  function clrVars(el,hex){
-    var n=parseInt(hex.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255;
-    function mix(t,k){return [Math.round(r+(t-r)*k),Math.round(g+(t-g)*k),Math.round(b+(t-b)*k)]}
-    function h2(a){return '#'+a.map(function(v){return ('0'+v.toString(16)).slice(-2)}).join('')}
-    var l=mix(255,.5),d=mix(0,.55),dd=mix(0,.7),lum=(0.299*r+0.587*g+0.114*b)/255;
-    var st=el.style;
-    st.setProperty('--hc',hex);st.setProperty('--hcl',h2(l));st.setProperty('--hcd',h2(d));
-    st.setProperty('--hcr',r+','+g+','+b);st.setProperty('--hcdr',dd.join(','));
-    st.setProperty('--hct',lum>.5?'#1a1400':'#ffffff');
-  }
-  function clrOpen(it){
-    var old=document.getElementById('gEdit');if(old) old.remove();
-    var ov=document.createElement('div');ov.id='gEdit';ov.className='gedit';
-    var bx=document.createElement('div');bx.className='gbox';ov.appendChild(bx);
-    function mk(tag,txt,cls){var e=document.createElement(tag);if(txt) e.textContent=txt;if(cls) e.className=cls;return e}
-    bx.appendChild(mk('h3','Colour pad'));
-    var cur=clrHsv(it.hc||'#ffd84a'),hex=it.hc||'#ffd84a';
-    var sv=mk('div','','clrsv'),svk=mk('i','','clrk');sv.appendChild(svk);bx.appendChild(sv);
-    var hue=document.createElement('input');hue.type='range';hue.min='0';hue.max='359';hue.step='1';hue.className='clrhue';hue.setAttribute('aria-label','Hue');bx.appendChild(hue);
-    var row=mk('div','','clrrow'),prev=mk('div','','clrprev'),hx=document.createElement('input');hx.type='text';hx.className='txt clrhex';hx.maxLength=7;hx.setAttribute('aria-label','Hex');hx.autocomplete='off';
-    row.appendChild(prev);row.appendChild(hx);bx.appendChild(row);
-    var sw=mk('div','','clrsw');
-    ['#ffd84a','#ff7a2f','#e24b4a','#d4537e','#7f77dd','#378add','#1d9e75','#8bc34a','#ffffff','#9aa3b0'].forEach(function(c){
-      var b=mk('button','','clrs');b.type='button';b.style.background=c;b.setAttribute('aria-label',c);
-      b.addEventListener('click',function(){cur=clrHsv(c);draw()});sw.appendChild(b);
-    });
-    bx.appendChild(sw);
-    function draw(from){
-      hex=clrHex(cur.h,cur.s,cur.v);
-      sv.style.background='linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,'+clrHex(cur.h,1,1)+')';
-      svk.style.left=(cur.s*100)+'%';svk.style.top=((1-cur.v)*100)+'%';
-      hue.value=String(Math.round(cur.h)%360);
-      if(from!=='hex') hx.value=hex;
-      prev.style.background=hex;prev.style.filter='';
-    }
-    function svAt(e){
-      var r=sv.getBoundingClientRect();
-      cur.s=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));cur.v=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));draw();
-    }
-    var dr=false;
-    sv.addEventListener('pointerdown',function(e){dr=true;try{sv.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault();svAt(e)});
-    sv.addEventListener('pointermove',function(e){if(dr) svAt(e)});
-    ['pointerup','pointercancel'].forEach(function(n){sv.addEventListener(n,function(){dr=false})});
-    hue.addEventListener('input',function(){cur.h=+hue.value;draw()});
-    hx.addEventListener('input',function(){var v=hx.value.trim();if(v.charAt(0)!=='#') v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v)){cur=clrHsv(v.toLowerCase());draw('hex')}});
-    var act=mk('div','','gact'),ap=mk('button','Apply','btn'),all=mk('button','Apply to all widgets','btn'),rs=mk('button','Reset colour','btn'),cn=mk('button','Cancel','btn');
-    [ap,all,rs,cn].forEach(function(b){b.type='button'});ap.setAttribute('aria-pressed','true');
-    ap.addEventListener('click',function(){delete it.col;it.hc=hex;ov.remove();save();syncBoard()});
-    all.addEventListener('click',function(){C.board.forEach(function(o){if(NOCLR.indexOf(o.k)<0){delete o.col;o.hc=hex}});ov.remove();save();syncBoard()});
-    rs.addEventListener('click',function(){delete it.col;delete it.hc;ov.remove();save();syncBoard()});
-    cn.addEventListener('click',function(){ov.remove()});
-    act.appendChild(ap);act.appendChild(all);act.appendChild(rs);act.appendChild(cn);bx.appendChild(act);
-    ov.addEventListener('click',function(e){if(e.target===ov) ov.remove()});
-    document.body.appendChild(ov);draw();
-  }
   function bdToolbar(it){
     var ed=document.createElement('div');ed.className='bdw-ed';
     var dash=dashOn();
     if(dash&&it!==bdPick){ed.classList.add('empty');return ed}
     var defs=dash?[]:[['◀','Move earlier',function(){bdMove(it,-1)}],['▶','Move later',function(){bdMove(it,1)}]];
     if(!dash&&it.k!=='d') defs.push(['↔','Wide or normal',function(){it.w=it.w===2?1:2;save();syncBoard()}]);
-    if(dash&&NOCLR.indexOf(it.k)<0) defs.push(['●','Colour',function(){clrOpen(it)}]);
     if(it.k==='s'||it.k==='m') defs.push(['\u2195','Vertical or horizontal',function(){it.v=!it.v;if(dashOn()) dashRefit(it);save();syncBoard()},!!it.v]);
     if(it.k==='s'||it.k==='j'||it.k==='d'||it.k==='m') defs.push(['0','Return to 0 on release',function(){
       it.hold=!it.hold;
@@ -5269,7 +5184,7 @@ html,body{overflow-anchor:none}
     'Channel A drives and channel B steers. Use the Joystick layout: up and down drives, left and right steers.':'Saluran A memandu dan saluran B mengemudi. Guna susun atur Joystick: atas dan bawah memandu, kiri dan kanan mengemudi.',
     'Channels A and B drive the tracks, C, D and E move the arm, bucket and swing. Uses the Dual stick layout.':'Saluran A dan B menggerakkan track, C, D dan E menggerakkan lengan, baldi dan putaran. Guna susun atur Dua stick.',
     'Model created. Rename the channels or change the layout any time.':'Model dicipta. Anda boleh namakan semula saluran atau tukar susun atur bila-bila masa.',
-'Switch (SPDT)':'Suis (SPDT)','Switch settings':'Tetapan suis','Output A':'Output A','Output B':'Output B','Centre off position':'Kedudukan tengah mati','Reverse output A':'Songsang output A','Reverse output B':'Songsang output B','Pick two different channels.':'Pilih dua saluran berbeza.','Slider settings':'Tetapan slider','Mix settings':'Tetapan campuran','Dial settings':'Tetapan dail','Colour pad':'Pad warna','Steering wheel':'Stereng','Gear lever':'Tuas gear','D-pad':'Pad arah','Tidy':'Susun','Wheel':'Stereng','Lever':'Tuas','Widgets tidied. Back undoes it.':'Widget disusun. Back untuk batal.','Steering wheel settings':'Tetapan stereng','Full lock at':'Kunci penuh pada','On release':'Bila dilepas','Return to centre':'Kembali ke tengah','Stay':'Kekal','D-pad settings':'Tetapan pad arah','Drive mode':'Mod pemanduan','Tank (2 motors)':'Tank (2 motor)','Car (drive + steer)':'Kereta (pacu + stereng)','Ramp time (0 = instant)':'Masa ramp (0 = serta-merta)','Hold to move':'Tahan untuk bergerak','Tap to toggle':'Ketik untuk togol','Dial selector: previous position':'Suis dail: kedudukan sebelum','Dial selector: next position':'Suis dail: kedudukan seterusnya','Dial selector: on/off':'Suis dail: hidup/mati','Apply to all widgets':'Guna pada semua widget','Reset colour':'Set semula warna','Apply':'Guna','Dial selector':'Suis dail','Selector settings':'Tetapan suis dail','Output power':'Kuasa output','Positions':'Kedudukan','Hub':'Hab','Hub 1':'Hab 1','Hub 2':'Hab 2','Hub 3':'Hab 3','Both ways':'Dua arah','Forward only':'Ke depan sahaja','On/off ramp time (0 = instant)':'Masa ramp on/off (0 = serta-merta)','Turbo settings':'Tetapan turbo','Direction & limit':'Arah & had','Reverse direction':'Songsang arah','Power limit':'Had kuasa','Snap to':'Lekat pada','Turbo power':'Kuasa turbo','Tap to lock on':'Ketik untuk kunci hidup','Brightness':'Kecerahan','Blink':'Kelip','Repeat':'Ulang','Speed':'Laju','Loop':'Gelung','On':'Hidup','Steady':'Tetap','Slow':'Perlahan','Fast':'Laju','Toggle settings':'Tetapan togol','Ramp settings':'Tetapan naik perlahan','Auto-stop settings':'Tetapan henti auto','Timer settings':'Tetapan pemasa','Widget settings':'Tetapan widget','Power':'Kuasa','Target power':'Kuasa sasaran','Ramp time':'Masa naik','Stop after':'Henti selepas','Alert after (0 = off)':'Amaran selepas (0 = mati)','Off':'Mati','Decrease':'Kurang','Increase':'Tambah','Auto-stop':'Henti auto','Ramp':'Naik perlahan','Arc meter':'Meter arka','Meter settings':'Tetapan meter','Target line':'Garisan sasaran','Target value':'Nilai sasaran','Monitor':'Pemantau','4 motors + driver':'4 motor + pemandu','LED and arc meter, slider, scope and ramp for one channel':'Meter LED dan arka, slider, scope dan ramp untuk satu saluran','Four arc meters on top, joystick and scope below':'Empat meter arka di atas, joystick dan scope di bawah','Main value':'Nilai utama','Widget':'Widget','Hub output':'Output hab','Colour theme':'Tema warna','Blue-orange':'Biru-oren','Mono':'Mono','Time window':'Tetingkap masa','LED meter':'Meter LED','Scope':'Osiloskop','Duration':'Tempoh','ON':'AKTIF','Gear':'Gear','Gear settings':'Tetapan gear','Session timer':'Pemasa sesi','Dial':'Dail','R (reverse)':'R (undur)','Add gear':'Tambah gear','Remove gear':'Buang gear','Save':'Simpan','Cancel':'Batal','Session timer reset.':'Pemasa sesi ditetapkan semula.','No alert \u00b7 hold to reset':'Tiada amaran \u00b7 tahan untuk set semula','Light settings':'Tetapan lampu','Test hub':'Uji hab','Kid':'Kanak-kanak','Full':'Penuh','Power profile':'Profil kuasa','Save current limit as profile':'Simpan had semasa sebagai profil','Save profile':'Simpan profil','Profile saved.':'Profil disimpan.','Stick range (maximum output)':'Julat stick (output maksimum)','Hub names (optional)':'Nama hab (pilihan)','Hub 1 name':'Nama hab 1','Hub 2 name':'Nama hab 2','Hub 3 name':'Nama hab 3','Turbo':'Turbo','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
+'Switch (SPDT)':'Suis (SPDT)','Switch settings':'Tetapan suis','Output A':'Output A','Output B':'Output B','Centre off position':'Kedudukan tengah mati','Reverse output A':'Songsang output A','Reverse output B':'Songsang output B','Pick two different channels.':'Pilih dua saluran berbeza.','Slider settings':'Tetapan slider','Mix settings':'Tetapan campuran','Dial settings':'Tetapan dail','Steering wheel':'Stereng','Gear lever':'Tuas gear','D-pad':'Pad arah','Tidy':'Susun','Wheel':'Stereng','Lever':'Tuas','Widgets tidied. Back undoes it.':'Widget disusun. Back untuk batal.','Steering wheel settings':'Tetapan stereng','Full lock at':'Kunci penuh pada','On release':'Bila dilepas','Return to centre':'Kembali ke tengah','Stay':'Kekal','D-pad settings':'Tetapan pad arah','Drive mode':'Mod pemanduan','Tank (2 motors)':'Tank (2 motor)','Car (drive + steer)':'Kereta (pacu + stereng)','Ramp time (0 = instant)':'Masa ramp (0 = serta-merta)','Hold to move':'Tahan untuk bergerak','Tap to toggle':'Ketik untuk togol','Dial selector: previous position':'Suis dail: kedudukan sebelum','Dial selector: next position':'Suis dail: kedudukan seterusnya','Dial selector: on/off':'Suis dail: hidup/mati','Dial selector':'Suis dail','Selector settings':'Tetapan suis dail','Output power':'Kuasa output','Positions':'Kedudukan','Hub':'Hab','Hub 1':'Hab 1','Hub 2':'Hab 2','Hub 3':'Hab 3','Both ways':'Dua arah','Forward only':'Ke depan sahaja','On/off ramp time (0 = instant)':'Masa ramp on/off (0 = serta-merta)','Turbo settings':'Tetapan turbo','Direction & limit':'Arah & had','Reverse direction':'Songsang arah','Power limit':'Had kuasa','Snap to':'Lekat pada','Turbo power':'Kuasa turbo','Tap to lock on':'Ketik untuk kunci hidup','Brightness':'Kecerahan','Blink':'Kelip','Repeat':'Ulang','Speed':'Laju','Loop':'Gelung','On':'Hidup','Steady':'Tetap','Slow':'Perlahan','Fast':'Laju','Toggle settings':'Tetapan togol','Ramp settings':'Tetapan naik perlahan','Auto-stop settings':'Tetapan henti auto','Timer settings':'Tetapan pemasa','Widget settings':'Tetapan widget','Power':'Kuasa','Target power':'Kuasa sasaran','Ramp time':'Masa naik','Stop after':'Henti selepas','Alert after (0 = off)':'Amaran selepas (0 = mati)','Off':'Mati','Decrease':'Kurang','Increase':'Tambah','Auto-stop':'Henti auto','Ramp':'Naik perlahan','Arc meter':'Meter arka','Meter settings':'Tetapan meter','Target line':'Garisan sasaran','Target value':'Nilai sasaran','Monitor':'Pemantau','4 motors + driver':'4 motor + pemandu','LED and arc meter, slider, scope and ramp for one channel':'Meter LED dan arka, slider, scope dan ramp untuk satu saluran','Four arc meters on top, joystick and scope below':'Empat meter arka di atas, joystick dan scope di bawah','Main value':'Nilai utama','Widget':'Widget','Hub output':'Output hab','Colour theme':'Tema warna','Blue-orange':'Biru-oren','Mono':'Mono','Time window':'Tetingkap masa','LED meter':'Meter LED','Scope':'Osiloskop','Duration':'Tempoh','ON':'AKTIF','Gear':'Gear','Gear settings':'Tetapan gear','Session timer':'Pemasa sesi','Dial':'Dail','R (reverse)':'R (undur)','Add gear':'Tambah gear','Remove gear':'Buang gear','Save':'Simpan','Cancel':'Batal','Session timer reset.':'Pemasa sesi ditetapkan semula.','No alert \u00b7 hold to reset':'Tiada amaran \u00b7 tahan untuk set semula','Light settings':'Tetapan lampu','Test hub':'Uji hab','Kid':'Kanak-kanak','Full':'Penuh','Power profile':'Profil kuasa','Save current limit as profile':'Simpan had semasa sebagai profil','Save profile':'Simpan profil','Profile saved.':'Profil disimpan.','Stick range (maximum output)':'Julat stick (output maksimum)','Hub names (optional)':'Nama hab (pilihan)','Hub 1 name':'Nama hab 1','Hub 2 name':'Nama hab 2','Hub 3 name':'Nama hab 3','Turbo':'Turbo','Stop test':'Henti ujian','Release the E-Stop first.':'Lepaskan E-Stop dahulu.','Stop the current playback first.':'Henti main semula semasa dahulu.','Toggle':'Togol','Toggle settings':'Tetapan togol','LED button':'Butang LED','Latch switch':'Suis selak','Direction':'Arah','Style':'Gaya','Power':'Kuasa','Speed':'Kelajuan','Start after':'Mula selepas','Now':'Sekarang','Light':'Lampu','Brightness':'Kecerahan','Blink':'Kelip','Steady':'Tetap','Slow blink':'Kelip perlahan','Fast blink':'Kelip laju','Pulse':'Denyut','Mix':'Campur','Share of power for each channel (same order as above)':'Bahagian kuasa untuk setiap saluran','Pick at least one channel.':'Pilih sekurang-kurangnya satu saluran.','Pick different channels.':'Pilih saluran yang berbeza.','Light channel':'Saluran lampu','ON':'HIDUP','OFF':'MATI',
     'Record & replay':'Rakam & main semula','Record':'Rakam','Play':'Main','Loop':'Ulang','Ready':'Sedia','Recordings':'Rakaman','Recording name':'Nama rakaman',
     'No recordings yet':'Belum ada rakaman','Stop recording':'Henti rakam','Connect the hub first.':'Sambung hab dahulu.',
     'Sequences':'Jujukan','Sequence':'Jujukan','Sequence name':'Nama jujukan','Add step':'Tambah langkah','Run':'Jalan','New sequence':'Jujukan baharu','Copy':'Salin',
