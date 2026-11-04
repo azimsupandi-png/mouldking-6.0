@@ -69,10 +69,10 @@ with sync_playwright() as p:
     # Tidy: scrambled widgets are packed with no overlap and the same sizes
     pg.evaluate("""()=>{const t=__t;t.C.board=t.cleanBoard([{k:'n',c:0,w:1},{k:'n',c:1,w:1},{k:'n',c:2,w:1}]);t.save();t.syncBoard()}""")
     pg.wait_for_timeout(300)
-    pg.evaluate("""()=>{const t=__t;t.C.board[0].g=[30,10,10,12];t.C.board[1].g=[4,0,10,12];t.C.board[2].g=[18,12,10,12];t.syncBoard()}""")
+    pg.evaluate("""()=>{const t=__t;t.C.board[0].g=[30,2,10,12];t.C.board[1].g=[4,0,10,12];t.C.board[2].g=[18,3,10,12];t.syncBoard()}""")
     pg.click('#dbTidy'); pg.wait_for_timeout(300)
     tg = pg.evaluate("__t.C.board.map(o=>o.g)")
-    chk('tidy keeps sizes and removes gaps', sorted(g[0] for g in tg if g[1] == 0) == [0, 10, 20] and all(g[2] == 10 and g[3] == 12 for g in tg))
+    chk('tidy aligns a messy row: same top, no gaps, same sizes', sorted(g[0] for g in tg) == [0, 10, 20] and all(g[1] == 0 and g[2] == 10 and g[3] == 12 for g in tg))
     chk('no script errors', not errs)
     b.close()
 sys.exit(1 if fails else 0)
