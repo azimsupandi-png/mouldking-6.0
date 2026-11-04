@@ -3807,7 +3807,7 @@ html,body{overflow-anchor:none}
     if(k==='w') return L?[18,7]:[24,7];
     if(k==='a') return L?[14,6]:[24,6];
     if(k==='y') return it.sc?(L?[18,12]:[24,12]):(L?[18,6]:[24,6]);
-    if(k==='f') return L?[14,10]:[18,10];
+    if(k==='f') return L?[10,12]:[14,12];
     if(k==='i') return L?[8,14]:[10,14];
     if(k==='k') return L?[20,12]:[24,12];
     if(k==='n') return L?[10,12]:[14,12];
@@ -4150,7 +4150,12 @@ html,body{overflow-anchor:none}
     bdEditBtn.setAttribute('aria-pressed',String(bdEditing));
     bdEditBtn.textContent=bdEditing?'Done editing':'Edit board';
     var dash=dashOn();
-    if(dash){dashAuto();dashCell()}
+    if(dash){dashAuto();dashCell();
+      // arc meters from older builds (old default 14x10) become the same size as the dial and wheel (10x12)
+      if(DG.k==='g'){var mig=false;C.board.forEach(function(o){
+        if(o.k==='f'&&o.g&&o.g[2]===14&&o.g[3]===10){var t=[o.g[0],o.g[1],10,12];if(t[1]+12<=DG.y&&!dashHits(o,t)){o.g=t;mig=true}}});
+        if(mig) save()}
+    }
     bdGrid.classList.toggle('editing',dash&&bdEditing);
     $('#dbEdit').setAttribute('aria-pressed',String(bdEditing));
     $('#dbEdit').textContent=bdEditing?'Done':'Edit';
