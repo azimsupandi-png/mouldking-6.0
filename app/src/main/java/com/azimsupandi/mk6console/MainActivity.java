@@ -106,6 +106,10 @@ public class MainActivity extends Activity {
 
         web = new WebView(this);
         setContentView(web);
+        // Android adds its own long-press buzz on top of the page's. Turn it off so the
+        // app's Vibration setting is the only thing that decides whether anything vibrates.
+        web.setHapticFeedbackEnabled(false);
+        web.setLongClickable(false);
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -556,6 +560,7 @@ public class MainActivity extends Activity {
             else if ("lost".equals(kind)) p = new long[] {0, 300};
             else if ("ok".equals(kind)) p = new long[] {0, 13};
             else if ("dial".equals(kind)) p = new long[] {0, 13};
+            else if ("hold".equals(kind)) p = new long[] {0, 35};
             else p = new long[] {0, 13};
             final long[] pattern = p;
             runOnUiThread(() -> buzz(pattern));

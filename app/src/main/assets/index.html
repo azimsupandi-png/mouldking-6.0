@@ -3261,7 +3261,7 @@ html,body{overflow-anchor:none}
       });
     }catch(e){}
   }
-  var FB={estop:[[440,440],0.12,'estop'],release:[[600,800],0.1,'ok'],ok:[[700,900],0.09,'ok'],lost:[[500,300],0.2,'lost'],warn:[[880,880,880],0.16,'warn'],idle:[[700,500,350],0.14,'warn']};
+  var FB={estop:[[440,440],0.12,'estop'],release:[[600,800],0.1,'ok'],ok:[[700,900],0.09,'ok'],lost:[[500,300],0.2,'lost'],warn:[[880,880,880],0.16,'warn'],idle:[[700,500,350],0.14,'warn'],hold:[[700,900],0.09,'hold']};
   function feedback(kind){
     var f=FB[kind];if(!f) return;
     beep(f[0],f[1]);
@@ -3410,7 +3410,7 @@ html,body{overflow-anchor:none}
     btn.addEventListener('pointerdown',function(e){
       if(btn.dataset.tap==='1') return;
       up();btn.classList.add('holding');
-      holdT=setTimeout(function(){holdT=0;btn.classList.remove('holding');fn()},ms);
+      holdT=setTimeout(function(){holdT=0;btn.classList.remove('holding');feedback('hold');fn()},ms);
     });
     ['pointerup','pointercancel','pointerleave','blur'].forEach(function(ev){btn.addEventListener(ev,up)});
     btn.addEventListener('contextmenu',function(e){e.preventDefault()});
@@ -3440,7 +3440,7 @@ html,body{overflow-anchor:none}
     lockBtn.addEventListener('pointerdown',function(){
       if(!store.prefs.lock) return;
       up();lockBtn.classList.add('holding');
-      holdT=setTimeout(function(){holdT=0;lockBtn.classList.remove('holding');store.prefs.lock=false;save();applyLock();feedback('ok')},2000);
+      holdT=setTimeout(function(){holdT=0;lockBtn.classList.remove('holding');store.prefs.lock=false;save();applyLock();feedback('hold')},2000);
     });
     ['pointerup','pointercancel','pointerleave','blur'].forEach(function(ev){lockBtn.addEventListener(ev,up)});
   })();
@@ -4164,7 +4164,7 @@ html,body{overflow-anchor:none}
             if(off&&!rp&&cv!==0) w.dlv=cv;
             if(rd>0) RAMP[nc]={t0:performance.now(),from:rt.t[nc],to:tg,d:rd};
             else{delete RAMP[nc];setT(nc,tg,false)}
-            feedback('ok');if(!(NB&&NB.haptic)&&navigator.vibrate){try{navigator.vibrate(30)}catch(_){}}
+            feedback('hold');
           },550);
         });
         nk.addEventListener('pointermove',function(e){
@@ -4218,7 +4218,7 @@ html,body{overflow-anchor:none}
             var c=rch(rcur()),on=rison(),rd=it.rt===undefined?3:it.rt,tg=on?0:(it.p||100);
             if(rd>0) RAMP[c]={t0:performance.now(),from:rt.t[c],to:tg,d:rd};
             else{delete RAMP[c];setT(c,tg,false)}
-            feedback('ok');if(!(NB&&NB.haptic)&&navigator.vibrate){try{navigator.vibrate(30)}catch(_){}}
+            feedback('hold');
           },550);
         });
         rk.addEventListener('pointermove',function(e){
@@ -4254,7 +4254,7 @@ html,body{overflow-anchor:none}
         var zs=document.createElement('small');
         zd.appendChild(zt);zd.appendChild(zs);
         var zlp=0, zdone=false;
-        zd.addEventListener('pointerdown',function(){zdone=false;clearTimeout(zlp);zlp=setTimeout(function(){zdone=true;sessReset();toast('Session timer reset.');feedback('ok');paintBoard()},800)});
+        zd.addEventListener('pointerdown',function(){zdone=false;clearTimeout(zlp);zlp=setTimeout(function(){zdone=true;sessReset();toast('Session timer reset.');feedback('hold');paintBoard()},800)});
         ['pointerup','pointercancel','pointerleave'].forEach(function(ev){zd.addEventListener(ev,function(){clearTimeout(zlp)})});
         zd.addEventListener('click',function(){
           if(zdone){zdone=false;return}
