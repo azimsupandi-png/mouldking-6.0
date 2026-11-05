@@ -965,8 +965,9 @@ html,body{overflow-anchor:none}
 .bdw .dialbox>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .bdw .dialbox .dialk{position:absolute;inset:14%;height:auto;max-height:none;max-width:none;width:auto;aspect-ratio:auto}
 .bdw .dialdots{display:flex;gap:6px;justify-content:center;flex:none;padding:3px 0 1px}
-.bdw .dialdots i{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.5}
-.bdw .dialdots i.on{background:var(--fg);opacity:1}
+.bdw .dialdots{align-items:center;gap:8px}
+.bdw .dialdots i{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.55}
+.bdw .dialdots i.on{width:9px;height:9px;background:var(--danger,#E03E3E);opacity:1}
 .bdw .dialk i{position:absolute;inset:0;display:block;transition:none}
 .bdw .dialk i::after{content:"";position:absolute;left:50%;top:7%;width:10%;height:26%;min-width:5px;transform:translateX(-50%);border-radius:4px;background:#aeb6c2}
 .bdw .dialk.on i::after{background:var(--hc,#ffd84a);box-shadow:0 0 8px rgba(var(--hcr,255,200,40),.8)}
@@ -2007,7 +2008,7 @@ html,body{overflow-anchor:none}
       if(m.dg) m.dg.remove();
       if(m.nch<2) return;
       m.dg=sv('g',{},svg);
-      chs.forEach(function(q,j){var sp=m.cmp?10:14;sv('circle',{cx:cw/2+(j-(m.nch-1)/2)*sp,cy:ch-(m.cmp?5:7),r:q===c?(m.cmp?3.5:4.5):(m.cmp?2.4:3),fill:q===c?TXT:MUT,opacity:q===c?1:.55},m.dg)});
+      chs.forEach(function(q,j){var sp=m.cmp?10:14;sv('circle',{cx:cw/2+(j-(m.nch-1)/2)*sp,cy:ch-(m.cmp?5:7),r:q===c?(m.cmp?3.5:4.5):(m.cmp?2.4:3),fill:q===c?'var(--danger,#E03E3E)':MUT,opacity:q===c?1:.55},m.dg)});
     }
     if(k==='f'){
       m.seg=[];for(i=0;i<24;i++) m.seg.push(sv('path',{fill:'none',stroke:TRK},svg));
