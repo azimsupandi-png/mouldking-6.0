@@ -574,7 +574,7 @@ public class MainActivity extends Activity {
             else if ("ok".equals(kind)) p = new long[] {0, 13};
             else if ("dial".equals(kind)) {
                 // Lighter than the other taps: shorter and, where the phone allows it, softer.
-                runOnUiThread(() -> buzzLight(11, 140));
+                runOnUiThread(() -> buzzLight(12, 140));
                 return;
             }
             else if ("hold".equals(kind)) p = new long[] {0, 35};

@@ -2188,7 +2188,7 @@ html,body{overflow-anchor:none}
     if(!store.prefs.haptic) return;
     var nw=Date.now();if(nw-DBZ<45) return;DBZ=nw;
     if(NB&&NB.haptic){try{NB.haptic('dial')}catch(e){}}
-    else if(navigator.vibrate){try{navigator.vibrate(11)}catch(e){}}
+    else if(navigator.vibrate){try{navigator.vibrate(12)}catch(e){}}
   }
   function wOut(it,v){return Math.round((it.inv?-v:v)*(it.cap||100)/100)}
   function wIn(it,t){return Math.max(-100,Math.min(100,Math.round((it.inv?-t:t)*100/(it.cap||100))))}
@@ -4306,27 +4306,36 @@ html,body{overflow-anchor:none}
         var rcur=function(){return Math.max(0,Math.min(rsn-1,it.s||0))};
         var rison=function(){var c=rch(rcur()),rp=RAMP[c];return rp?rp.to!==0:rt.t[c]!==0};
         var rmove=function(ni){
-          if(ni===rcur()) return;
-          noteInput();
-          var oc=rch(rcur());delete RAMP[oc];setT(oc,0,false);
-          it.s=ni;save();dialBuzz();
+          // Positions are visited in order (A, B, C ...): a jump is walked through one position at a time.
+          ni=Math.max(0,Math.min(rsn-1,ni));
+          while(ni!==rcur()){
+            noteInput();
+            var oc=rch(rcur()),rd0=it.rt===undefined?3:it.rt;
+            // The position being left fades out over the ramp time instead of cutting off.
+            if(rd0>0&&rt.t[oc]!==0) RAMP[oc]={t0:performance.now(),from:rt.t[oc],to:0,d:rd0};
+            else{delete RAMP[oc];setT(oc,0,false)}
+            it.s=rcur()+(ni>rcur()?1:-1);save();dialBuzz();
+          }
         };
         var rtog=function(){
           var c=rch(rcur()),on=rison(),rd=it.rt===undefined?3:it.rt,tg=on?0:(it.p||100);
           if(rd>0) RAMP[c]={t0:performance.now(),from:rt.t[c],to:tg,d:rd};
           else{delete RAMP[c];setT(c,tg,false)}
         };
+        // Relative turning, like the dial: touching never jumps to another position.
+        var rAng=0,rLa=0;
+        var rPtr=function(e){var rc=rk.getBoundingClientRect();return Math.atan2(e.clientX-(rc.left+rc.width/2),-(e.clientY-(rc.top+rc.height/2)))*180/Math.PI};
         var rset=function(e){
-          var rc=rk.getBoundingClientRect(),a=Math.atan2(e.clientX-(rc.left+rc.width/2),-(e.clientY-(rc.top+rc.height/2)))*180/Math.PI;
-          if(Math.abs(a)>135) a=a>0?135:-135;
-          var ni=rsn===1?0:Math.round((a+135)/270*(rsn-1));
-          rmove(ni);
+          var a=rPtr(e),d=a-rLa;rLa=a;
+          if(d>180) d-=360;else if(d<-180) d+=360;
+          rAng=Math.max(-135,Math.min(135,rAng+d));
+          rmove(rsn===1?0:Math.round((rAng+135)/270*(rsn-1)));
         };
         var rT=0,rX=0,rY=0,rPend=false,rLong=false;
         rk.addEventListener('pointerdown',function(e){
           if(S.estop||S.play) return;
           e.preventDefault();try{rk.setPointerCapture(e.pointerId)}catch(_){}
-          rX=e.clientX;rY=e.clientY;rPend=true;rLong=false;clearTimeout(rT);rk.classList.add('holding');
+          rX=e.clientX;rY=e.clientY;rPend=true;rLong=false;rAng=rang(rcur());rLa=rPtr(e);clearTimeout(rT);rk.classList.add('holding');
           rT=setTimeout(function(){
             if(!rPend) return;
             rPend=false;rLong=true;noteInput();rk.classList.remove('holding');rk.classList.add('pop');setTimeout(function(){rk.classList.remove('pop')},250);
@@ -4340,7 +4349,6 @@ html,body{overflow-anchor:none}
         });
         ['pointerup','pointercancel'].forEach(function(ev){rk.addEventListener(ev,function(e){
           clearTimeout(rT);rk.classList.remove('holding');
-          if(rPend&&ev==='pointerup'&&!S.estop&&!S.play) rset(e);
           rPend=false;rLong=false;w.drag=false;
         })});
         rk.addEventListener('contextmenu',function(e){e.preventDefault()});

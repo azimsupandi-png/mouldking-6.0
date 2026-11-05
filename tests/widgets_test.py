@@ -233,15 +233,16 @@ def run_behaviour(b, group):
         check(L + 'lever: labels top to bottom 3 2 1 N R', lab == '321NR', lab)
         ev("__t.rt.t[4]=0;__t.rt.t[5]=0")
     if group == 'B':
-        rsdrag = lambda ang: ev("""(()=>{const k=document.querySelector('.dialk[aria-valuemax="6"]'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,a=%s*Math.PI/180;
-          const X=x+Math.sin(a)*r.width/2*.9,Y=y-Math.cos(a)*r.width/2*.9;
-          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:9,clientX:x,clientY:y}));
-          k.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:9,clientX:X,clientY:Y}));
-          k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:9,clientX:X,clientY:Y}))})()""" % ang)
+        rsw = lambda a0, a1: ev("""(()=>{const k=document.querySelector('.dialk[aria-valuemax="6"]'),r=k.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,R=r.width/2*.8,a0=%s,a1=%s,n=Math.max(2,Math.ceil(Math.abs(a1-a0)/10));
+          const P=a=>({clientX:cx+R*Math.sin(a*Math.PI/180),clientY:cy-R*Math.cos(a*Math.PI/180)});
+          k.dispatchEvent(new PointerEvent('pointerdown',Object.assign({bubbles:true,pointerId:9},P(a0))));
+          for(let i=1;i<=n;i++) k.dispatchEvent(new PointerEvent('pointermove',Object.assign({bubbles:true,pointerId:9},P(a0+(a1-a0)*i/n))));
+          k.dispatchEvent(new PointerEvent('pointerup',Object.assign({bubbles:true,pointerId:9},P(a1))))})()""" % (a0, a1))
         rshold = lambda: ev("""(()=>{const k=document.querySelector('.dialk[aria-valuemax="6"]'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:10,clientX:x,clientY:y}));
           return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:10,clientX:x,clientY:y}));res(1)},1200))})()""")
         rsel = lambda: ev("__t.C.board.find(o=>o.k==='rs').s")
+        rsdrag = lambda ang: rsw(-135 + 54 * rsel(), ang)
         rsdrag(-27); pg.wait_for_timeout(200)
         check(L + 'selector: drag selects position C without output', rsel() == 2 and T(2) == 0, (rsel(), T(2)))
         rshold(); pg.wait_for_timeout(200)
@@ -251,10 +252,22 @@ def run_behaviour(b, group):
         check(L + 'selector: no letters on the dial', ev("document.querySelectorAll('.dialbox svg text').length") == 0)
         rsdrag(130); pg.wait_for_timeout(200)
         check(L + 'selector: changing position switches the old output off', rsel() == 5 and T(2) == 0 and T(5) == 0, (rsel(), T(2), T(5)))
+        rsw(-135 + 54 * rsel(), -135 + 54 * rsel()); pg.wait_for_timeout(100)
+        check(L + 'selector: tap does not jump to another position', rsel() == 5, rsel())
+        rsw(-135 + 54 * 5, 60); pg.wait_for_timeout(100)
+        check(L + 'selector: turning back moves down one position at a time, never jumps to A', 1 <= rsel() <= 4, rsel())
+        rsdrag(130); pg.wait_for_timeout(100)
         rshold(); pg.wait_for_timeout(200)
         check(L + 'selector: F on', T(5) == 100, T(5))
         rshold(); pg.wait_for_timeout(200)
         check(L + 'selector: long press again switches off', T(5) == 0, T(5))
+        ev("__t.C.board.find(o=>o.k==='rs').rt=2;__t.syncBoard()"); pg.wait_for_timeout(300)
+        rshold(); pg.wait_for_timeout(2300)
+        ev("__t.rt.t[4]=0"); rsw(-135 + 54 * 5, 80); pg.wait_for_timeout(300)
+        mid_rs = T(5)
+        pg.wait_for_timeout(2500)
+        check(L + 'selector: leaving a running position fades it out (no sudden off)', 0 < mid_rs < 100 and T(5) == 0, (mid_rs, T(5)))
+        ev("__t.C.board.find(o=>o.k==='rs').rt=0;__t.C.board.find(o=>o.k==='rs').s=5;__t.syncBoard()"); pg.wait_for_timeout(300)
         ns2 = ev("(()=>{const o=Object.assign({},__t.C.board.find(o=>o.k==='rs'),{ns:2});return __t.cleanBoard([o])[0].ns})()")
         check(L + 'selector: 2 positions no longer allowed (falls back to 6)', ns2 == 6, ns2)
         ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)

@@ -81,3 +81,5 @@ Python with `playwright` and Chromium installed. Run it before each commit.
 ### Dial
 
 The dial turns relative to where it is: touching it never jumps to another value, and it stops at the ends instead of wrapping round. In the dial's settings, *Swipe to other channels* lets you swipe sideways on the card (outside the knob) to move the dial to the next channel, like the arc meter.
+
+The dial selector also turns relative to where it is and steps through the positions in order (A to F), and the position you leave fades out over the on/off ramp time instead of cutting off.
