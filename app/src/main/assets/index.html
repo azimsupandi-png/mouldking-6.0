@@ -2155,7 +2155,7 @@ html,body{overflow-anchor:none}
         var tx2=it.ow?String(Math.round(out)):mSgn(out);if(m.val.textContent!==tx2) m.val.textContent=tx2;
         var sb=diff?((it.sh?'of ':'hub ')+(oth<0?'\u2212':'')+Math.abs(Math.round(oth))):'%';if(m.sub.textContent!==sb) m.sub.textContent=sb;
         for(j=0;j<24;j++){var vc=it.ow?(j+.5)*100/24:-100+(j+.5)*200/24,on=it.ow?(out>0&&vc<=out):((vc>0&&vc<=out)||(vc<0&&vc>=out));var col=on?mCol(vc,th):TRK;if(m.seg[j].getAttribute('stroke')!==col) m.seg[j].setAttribute('stroke',col)}
-        var rd=diff?(it.ow?mArc(m.cx,m.cy,m.R2,210,mAgF(oth)):mArc(m.cx,m.cy,m.R2,90,mAg(oth))):'';if(m.rd!==rd){m.rd=rd;m.req.setAttribute('d',rd)}
+        var rd='';if(m.rd!==rd){m.rd=rd;m.req.setAttribute('d',rd)}
       }else{
         if(it.ow){out=Math.max(0,out);oth=Math.max(0,oth)}
         var tx3=(it.ow?String(Math.round(out)):mSgn(out))+'%';if(m.val.textContent!==tx3) m.val.textContent=tx3;
