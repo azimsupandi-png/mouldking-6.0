@@ -958,7 +958,7 @@ html,body{overflow-anchor:none}
 .bdw .dphub{grid-area:2/2;border-radius:50%;background:#14181f;border:2px solid #0d1015;margin:12%}
 .bdw .dialk{transition:transform .55s linear}
 .bdw .dialk.holding{transform:scale(.94)}
-.bdw .dialk.holding::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2px solid #EF9F27;pointer-events:none;animation:dialHold 1s linear forwards}
+.bdw .dialk.holding::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2px solid #EF9F27;pointer-events:none;animation:dialHold .8s linear forwards}
 .bdw .dialk.pop{animation:dialPop .22s ease-out}
 @keyframes dialHold{from{opacity:.15;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
 @keyframes dialPop{from{transform:scale(1.06)}to{transform:scale(1)}}
@@ -4259,7 +4259,7 @@ html,body{overflow-anchor:none}
             if(rd>0) RAMP[nc]={t0:performance.now(),from:rt.t[nc],to:tg,d:rd};
             else{delete RAMP[nc];setT(nc,tg,false)}
             feedback('hold');
-          },1000);
+          },800);
         });
         nk.addEventListener('pointermove',function(e){
           if(nPend&&Math.hypot(e.clientX-nX,e.clientY-nY)>6){nPend=false;clearTimeout(nT);w.drag=true;nk.classList.remove('holding')}
@@ -4332,7 +4332,7 @@ html,body{overflow-anchor:none}
             rPend=false;rLong=true;noteInput();rk.classList.remove('holding');rk.classList.add('pop');setTimeout(function(){rk.classList.remove('pop')},250);
             rtog();
             feedback('hold');
-          },1000);
+          },800);
         });
         rk.addEventListener('pointermove',function(e){
           if(rPend&&Math.hypot(e.clientX-rX,e.clientY-rY)>6){rPend=false;clearTimeout(rT);w.drag=true;rk.classList.remove('holding')}
