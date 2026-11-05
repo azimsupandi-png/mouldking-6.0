@@ -239,8 +239,7 @@ public class MainActivity extends Activity {
             int rot = 0;
             try { rot = getWindowManager().getDefaultDisplay().getRotation() * 90; } catch (RuntimeException ignored) { }
             final String js = String.format(Locale.US,
-                "window.onTilt&&window.onTilt(%.2f,%.2f,%d,%.2f)", e.values[0], e.values[1], rot,
-                e.values.length > 2 ? e.values[2] : 0f);
+                "window.onTilt&&window.onTilt(%.2f,%.2f,%d)", e.values[0], e.values[1], rot);
             web.evaluateJavascript(js, null);
         }
         @Override public void onAccuracyChanged(Sensor s, int a) { }

@@ -87,6 +87,3 @@ The dial selector also turns relative to where it is and steps through the posit
 ### Steering wheel gyro
 
 In the steering wheel's settings, *Gyro* (Off/On) lets you hold the wheel and tilt the phone to steer, like tilt steering. It uses the tilt sensitivity and reverse settings from the Tilt steering card, and works even if that card's master switch is off.
-
-### Gyro meter
-Add it from the board's add menu ("Gyro meter"). It reads the phone's tilt and has three styles: **Wheel** (steering wheel turning inside an LED ring), **Tape** (a heading-style scale that slides under a fixed marker) and **Level** (a bullseye ball that moves with roll sideways and pitch up/down). Settings: style, full scale (±30/45/60/90°) and reverse. Hold the widget for 800 ms to set the current position as level. Pitch needs the app's tilt sensor passthrough (APK); in a plain browser only roll is available.

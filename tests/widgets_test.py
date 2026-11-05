@@ -39,10 +39,9 @@ GROUP_B = [
     {'k': 'i', 'c': 1, 'w': 1},
     {'k': 'rs', 'w': 1, 'p': 100, 'ns': 6, 's': 0, 'rt': 0},
     {'k': 'dp', 'c': 3, 'd': 4, 'w': 1, 'm': 'tank', 'p': 70, 'rt': 0},
-    {'k': 'gm', 'w': 1, 'gs': 0, 'gr': 60},
 ]
 GROUPS = {'A': GROUP_A, 'B': GROUP_B}
-EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 't', 'y', 'a', 'z', 'w', 'k', 'f', 'i', 'rs', 'st', 'lv', 'dp', 'gm']
+EXPECT_SETTINGS = ['s', 'm', 'n', 'g', 'b', 'l', 't', 'y', 'a', 'z', 'w', 'k', 'f', 'i', 'rs', 'st', 'lv', 'dp']
 
 fails = []
 def check(name, cond, extra=''):
@@ -268,7 +267,7 @@ def run_behaviour(b, group):
         check(L + 'selector: drag selects position C without output', rsel() == 2 and T(2) == 0, (rsel(), T(2)))
         rshold(); pg.wait_for_timeout(200)
         check(L + 'selector: long press switches C on', T(2) == 100, T(2))
-        dots = ev("[...document.querySelectorAll('.dialbox:not(.gmbox) svg g')].map(g=>g.children[1].getAttribute('fill')+'|'+(+g.children[1].getAttribute('opacity')).toFixed(2))")
+        dots = ev("[...document.querySelectorAll('.dialbox svg g')].map(g=>g.children[1].getAttribute('fill')+'|'+(+g.children[1].getAttribute('opacity')).toFixed(2))")
         check(L + 'selector: six small red dots, only the active one bright', all(d.startswith('#E24B4A') for d in dots) and sum(1 for d in dots if float(d.split('|')[1]) > .9) == 1 and len(dots) == 6, dots)
         check(L + 'selector: no letters on the dial', ev("document.querySelectorAll('.dialbox svg text').length") == 0)
         rsdrag(130); pg.wait_for_timeout(200)
@@ -403,29 +402,6 @@ def run_behaviour(b, group):
         press('u', 48); pg.wait_for_timeout(300); mid = T(3)
         lift('u', 48); pg.wait_for_timeout(1300)
         check(L + 'dpad ramp: partway after 0.3 s, back to 0 after release', 0 < mid < 70 and T(3) == 0, (mid, T(3)))
-        # gyro meter (wheel / tape / level)
-        import math
-        def tilt(roll=0, pitch=0):
-            r, q = math.radians(roll), math.radians(pitch)
-            ev("window.onTilt(%.3f,%.3f,0,%.3f)" % (-9.8*math.cos(q)*math.sin(r), 9.8*math.cos(q)*math.cos(r), 9.8*math.sin(q)))
-            pg.wait_for_timeout(500)
-        gtxt = lambda: ev("(()=>{const o=document.querySelector('.bdw .gmv,.bdw .head .out,.bdw [class*=out]');return document.body.innerText})()")
-        ev("(()=>{const o=__t.C.board.find(o=>o.k==='gm');o.gs=0;__t.syncBoard()})()"); tilt(0, 0); pg.wait_for_timeout(300)
-        tilt(25, 0)
-        rot = ev("document.querySelector('.gmw').getAttribute('transform')")
-        txt = ev("document.body.innerText")
-        check(L + 'gyro wheel: rotates ~25 and shows +25', 'rotate(2' in rot and '+25' in txt, (rot,))
-        ev("(()=>{const o=__t.C.board.find(o=>o.k==='gm');o.rv=1;__t.syncBoard()})()"); tilt(25, 0)
-        rot = ev("document.querySelector('.gmw').getAttribute('transform')")
-        check(L + 'gyro wheel reverse: rotates negative', 'rotate(-2' in rot, rot)
-        ev("(()=>{const o=__t.C.board.find(o=>o.k==='gm');o.rv=0;o.gs=1;__t.syncBoard()})()"); tilt(25, 0)
-        tr = ev("document.querySelector('.gmt').getAttribute('transform')")
-        check(L + 'gyro tape: scale slides by -25*3.4', 'translate(-85' in tr, tr)
-        ev("(()=>{const o=__t.C.board.find(o=>o.k==='gm');o.gs=2;__t.syncBoard()})()"); tilt(30, 10)
-        cx = float(ev("document.querySelector('.gmb').getAttribute('cx')")); cy = float(ev("document.querySelector('.gmb').getAttribute('cy')"))
-        txt = ev("document.body.innerText")
-        check(L + 'gyro level: ball right and up, header R/P', cx > 65 and cy < 50 and 'R +30' in txt and 'P +10' in txt, (cx, cy))
-        tilt(0, 0)
         # gamepad -> dial selector: LB/RB move, A toggles on/off
         ev("""(()=>{window.__fp={connected:true,id:'test pad',axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false,value:0}))};
           navigator.getGamepads=()=>[window.__fp];__t.C.pad.on=true;__t.C.pad.map={4:'rp',5:'rn',0:'rg'};__t.save()})()""")
