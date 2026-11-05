@@ -359,9 +359,9 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdw.vert .holds{display:none}
 .bdv,.bdv input[type=range],:root .bdv input[type=range],:root[data-skin="studs"] .bdv input[type=range]{touch-action:none}
 :root[data-skin="studs"] .bdv input[type=range],:root .bdv input[type=range]{position:absolute;left:50%;top:50%;width:210px;margin:-23px 0 0 -105px;transform:rotate(-90deg)}
-.tl-wheel{width:96px;height:96px;margin:6px auto;color:#8a909a;opacity:.45;transition:opacity .15s}
+.tl-wheel{width:110px;height:110px;margin:6px auto;opacity:.5;transition:opacity .15s}
 .tl-wheel svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.7))}
-.tl-wheel.on{opacity:1;color:#e8e6df}
+.tl-wheel.on{opacity:1}
 .prof-wrap{display:flex;gap:8px;align-items:center}
 .prof-wrap select,.prof-wrap input{flex:1;min-width:0}
 @media (prefers-reduced-motion:reduce){.knob.rest,.fill{transition:none}.estop[aria-pressed="true"],.bar-banner{animation:none}}
@@ -1420,7 +1420,7 @@ html,body{overflow-anchor:none}
           <label class="check" for="tlInv"><input id="tlInv" type="checkbox">Reverse tilt direction</label>
           <label class="check" for="tlAll"><input id="tlAll" type="checkbox">Tilt on every Board joystick and slider</label>
         </div>
-        <div class="tl-wheel" id="tlWheel" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="10"/><circle cx="50" cy="50" r="9" fill="currentColor"/><path d="M50 50L12 62M50 50L88 62M50 50V86" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><rect x="44" y="4" width="12" height="18" rx="4" fill="#ffc400"/></svg></div>
+        <div class="tl-wheel" id="tlWheel" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="tlgR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a94a6"/><stop offset=".5" stop-color="#3a4252"/><stop offset="1" stop-color="#1b2029"/></linearGradient><linearGradient id="tlgS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b7587"/><stop offset="1" stop-color="#2a303b"/></linearGradient><radialGradient id="tlgH" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#5b6578"/><stop offset="1" stop-color="#14181f"/></radialGradient></defs><circle cx="50" cy="50" r="45" fill="none" stroke="#0b0d11" stroke-width="12"/><circle cx="50" cy="50" r="45" fill="none" stroke="url(#tlgR)" stroke-width="8.5"/><circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1" stroke-dasharray="1.2 1.8"/><path d="M9 50H91M50 50V92" stroke="#0b0d11" stroke-width="10.5" stroke-linecap="round"/><path d="M9 50H91M50 50V92" stroke="url(#tlgS)" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="50" r="13" fill="url(#tlgH)" stroke="#0b0d11" stroke-width="2"/><circle cx="50" cy="50" r="4" style="fill:var(--hc,#ffd84a)" opacity=".9"/><rect x="43.5" y="2.5" width="13" height="16" rx="3.5" style="fill:var(--hc,#ffd84a);stroke:var(--hcd,#7a6a1f)" stroke-width="1.2"/><rect x="46" y="5" width="3" height="11" rx="1.5" fill="rgba(255,255,255,.55)"/></svg></div>
         <p class="rec-stat" id="tlSt"></p>
         <p class="note">Touch and hold the joystick with one thumb. Up and down drives. Tilt the phone left or right like a steering wheel to steer. It works with the left joystick, or the first joystick on the Board. Hold the phone upright or sideways, not flat.</p>
       </section>
