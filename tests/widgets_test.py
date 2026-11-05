@@ -102,11 +102,24 @@ def run_behaviour(b, group):
         check(L + 'gear 3 sends 100 to B', T(1) == 100, T(1))
         ev("document.querySelector('.gear .tgd[data-g=\"1\"]').click()"); pg.wait_for_timeout(150)
         check(L + 'gear N stops B', T(1) == 0, T(1))
-        ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.right-4,y=r.top+r.height/2;
-          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:2,clientX:x,clientY:y}));
-          k.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:2,clientX:x,clientY:y+10}));
-          k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:2,clientX:x,clientY:y+10}))})()""")
-        check(L + 'dial touch and drag sets a positive value', T(3) > 40, T(3))
+        # dial: relative drag only. sweep(a0,a1) turns a finger round the knob from angle a0 to a1 (degrees, 0 = top).
+        sweep = lambda a0, a1, pid=2: ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,R=r.width/2*.8,a0=%s,a1=%s,n=Math.max(2,Math.ceil(Math.abs(a1-a0)/10));
+          const P=a=>({clientX:cx+R*Math.sin(a*Math.PI/180),clientY:cy-R*Math.cos(a*Math.PI/180)});
+          k.dispatchEvent(new PointerEvent('pointerdown',Object.assign({bubbles:true,pointerId:%d},P(a0))));
+          for(let i=1;i<=n;i++) k.dispatchEvent(new PointerEvent('pointermove',Object.assign({bubbles:true,pointerId:%d},P(a0+(a1-a0)*i/n))));
+          k.dispatchEvent(new PointerEvent('pointerup',Object.assign({bubbles:true,pointerId:%d},P(a1))))})()""" % (a0, a1, pid, pid, pid))
+        sweep(90, 90); pg.wait_for_timeout(100)
+        check(L + 'dial: touching the right edge does not jump', T(3) == 0, T(3))
+        sweep(0, 100); pg.wait_for_timeout(100)
+        check(L + 'dial: dragging round raises the value from 0', 60 <= T(3) <= 80, T(3))
+        sweep(-20, 40); pg.wait_for_timeout(100)
+        check(L + 'dial: touching elsewhere continues from the current value', 90 <= T(3) <= 100, T(3))
+        sweep(150, 200); pg.wait_for_timeout(100)
+        check(L + 'dial: stops at 100, does not wrap round to the other end', T(3) == 100, T(3))
+        sweep(180, 100); pg.wait_for_timeout(100)
+        check(L + 'dial: turning back lowers it from 100', 0 < T(3) < 100, T(3))
+        sweep(0, -250); pg.wait_for_timeout(100)
+        check(L + 'dial: stops at -100 the other way', T(3) == -100, T(3))
         ev("__t.rt.t[3]=0")
         hold = lambda: ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:5,clientX:x,clientY:y}));
@@ -129,17 +142,29 @@ def run_behaviour(b, group):
         hold(); pg.wait_for_timeout(3400)
         check(L + 'dial long press: on, off, on again', v0 == 50 and v1 == 0 and T(3) == 50, (v0, v1, T(3)))
         ev("__t.rt.t[3]=0;__t.C.board.find(o=>o.k==='n').ow=1;__t.C.board.find(o=>o.k==='n').th=1;__t.syncBoard()"); pg.wait_for_timeout(300)
-        drag_to = lambda dx: ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,dx=%s;
-          k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:7,clientX:x,clientY:y}));
-          k.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:7,clientX:x+dx*r.width/2*.9,clientY:y}));
-          k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:7,clientX:x+dx*r.width/2*.9,clientY:y}))})()""" % dx)
+        drag_to = lambda dx: sweep(-135, 135, 7) if dx > 0 else sweep(135, -135, 7)
         drag_to(1); pg.wait_for_timeout(300); ow1 = T(3)
         lit = ev("[...document.querySelectorAll('.dialbox svg path')].filter(p=>p.getAttribute('fill').startsWith('#')).length")
         col = ev("(()=>{const l=[...document.querySelectorAll('.dialbox svg path')].filter(p=>p.getAttribute('fill').startsWith('#'));return l.length?l[0].getAttribute('fill'):''})()")
         drag_to(-1); pg.wait_for_timeout(300); ow0 = T(3)
-        check(L + 'dial forward-only: right = high, left = low, never negative', 70 <= ow1 <= 100 and 0 <= ow0 <= 30, (ow1, ow0))
+        check(L + 'dial forward-only: turn forward = high, turn back = low, never negative', 70 <= ow1 <= 100 and 0 <= ow0 <= 30, (ow1, ow0))
         check(L + 'dial forward-only LED ring lights from the start', lit >= 15, lit)
         check(L + 'dial colour theme applies', col.lower() == '#378add', col)
+        swp = lambda dx, tgt: ev("""(()=>{const k=document.querySelector('.dialk'),e=%s,r=e.getBoundingClientRect(),y=r.top+14;
+          e.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:9,clientX:r.left+r.width/2,clientY:y}));
+          e.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:9,clientX:r.left+r.width/2+(%s),clientY:y+2}))})()""" % (tgt, dx))
+        dc = lambda: ev("__t.C.board.find(o=>o.k==='n').c")
+        card = "k.closest('.bdw')"
+        c0 = dc(); swp(-90, card); pg.wait_for_timeout(250)
+        check(L + 'dial: swipe does nothing while the option is off', dc() == c0 and ev("document.querySelectorAll('.dialdots').length") == 0, dc())
+        ev("__t.C.board.find(o=>o.k==='n').sw=1;__t.syncBoard()"); pg.wait_for_timeout(300)
+        check(L + 'dial: swipe option shows channel dots', ev("document.querySelectorAll('.dialdots i').length") >= 2)
+        swp(-90, card); pg.wait_for_timeout(250); c1 = dc()
+        swp(90, card); pg.wait_for_timeout(250); c2 = dc()
+        check(L + 'dial: swipe left moves to the next channel, right comes back', c1 != c0 and c2 == c0, (c0, c1, c2))
+        c0 = dc(); swp(-90, "document.querySelector('.dialk')"); pg.wait_for_timeout(250)
+        check(L + 'dial: swiping on the knob turns it, it does not change channel', dc() == c0, dc())
+        ev("delete __t.C.board.find(o=>o.k==='n').sw;__t.syncBoard()"); pg.wait_for_timeout(300)
         ev("(()=>{const o=__t.C.board.find(o=>o.k==='n');delete o.ow;delete o.th;__t.syncBoard()})()"); pg.wait_for_timeout(300)
         ev("__t.rt.t[3]=0")
         ev("__t.rt.t[3]=0")

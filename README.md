@@ -77,3 +77,7 @@ widget kind (render, settings popup, behaviour, reload) in landscape and portrai
 Python with `playwright` and Chromium installed. Run it before each commit.
 
 `python3 tests/dashboard_edit_test.py` checks Dashboard editing in landscape (drag, select, resize, templates).
+
+### Dial
+
+The dial turns relative to where it is: touching it never jumps to another value, and it stops at the ends instead of wrapping round. In the dial's settings, *Swipe to other channels* lets you swipe sideways on the card (outside the knob) to move the dial to the next channel, like the arc meter.
