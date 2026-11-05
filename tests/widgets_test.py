@@ -123,7 +123,7 @@ def run_behaviour(b, group):
         ev("__t.rt.t[3]=0")
         hold = lambda: ev("""(()=>{const k=document.querySelector('.dialk'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:5,clientX:x,clientY:y}));
-          return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:5,clientX:x,clientY:y}));res(1)},700))})()""")
+          return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:5,clientX:x,clientY:y}));res(1)},1200))})()""")
         ev("__t.C.board.find(o=>o.k==='n').rt=0;__t.syncBoard()"); pg.wait_for_timeout(300)
         hold(); i0 = T(3); hold(); i1 = T(3)
         check(L + 'dial ramp time 0 switches instantly', i0 == 50 and i1 == 0, (i0, i1))
@@ -240,7 +240,7 @@ def run_behaviour(b, group):
           k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:9,clientX:X,clientY:Y}))})()""" % ang)
         rshold = lambda: ev("""(()=>{const k=document.querySelector('.dialk[aria-valuemax="6"]'),r=k.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
           k.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:10,clientX:x,clientY:y}));
-          return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:10,clientX:x,clientY:y}));res(1)},700))})()""")
+          return new Promise(res=>setTimeout(()=>{k.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:10,clientX:x,clientY:y}));res(1)},1200))})()""")
         rsel = lambda: ev("__t.C.board.find(o=>o.k==='rs').s")
         rsdrag(-27); pg.wait_for_timeout(200)
         check(L + 'selector: drag selects position C without output', rsel() == 2 and T(2) == 0, (rsel(), T(2)))
