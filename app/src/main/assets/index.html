@@ -386,7 +386,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdw-h span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bdw-h output{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .bdw-chip{display:inline-block;min-width:1.5em;margin-right:.45em;padding:0 .3em;border-radius:5px;background:#ffc400;color:#111;font-style:normal;font-weight:800;text-align:center;line-height:1.35}
-.bdw.bdw-act{outline:2px solid rgba(255,216,74,.9);outline-offset:-5px}
 .bdw input[type=range]{width:100%;min-height:44px}
 .bdw .hold{min-height:72px;font-size:15px;letter-spacing:.04em;padding:0 4px;min-width:0;white-space:nowrap}
 .bdw .hold{display:flex;align-items:center;justify-content:center;gap:8px;overflow:hidden}
@@ -3155,6 +3154,7 @@ html,body{overflow-anchor:none}
     if(!S.connected) refs.forEach(function(r){r.sent.textContent='not sent'});
   }
   link.addEventListener('click',function(){
+    if(bdEditing){toast('Finish editing first, then connect the hub.');return}
     last=null;
     if(NB){
       if(S.connected){wantLink=false;NB.stop();S.connected=false;hubMsg='';stopPlay(true)}
@@ -4840,11 +4840,6 @@ html,body{overflow-anchor:none}
         if(w.out) w.out.textContent=fmt(v);
         if(w.rng&&!w.drag&&+w.rng.value!==vu) w.rng.value=String(vu);
       }
-      // a widget that is sending something gets a soft yellow glow
-      var gch=[],git=w.it;
-      if(w.rsd) gch.push(w.rsd.ch(w.rsd.cur())); else if(w.mix) w.mix.forEach(function(z){gch.push(z.c)}); else{if(typeof git.c==='number') gch.push(git.c);if(typeof git.d==='number'&&git.d>=0&&git.k!=='y') gch.push(git.d)}
-      var gact=!bdEditing&&!S.estop&&git.k!=='f'&&git.k!=='i'&&git.k!=='k'&&gch.some(function(q){return Math.abs(rt.t[q]||0)>=1});
-      if(w.el&&w.gl!==gact){w.gl=gact;w.el.classList.toggle('bdw-act',gact)}
     });
   }
   bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing) snapBoard();syncBoard()});

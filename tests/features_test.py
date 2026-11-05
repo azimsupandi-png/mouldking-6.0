@@ -31,10 +31,16 @@ def main():
         t70 = (ev(tick % 'f'), ev(tick % 'i'))
         check('meters: no hub-limit tick at 100%, two ticks at 70%', t100 == (0, 0) and t70 == (2, 2), (t100, t70))
         ev("__t.C.limit=100;__t.paintBoard()")
-        # glow
-        ev("__t.rt.t[2]=50;__t.paintBoard()"); on = ev("document.querySelectorAll('.bdw.bdw-act').length")
-        ev("__t.rt.t[2]=0;__t.paintBoard()"); off = ev("document.querySelectorAll('.bdw.bdw-act').length")
-        check('glow: a widget that sends something glows, idle does not', on == 1 and off == 0, (on, off))
+        # connecting is refused while editing
+        ev("__t.S.connected=false;document.querySelector('#dbEdit').disabled=false;document.querySelector('#dbEdit').click()")
+        pg.wait_for_timeout(200)
+        ev("document.querySelector('#link').click()"); pg.wait_for_timeout(200)
+        edit_conn = ev("__t.S.connected")
+        ev("document.querySelector('#dbEdit').click()"); pg.wait_for_timeout(200)
+        ev("document.querySelector('#link').click()"); pg.wait_for_timeout(200)
+        done_conn = ev("__t.S.connected")
+        check('connect: refused while editing, allowed after Done', edit_conn is False and done_conn is True, (edit_conn, done_conn))
+        ev("document.querySelector('#dbEdit').disabled=false")
         # paired channels
         ev("(()=>{const o=__t.C.board.find(o=>o.k==='n');o.pc=1;o.pi=1;__t.C.board=__t.cleanBoard(__t.C.board);__t.syncBoard()})()")
         kept = ev("(()=>{const o=__t.C.board.find(o=>o.k==='n');return [o.pc,o.pi]})()")

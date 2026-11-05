@@ -93,10 +93,10 @@ In the steering wheel's settings, *Gyro* (Off/On) lets you hold the wheel and ti
 ### Dashboard polish
 - **Channel chip:** widget titles show a yellow chip with the channel letter plus the channel name (the full title is the tooltip).
 - **Hub limit tick:** arc and LED meters mark the hub's real maximum (power limit, speed, channel max) with a white tick when it is below 100%.
-- **Active glow:** a widget that is sending a value gets a yellow inner outline.
 - **Hub lost:** when the hub link drops, widgets dim and a red banner appears (tap to dismiss); both clear when the hub is back.
 - **Selector dots:** the selected position is a bigger red dot, the others are small grey dots.
 - **Gyro steering:** wheel settings have a dead zone (Off/3/5/8 degrees) and a per-wheel sensitivity (30/45/60 degrees for full lock, or the phone setting).
 - **Second channel:** slider, dial and wheel settings can also drive another channel of the same hub with the same value or the opposite one (tank turn).
+- **Edit mode:** the hub cannot be connected while editing the board.
 - **Lock:** the Lock button in the dashboard bar makes the board untouchable (E-Stop still works). Hold the lock button for 1 s to unlock.
 - **Board history:** the last 3 boards per model are kept every time editing finishes; restore them from Settings, Board history.
