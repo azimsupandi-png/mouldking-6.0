@@ -1770,7 +1770,7 @@ html,body{overflow-anchor:none}
         }
       }else if(x.k==='st'){
         var stc=Math.round(+x.c),sra=Math.round(+x.ra);
-        if(stc>=0&&stc<NMAX){var so={k:'st',c:stc,w:w};if([90,180,270].indexOf(sra)>=0) so.ra=sra;if(x.hold===true) so.hold=true;out.push(so)}
+        if(stc>=0&&stc<NMAX){var so={k:'st',c:stc,w:w};if([90,180,270].indexOf(sra)>=0) so.ra=sra;if(x.hold===true) so.hold=true;if(x.gy===1||x.gy===true) so.gy=1;out.push(so)}
       }else if(x.k==='dp'){
         var dpa=Math.round(+x.c),dpb=Math.round(+x.d),dpp=Math.round(+x.p),dpr=Math.round(+x.rt*10)/10;
         if(dpa>=0&&dpa<NMAX&&dpb>=-1&&dpb<NMAX&&dpb!==dpa){
@@ -2209,7 +2209,8 @@ html,body{overflow-anchor:none}
     g:{t:'Direction & limit',f:[F_INV,F_CAP]},
     lv:{t:'Direction & limit',f:[F_INV,F_CAP]},
     st:{t:'Steering wheel settings',f:[F_INV,F_CAP,{k:'ra',l:'Full lock at',ch:[90,180,270],lab:['90\u00b0','180\u00b0','270\u00b0'],only:true,def:180},
-      {k:'hold',l:'On release',ch:[0,1],lab:['Return to centre','Stay'],only:true,def:0,g:function(it){return it.hold?1:0},s:function(it,v){if(v) it.hold=true; else delete it.hold}}]},
+      {k:'hold',l:'On release',ch:[0,1],lab:['Return to centre','Stay'],only:true,def:0,g:function(it){return it.hold?1:0},s:function(it,v){if(v) it.hold=true; else delete it.hold}},
+      {k:'gy',l:'Gyro (hold the wheel and tilt the phone)',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.gy?1:0},s:function(it,v){if(v) it.gy=1; else delete it.gy}}]},
     dp:{t:'D-pad settings',f:[{k:'p',l:'Power',u:'%',min:10,max:100,st:5,ch:[40,70,100],def:70},
       {k:'m',l:'Drive mode',ch:[0,1],lab:['Tank (2 motors)','Car (drive + steer)'],only:true,def:0,g:function(it){return it.m==='car'?1:0},s:function(it,v){it.m=v?'car':'tank'}},
       {k:'rt',l:'Ramp time (0 = instant)',u:'s',min:0,max:3,st:0.1,ch:[0,0.3,1],def:0.3},
@@ -2485,7 +2486,8 @@ html,body{overflow-anchor:none}
   var sticks=[];
   var TILT={g:[0,0],has:false,zero:null,ang:null,deg:0}, BD_TILT={cur:null};
   window.onTilt=function(x,y,ang){TILT.g=[+x||0,+y||0];TILT.has=true;TILT.ang=ang;};
-  function tiltNative(){ if(NB&&NB.tilt){try{NB.tilt(!!(C.tilt&&C.tilt.on))}catch(e){}} }
+  function gyroAny(){return !!(C.board&&C.board.some(function(o){return o.k==='st'&&o.gy}))}
+  function tiltNative(){ if(NB&&NB.tilt){try{NB.tilt(!!((C.tilt&&C.tilt.on)||gyroAny()))}catch(e){}} }
   if(typeof window.addEventListener==='function'){
     window.addEventListener('devicemotion',function(e){
       var a=e&&e.accelerationIncludingGravity;
@@ -2520,9 +2522,14 @@ html,body{overflow-anchor:none}
   function tiltStep(){
     var st=sticks[0], held=false;
     if(st&&st.id!==null&&tiltActive()){applyStick(0,tiltVal(),st.y||0);held=true}
-    if(BD_TILT.cur&&tiltActive()){
+    if(BD_TILT.cur&&(BD_TILT.cur.st?TILT.has:tiltActive())){
       var bt=BD_TILT.cur, tv=tiltVal();
-      if(bt.sl){setT(bt.c,tv*100,true);if(bt.r) bt.r.value=String(Math.round(tv*100))}
+      if(bt.st){
+        // Steering wheel with gyro on: the phone's tilt turns the wheel while it is held.
+        var gv=Math.round(tv*20)*5;noteInput();
+        if(gv!==bt.last){bt.last=gv;dialBuzz()}
+        setT(bt.c,wOut(bt.it,gv),false);
+      }else if(bt.sl){setT(bt.c,tv*100,true);if(bt.r) bt.r.value=String(Math.round(tv*100))}
       else applyJoy(bt,tv,bt.y||0);
       held=true;
     }
@@ -4384,15 +4391,16 @@ html,body{overflow-anchor:none}
         sbx.appendChild(ssv);
         var sk=document.createElement('div');sk.className='stk';sk.setAttribute('role','slider');sk.setAttribute('aria-valuemin','-100');sk.setAttribute('aria-valuemax','100');
         sk.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="stgR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a94a6"/><stop offset=".5" stop-color="#3a4252"/><stop offset="1" stop-color="#1b2029"/></linearGradient><linearGradient id="stgS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b7587"/><stop offset="1" stop-color="#2a303b"/></linearGradient><radialGradient id="stgH" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#5b6578"/><stop offset="1" stop-color="#14181f"/></radialGradient></defs><circle cx="50" cy="50" r="45" fill="none" stroke="#0b0d11" stroke-width="12"/><circle cx="50" cy="50" r="45" fill="none" stroke="url(#stgR)" stroke-width="8.5"/><circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1" stroke-dasharray="1.2 1.8"/><path d="M9 50H91M50 50V92" stroke="#0b0d11" stroke-width="10.5" stroke-linecap="round"/><path d="M9 50H91M50 50V92" stroke="url(#stgS)" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="50" r="13" fill="url(#stgH)" stroke="#0b0d11" stroke-width="2"/><circle cx="50" cy="50" r="4" style="fill:var(--hc,#ffd84a)" opacity=".9"/><rect x="43.5" y="2.5" width="13" height="16" rx="3.5" style="fill:var(--hc,#ffd84a);stroke:var(--hcd,#7a6a1f)" stroke-width="1.2"/><rect x="46" y="5" width="3" height="11" rx="1.5" fill="rgba(255,255,255,.55)"/></svg>';
-        var sAng=0,sPrev=0,sDrag=false;
+        var sAng=0,sPrev=0,sDrag=false,sGy={st:true,c:sc,it:it,last:0};
         var sAt=function(e){var rc=sk.getBoundingClientRect();return Math.atan2(e.clientX-(rc.left+rc.width/2),-(e.clientY-(rc.top+rc.height/2)))*180/Math.PI};
         sk.addEventListener('pointerdown',function(e){
           if(S.estop||S.play) return;
           e.preventDefault();try{sk.setPointerCapture(e.pointerId)}catch(_){}
           delete RAMP[sc];sAng=wIn(it,rt.t[sc])/100*srg;sPrev=sAt(e);sDrag=true;sk.classList.add('drag');w.slast=wIn(it,rt.t[sc]);
+          if(it.gy&&TILT.has){TILT.zero=null;sGy.last=0;BD_TILT.cur=sGy}
         });
         sk.addEventListener('pointermove',function(e){
-          if(!sDrag||S.estop||S.play) return;
+          if(!sDrag||S.estop||S.play||BD_TILT.cur===sGy) return;
           var a=sAt(e),d=a-sPrev;if(d>180) d-=360;if(d<-180) d+=360;sPrev=a;
           sAng=Math.max(-srg,Math.min(srg,sAng+d));
           var v=Math.round(sAng/srg*20)*5;
@@ -4402,7 +4410,7 @@ html,body{overflow-anchor:none}
         });
         ['pointerup','pointercancel'].forEach(function(ev){sk.addEventListener(ev,function(){
           if(!sDrag) return;
-          sDrag=false;sk.classList.remove('drag');
+          sDrag=false;sk.classList.remove('drag');if(BD_TILT.cur===sGy) BD_TILT.cur=null;
           if(!it.hold&&!S.estop&&!S.play&&rt.t[sc]!==0) RAMP[sc]={t0:performance.now(),from:rt.t[sc],to:0,d:0.25};
         })});
         sk.addEventListener('contextmenu',function(e){e.preventDefault()});
@@ -4594,7 +4602,7 @@ html,body{overflow-anchor:none}
     });
     dashFit();
     bdNote.textContent=C.board.length?'':'The board is empty. Tap Edit board to add controls.';
-    paintBoard();
+    paintBoard();tiltNative();
   }
   function paintBoard(){
     if(!bdW||!bdW.length) return;
