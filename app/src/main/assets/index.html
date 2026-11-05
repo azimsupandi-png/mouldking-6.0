@@ -2184,7 +2184,7 @@ html,body{overflow-anchor:none}
     if(!store.prefs.haptic) return;
     var nw=Date.now();if(nw-DBZ<45) return;DBZ=nw;
     if(NB&&NB.haptic){try{NB.haptic('dial')}catch(e){}}
-    else if(navigator.vibrate){try{navigator.vibrate(13)}catch(e){}}
+    else if(navigator.vibrate){try{navigator.vibrate(8)}catch(e){}}
   }
   function wOut(it,v){return Math.round((it.inv?-v:v)*(it.cap||100)/100)}
   function wIn(it,t){return Math.max(-100,Math.min(100,Math.round((it.inv?-t:t)*100/(it.cap||100))))}

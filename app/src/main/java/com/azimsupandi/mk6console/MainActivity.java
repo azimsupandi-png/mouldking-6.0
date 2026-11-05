@@ -163,6 +163,19 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void buzzLight(long ms, int amplitude) {
+        if (vibrator == null || !vibrator.hasVibrator()) return;
+        try {
+            if (vibrator.hasAmplitudeControl()) {
+                vibrator.vibrate(VibrationEffect.createOneShot(ms, amplitude));
+            } else {
+                vibrator.vibrate(VibrationEffect.createWaveform(new long[] {0, ms}, -1));
+            }
+        } catch (RuntimeException ignored) {
+            // Vibration is a nicety; never let it break control.
+        }
+    }
+
     private Intent modelIntent(String id) {
         Intent i = new Intent(this, MainActivity.class);
         i.setAction(Intent.ACTION_VIEW);
@@ -559,7 +572,11 @@ public class MainActivity extends Activity {
             else if ("warn".equals(kind)) p = new long[] {0, 200, 100, 200, 100, 200};
             else if ("lost".equals(kind)) p = new long[] {0, 300};
             else if ("ok".equals(kind)) p = new long[] {0, 13};
-            else if ("dial".equals(kind)) p = new long[] {0, 13};
+            else if ("dial".equals(kind)) {
+                // Lighter than the other taps: shorter and, where the phone allows it, softer.
+                runOnUiThread(() -> buzzLight(8, 60));
+                return;
+            }
             else if ("hold".equals(kind)) p = new long[] {0, 35};
             else p = new long[] {0, 13};
             final long[] pattern = p;
