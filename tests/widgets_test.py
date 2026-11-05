@@ -164,6 +164,11 @@ def run_behaviour(b, group):
         check(L + 'dial: swipe left moves to the next channel, right comes back', c1 != c0 and c2 == c0, (c0, c1, c2))
         c0 = dc(); swp(-90, "document.querySelector('.dialk')"); pg.wait_for_timeout(250)
         check(L + 'dial: swiping on the knob turns it, it does not change channel', dc() == c0, dc())
+        ev("__t.C.hubs=[0,1,2];__t.C.board.find(o=>o.k==='n').sw=1;__t.syncBoard()"); pg.wait_for_timeout(400)
+        dd = ev("""(()=>{const el=document.querySelector('.dialdots'),b=el.getBoundingClientRect(),r=[...el.children].map(i=>i.getBoundingClientRect());
+          return {n:r.length,round:r.every(q=>Math.abs(q.width-q.height)<.6&&q.width>=2),inside:r.every(q=>q.left>=b.left-.5&&q.right<=b.right+.5),red:getComputedStyle(el.querySelector('i.on')).backgroundColor}})()""")
+        check(L + 'dial dots: 18 channels all fit, round, active one red', dd['n'] == 18 and dd['round'] and dd['inside'] and dd['red'].startswith('rgb(2'), dd)
+        ev("__t.C.hubs=[0,-1,-1];__t.syncBoard()"); pg.wait_for_timeout(300)
         ev("delete __t.C.board.find(o=>o.k==='n').sw;__t.syncBoard()"); pg.wait_for_timeout(300)
         ev("(()=>{const o=__t.C.board.find(o=>o.k==='n');delete o.ow;delete o.th;__t.syncBoard()})()"); pg.wait_for_timeout(300)
         ev("__t.rt.t[3]=0")
@@ -273,6 +278,11 @@ def run_behaviour(b, group):
         ev("__t.rt.t[0]=60;__t.rt.t[1]=-40"); pg.wait_for_timeout(350)
         arc = ev("document.querySelector('.mtr[data-k=f] .mv').textContent")
         check(L + 'arc meter shows +60', arc == '+60', arc)
+        ev("__t.C.hubs=[0,1,2];__t.syncBoard()"); pg.wait_for_timeout(400)
+        ad = ev("""(()=>{const sv=document.querySelector('.mtr[data-k=f]'),b=sv.getBoundingClientRect(),cs=[...sv.querySelectorAll('circle')].filter(c=>+c.getAttribute('cy')>b.height-12);
+          return {n:cs.length,inside:cs.every(c=>{const q=c.getBoundingClientRect();return q.left>=b.left-.5&&q.right<=b.right+.5}),red:cs.filter(c=>c.getAttribute('fill').includes('danger')).length}})()""")
+        check(L + 'arc meter dots: 18 channels all inside, active one red', ad['n'] == 18 and ad['inside'] and ad['red'] == 1, ad)
+        ev("__t.C.hubs=[0,-1,-1];__t.syncBoard()"); pg.wait_for_timeout(300)
         ev("__t.C.board.find(o=>o.k==='f').ow=1;__t.syncBoard()"); pg.wait_for_timeout(300)
         lit_f = lambda: ev("[...document.querySelector('.mtr[data-k=f]').querySelectorAll('path')].slice(0,24).filter(p=>(p.getAttribute('stroke')||'').startsWith('#')).length")
         pg.wait_for_timeout(300); arc_o = ev("document.querySelector('.mtr[data-k=f] .mv').textContent"); n60 = lit_f()
