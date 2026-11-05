@@ -1752,7 +1752,7 @@ html,body{overflow-anchor:none}
         if(ycn>=0&&ycn<NMAX) {out.push({k:'y',c:ycn,w:w,p:(yp>=5&&yp<=100)?yp:50,d:(yd>=1&&yd<=30)?yd:4});if(x.sc===1||x.sc===true) out[out.length-1].sc=1}
       }else if(x.k==='f'||x.k==='i'||x.k==='k'){
         var ocn=Math.round(+x.c);
-        if(ocn>=0&&ocn<NMAX){out.push({k:x.k,c:ocn,w:w});if(x.k==='f'&&(x.ow===1||x.ow===true)) out[out.length-1].ow=1;if(x.k==='k'&&(+x.ws===30||+x.ws===60)) out[out.length-1].ws=+x.ws;if(x.k==='k'&&(x.tg===1||x.tg===true)){out[out.length-1].tg=1;var tvv=Math.round(+x.tv);out[out.length-1].tv=isFinite(tvv)?Math.max(-100,Math.min(100,tvv)):80}if((x.k==='f'||x.k==='i')&&(+x.th===1||+x.th===2)) out[out.length-1].th=+x.th;if((x.k==='f'||x.k==='i')&&(x.sh===1||x.sh===true)) out[out.length-1].sh=1}
+        if(ocn>=0&&ocn<NMAX){out.push({k:x.k,c:ocn,w:w});if((x.k==='f'||x.k==='i')&&(x.ow===1||x.ow===true)) out[out.length-1].ow=1;if(x.k==='k'&&(+x.ws===30||+x.ws===60)) out[out.length-1].ws=+x.ws;if(x.k==='k'&&(x.tg===1||x.tg===true)){out[out.length-1].tg=1;var tvv=Math.round(+x.tv);out[out.length-1].tv=isFinite(tvv)?Math.max(-100,Math.min(100,tvv)):80}if((x.k==='f'||x.k==='i')&&(+x.th===1||+x.th===2)) out[out.length-1].th=+x.th;if((x.k==='f'||x.k==='i')&&(x.sh===1||x.sh===true)) out[out.length-1].sh=1}
       }else if(x.k==='n'){
         var kcn=Math.round(+x.c);
         if(kcn>=0&&kcn<NMAX){out.push({k:x.k,c:kcn,w:w});var nrt=Math.round(+x.rt*2)/2;if(x.rt!==undefined&&nrt>=0&&nrt<=10&&nrt!==3) out[out.length-1].rt=nrt;if(+x.th===1||+x.th===2) out[out.length-1].th=+x.th;if(x.ow===1||x.ow===true) out[out.length-1].ow=1}
@@ -2028,15 +2028,15 @@ html,body{overflow-anchor:none}
       m.seg=[];for(i=0;i<20;i++) m.seg.push(sv('rect',{rx:1.5,fill:TRK},svg));
       m.rq=sv('rect',{rx:2,width:4,fill:th[3],visibility:'hidden'},svg);
       m.mid=sv('line',{stroke:TXT,'stroke-width':1.5},svg);
-      m.lt=T({'text-anchor':'end','font-size':11,fill:MUT},'+100');
-      m.lm=T({'text-anchor':'end','font-size':11,fill:MUT},'0');
-      m.lb=T({'text-anchor':'end','font-size':11,fill:MUT},'-100');
+      m.lt=T({'text-anchor':'end','font-size':11,fill:MUT},it.ow?'100':'+100');
+      m.lm=T({'text-anchor':'end','font-size':11,fill:MUT},it.ow?'50':'0');
+      m.lb=T({'text-anchor':'end','font-size':11,fill:MUT},it.ow?'0':'-100');
       m.val=T({'class':'mv','text-anchor':'middle','font-size':15,'font-weight':700,fill:TXT});
       m.lay=function(cw,ch){
         var dh=m.nch>1?16:0, top=6, bot=Math.max(top+60,ch-dh-30), colw=Math.max(24,Math.min(100,cw*.38)), x0=(cw-(36+colw+10))/2+36;
         var sh=(bot-top)/20, md=(top+bot)/2;m.md=md;m.half=(bot-top)/2;m.cx0=x0+colw+4;
         m.seg.forEach(function(r,j){r.setAttribute('x',x0.toFixed(1));r.setAttribute('width',colw.toFixed(1));r.setAttribute('y',(top+j*sh).toFixed(1));r.setAttribute('height',Math.max(2,sh-2).toFixed(1))});
-        m.mid.setAttribute('x1',x0-5);m.mid.setAttribute('x2',x0+colw+5);m.mid.setAttribute('y1',md);m.mid.setAttribute('y2',md);
+        m.mid.setAttribute('display',it.ow?'none':'inline');m.mid.setAttribute('x1',x0-5);m.mid.setAttribute('x2',x0+colw+5);m.mid.setAttribute('y1',md);m.mid.setAttribute('y2',md);
         m.lt.setAttribute('x',x0-8);m.lt.setAttribute('y',top+10);m.lm.setAttribute('x',x0-8);m.lm.setAttribute('y',md+4);m.lb.setAttribute('x',x0-8);m.lb.setAttribute('y',bot-2);
         m.val.setAttribute('x',cw/2);m.val.setAttribute('y',ch-dh-6);
         m.rq.setAttribute('x',m.cx0);dots(cw,ch);
@@ -2153,9 +2153,10 @@ html,body{overflow-anchor:none}
         for(j=0;j<24;j++){var vc=it.ow?(j+.5)*100/24:-100+(j+.5)*200/24,on=it.ow?(out>0&&vc<=out):((vc>0&&vc<=out)||(vc<0&&vc>=out));var col=on?mCol(vc,th):TRK;if(m.seg[j].getAttribute('stroke')!==col) m.seg[j].setAttribute('stroke',col)}
         var rd=diff?(it.ow?mArc(m.cx,m.cy,m.R2,210,mAgF(oth)):mArc(m.cx,m.cy,m.R2,90,mAg(oth))):'';if(m.rd!==rd){m.rd=rd;m.req.setAttribute('d',rd)}
       }else{
-        var tx3=mSgn(out)+'%';if(m.val.textContent!==tx3) m.val.textContent=tx3;
-        for(j=0;j<20;j++){var vv=100-(j+.5)*10,on2=(vv>0&&vv<=out)||(vv<0&&vv>=out);var cl=on2?mCol(vv,th):TRK;if(m.seg[j].getAttribute('fill')!==cl) m.seg[j].setAttribute('fill',cl)}
-        if(diff){var ln=Math.abs(oth)/100*m.half;m.rq.setAttribute('y',(oth>0?m.md-ln:m.md).toFixed(1));m.rq.setAttribute('height',Math.max(1,ln).toFixed(1));m.rq.setAttribute('visibility','visible')}else m.rq.setAttribute('visibility','hidden');
+        if(it.ow){out=Math.max(0,out);oth=Math.max(0,oth)}
+        var tx3=(it.ow?String(Math.round(out)):mSgn(out))+'%';if(m.val.textContent!==tx3) m.val.textContent=tx3;
+        for(j=0;j<20;j++){var vv=it.ow?100-(j+.5)*5:100-(j+.5)*10,on2=it.ow?(out>0&&vv<=out):((vv>0&&vv<=out)||(vv<0&&vv>=out));var cl=on2?mCol(vv,th):TRK;if(m.seg[j].getAttribute('fill')!==cl) m.seg[j].setAttribute('fill',cl)}
+        if(diff){var ln=it.ow?oth/100*m.half*2:Math.abs(oth)/100*m.half;m.rq.setAttribute('y',(it.ow?m.md+m.half-ln:(oth>0?m.md-ln:m.md)).toFixed(1));m.rq.setAttribute('height',Math.max(1,ln).toFixed(1));m.rq.setAttribute('visibility','visible')}else m.rq.setAttribute('visibility','hidden');
       }
     };
     return m;
@@ -2213,7 +2214,7 @@ html,body{overflow-anchor:none}
       {k:'bl',l:'Blink',ch:[0,1,2,3],lab:['Steady','Slow','Fast','Pulse'],only:true,def:0,g:function(it){return Math.max(0,['off','slow','fast','pulse'].indexOf(C.ch[it.c].blink||'off'))},s:function(it,v){C.ch[it.c].kind='light';C.ch[it.c].blink=['off','slow','fast','pulse'][v];syncChannel(it.c)}}]},
     t:{t:'Toggle settings',f:[{k:'p',l:'Power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100]},F_INV,F_CAP]},
     f:{t:'Meter settings',f:[F_SH,F_TH,{k:'ow',l:'Direction',ch:[0,1],lab:['Both ways','Forward only'],only:true,def:0}]},
-    i:{t:'Meter settings',f:[F_SH,F_TH]},
+    i:{t:'Meter settings',f:[F_SH,F_TH,{k:'ow',l:'Direction',ch:[0,1],lab:['Both ways','Forward only'],only:true,def:0}]},
     k:{t:'Scope settings',f:[{k:'ws',l:'Time window',ch:[10,30,60],lab:['10 s','30 s','60 s'],only:true,def:10},{k:'tg',l:'Target line',ch:[0,1],lab:['Off','On'],only:true,def:0},{k:'tv',l:'Target value',u:'%',min:-100,max:100,st:5,ch:[-80,-50,50,80,100],def:80}]},
     y:{t:'Ramp settings',f:[{k:'p',l:'Target power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100]},{k:'d',l:'Ramp time',u:'s',min:1,max:30,st:1,ch:[2,4,6,10]},{k:'sc',l:'Show scope',ch:[0,1],lab:['Off','On'],only:true,def:0},F_INV,F_CAP]},
     w:{t:'Switch settings',f:[{k:'p',l:'Power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100],def:100},
