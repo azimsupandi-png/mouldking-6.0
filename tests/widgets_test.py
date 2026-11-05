@@ -216,9 +216,11 @@ def run_behaviour(b, group):
           k.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:%d,clientX:cx+R*%s,clientY:cy+R*%s}));
           return new Promise(res=>setTimeout(()=>{res(__t.rt.t[4])},%d))})()""" % (pid, ax, ay, pid, bx, by, wait))
         v_r = wheel(21, 0, -1, 1, 0, 50)
+        zp = ev("[...document.querySelectorAll('.stbox polygon')].map(p=>p.getAttribute('points')||'')")
         ang = ev("document.querySelector('.stk').style.transform")
         ev("document.querySelector('.stk').dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:21}))")
         pg.wait_for_timeout(700)
+        check(L + 'wheel: coloured dashes light up all zones to the right', len(zp) == 3 and all(zp), zp)
         check(L + 'wheel: turn right sends about +100 and the wheel rotates', v_r >= 90 and 'rotate' in ang, (v_r, ang))
         check(L + 'wheel: springs back to 0 on release', T(4) == 0, T(4))
         stk = lambda t, pid=31: ev("""(()=>{const k=document.querySelector('.stk'),r=k.getBoundingClientRect();

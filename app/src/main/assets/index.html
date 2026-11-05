@@ -4388,6 +4388,13 @@ html,body{overflow-anchor:none}
         var sar=document.createElementNS('http://www.w3.org/2000/svg','path');
         sar.setAttribute('d','M'+spt(48.5,-srg)+'A48.5 48.5 0 '+(srg>90?1:0)+' 1 '+spt(48.5,srg));
         sar.setAttribute('fill','none');sar.setAttribute('stroke','rgba(150,160,175,.55)');sar.setAttribute('stroke-width','1.6');sar.setAttribute('stroke-dasharray','3 3');ssv.appendChild(sar);
+        // same dashes, coloured like the meters from centre to the current value
+        var sz=[];(function(){var th=MTH[(it.th===1||it.th===2)?it.th:0],uid='stz'+(MSEQ++);
+          for(var zi=0;zi<3;zi++){
+            var cp=document.createElementNS('http://www.w3.org/2000/svg','clipPath');cp.setAttribute('id',uid+zi);
+            var pg=document.createElementNS('http://www.w3.org/2000/svg','polygon');cp.appendChild(pg);ssv.appendChild(cp);
+            var pa=document.createElementNS('http://www.w3.org/2000/svg','path');pa.setAttribute('d',sar.getAttribute('d'));pa.setAttribute('fill','none');pa.setAttribute('stroke',th[zi]);pa.setAttribute('stroke-width','1.6');pa.setAttribute('stroke-dasharray','3 3');pa.setAttribute('clip-path','url(#'+uid+zi+')');ssv.appendChild(pa);
+            sz.push(pg)}})();
         sbx.appendChild(ssv);
         var sk=document.createElement('div');sk.className='stk';sk.setAttribute('role','slider');sk.setAttribute('aria-valuemin','-100');sk.setAttribute('aria-valuemax','100');
         sk.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="stgR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a94a6"/><stop offset=".5" stop-color="#3a4252"/><stop offset="1" stop-color="#1b2029"/></linearGradient><linearGradient id="stgS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b7587"/><stop offset="1" stop-color="#2a303b"/></linearGradient><radialGradient id="stgH" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#5b6578"/><stop offset="1" stop-color="#14181f"/></radialGradient></defs><circle cx="50" cy="50" r="45" fill="none" stroke="#0b0d11" stroke-width="12"/><circle cx="50" cy="50" r="45" fill="none" stroke="url(#stgR)" stroke-width="8.5"/><circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1" stroke-dasharray="1.2 1.8"/><path d="M9 50H91M50 50V92" stroke="#0b0d11" stroke-width="10.5" stroke-linecap="round"/><path d="M9 50H91M50 50V92" stroke="url(#stgS)" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="50" r="13" fill="url(#stgH)" stroke="#0b0d11" stroke-width="2"/><circle cx="50" cy="50" r="4" style="fill:var(--hc,#ffd84a)" opacity=".9"/><rect x="43.5" y="2.5" width="13" height="16" rx="3.5" style="fill:var(--hc,#ffd84a);stroke:var(--hcd,#7a6a1f)" stroke-width="1.2"/><rect x="46" y="5" width="3" height="11" rx="1.5" fill="rgba(255,255,255,.55)"/></svg>';
@@ -4414,7 +4421,7 @@ html,body{overflow-anchor:none}
           if(!it.hold&&!S.estop&&!S.play&&rt.t[sc]!==0) RAMP[sc]={t0:performance.now(),from:rt.t[sc],to:0,d:0.25};
         })});
         sk.addEventListener('contextmenu',function(e){e.preventDefault()});
-        sbx.appendChild(sk);sw0.appendChild(sbx);el.appendChild(sw0);w.stw={c:sc,k:sk,rg:srg};
+        sbx.appendChild(sk);sw0.appendChild(sbx);el.appendChild(sw0);w.stw={c:sc,k:sk,rg:srg,zs:sz};
       }else if(it.k==='lv'){
         var lvc=it.c;
         if(!isActive(lvc)) return;
@@ -4661,6 +4668,12 @@ html,body{overflow-anchor:none}
       }else if(w.stw){
         var sv0=wIn(w.it,rt.t[w.stw.c]);
         w.stw.k.style.transform='rotate('+(sv0/100*w.stw.rg)+'deg)';
+        (function(){var rg=w.stw.rg,cv=Math.max(-100,Math.min(100,sv0)),sg=cv<0?-1:1,m=Math.abs(cv),B=[0,55,80,100];
+          w.stw.zs.forEach(function(pg,zi){
+            var lo=B[zi],hi=Math.min(B[zi+1],m),pts='';
+            if(m>lo){var n=Math.max(2,Math.ceil((hi-lo)/100*rg/4));pts='50,50';
+              for(var q=0;q<=n;q++){var a=sg*(lo+(hi-lo)*q/n)/100*rg,r=a*Math.PI/180;pts+=' '+(50+70*Math.sin(r)).toFixed(2)+','+(50-70*Math.cos(r)).toFixed(2)}}
+            if(pg._p!==pts){pg._p=pts;pg.setAttribute('points',pts)}})})();
         w.stw.k.setAttribute('aria-valuenow',String(sv0));
         if(w.out) w.out.textContent=fmt(rt.t[w.stw.c]);
       }else if(w.lev){
