@@ -78,6 +78,8 @@ Python with `playwright` and Chromium installed. Run it before each commit.
 
 `python3 tests/dashboard_edit_test.py` checks Dashboard editing in landscape (drag, select, resize, templates).
 
+`python3 tests/features_test.py` checks the dashboard polish features below.
+
 ### Dial
 
 The dial turns relative to where it is: touching it never jumps to another value, and it stops at the ends instead of wrapping round. In the dial's settings, *Swipe to other channels* lets you swipe sideways on the card (outside the knob) to move the dial to the next channel, like the arc meter.
@@ -87,3 +89,14 @@ The dial selector also turns relative to where it is and steps through the posit
 ### Steering wheel gyro
 
 In the steering wheel's settings, *Gyro* (Off/On) lets you hold the wheel and tilt the phone to steer, like tilt steering. It uses the tilt sensitivity and reverse settings from the Tilt steering card, and works even if that card's master switch is off.
+
+### Dashboard polish
+- **Channel chip:** widget titles show a yellow chip with the channel letter plus the channel name (the full title is the tooltip).
+- **Hub limit tick:** arc and LED meters mark the hub's real maximum (power limit, speed, channel max) with a white tick when it is below 100%.
+- **Active glow:** a widget that is sending a value gets a yellow inner outline.
+- **Hub lost:** when the hub link drops, widgets dim and a red banner appears (tap to dismiss); both clear when the hub is back.
+- **Selector dots:** the selected position is a bigger red dot, the others are small grey dots.
+- **Gyro steering:** wheel settings have a dead zone (Off/3/5/8 degrees) and a per-wheel sensitivity (30/45/60 degrees for full lock, or the phone setting).
+- **Second channel:** slider, dial and wheel settings can also drive another channel of the same hub with the same value or the opposite one (tank turn).
+- **Lock:** the Lock button in the dashboard bar makes the board untouchable (E-Stop still works). Hold the lock button for 1 s to unlock.
+- **Board history:** the last 3 boards per model are kept every time editing finishes; restore them from Settings, Board history.

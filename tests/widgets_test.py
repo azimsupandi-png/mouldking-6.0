@@ -270,7 +270,7 @@ def run_behaviour(b, group):
         rshold(); pg.wait_for_timeout(200)
         check(L + 'selector: long press switches C on', T(2) == 100, T(2))
         dots = ev("[...document.querySelectorAll('.dialbox svg g')].map(g=>g.children[1].getAttribute('fill')+'|'+(+g.children[1].getAttribute('opacity')).toFixed(2))")
-        check(L + 'selector: six small red dots, only the active one bright', all(d.startswith('#E24B4A') for d in dots) and sum(1 for d in dots if float(d.split('|')[1]) > .9) == 1 and len(dots) == 6, dots)
+        check(L + 'selector: six dots, only the active one red and bright, others grey', len(dots) == 6 and sum(1 for d in dots if d.startswith('var(--danger') and float(d.split('|')[1]) > .9) == 1 and sum(1 for d in dots if d.startswith('#8a93a0')) == 5, dots)
         check(L + 'selector: no letters on the dial', ev("document.querySelectorAll('.dialbox svg text').length") == 0)
         rsdrag(130); pg.wait_for_timeout(200)
         check(L + 'selector: changing position switches the old output off', rsel() == 5 and T(2) == 0 and T(5) == 0, (rsel(), T(2), T(5)))

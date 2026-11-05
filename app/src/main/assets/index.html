@@ -385,6 +385,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .bdw-h{display:flex;justify-content:space-between;gap:8px;font-size:13px}
 .bdw-h span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bdw-h output{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.bdw-chip{display:inline-block;min-width:1.5em;margin-right:.45em;padding:0 .3em;border-radius:5px;background:#ffc400;color:#111;font-style:normal;font-weight:800;text-align:center;line-height:1.35}
+.bdw.bdw-act{outline:2px solid rgba(255,216,74,.9);outline-offset:-5px}
 .bdw input[type=range]{width:100%;min-height:44px}
 .bdw .hold{min-height:72px;font-size:15px;letter-spacing:.04em;padding:0 4px;min-width:0;white-space:nowrap}
 .bdw .hold{display:flex;align-items:center;justify-content:center;gap:8px;overflow:hidden}
@@ -698,6 +700,21 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root.dash body{position:fixed;left:0;top:0;right:0;bottom:0;width:100%}
 :root.dash main{padding-top:6px;padding-bottom:4px;padding-left:8px;padding-right:8px}
 :root.dash .bar-banner{display:none}
+#lostBanner{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:60;max-width:90vw;background:#3a1416;color:#ff8a88;border:1.5px solid #E24B4A;border-radius:10px;padding:6px 14px;font-size:13px;font-weight:800;letter-spacing:.04em;text-align:center}
+.snaplist{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.snaprow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border:1px solid var(--line,#3a404b);border-radius:10px;font-size:13px}
+.snaprow small{color:var(--muted,#8a93a0)}
+#lostBanner[hidden]{display:none}
+#lockPad{position:fixed;right:14px;bottom:14px;z-index:70;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:26px;border:2px solid #ffc400;background:#1d222b;color:#ffd84a;font-size:14px;font-weight:800;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#lockPad[hidden]{display:none}
+#lockPad .lkp{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,196,0,.35)}
+#lockPad.hold .lkp{width:100%;transition:width 1s linear}
+#lockPad .lkt{position:relative}
+#lockPad .lkt::before{content:"\1F512 "}
+:root.locked #cols,:root.locked .dashbar{pointer-events:none}
+:root.locked #cols{opacity:.92}
+:root.dash .bdw{transition:opacity .25s}
+:root.dash.nolink .bdw{opacity:.5}
 :root.dash main>*:not(.cols),:root.dash .cols>*:not(#boardCard),:root.dash #boardCard>h2,:root.dash #bdNote,:root.dash #boardCard>.rec-row,:root.dash .bd-dashchk{display:none}
 :root.dash .cols{display:block}
 :root.dash #boardCard{padding:0;border:0;background:none;box-shadow:none;margin:0}
@@ -1202,6 +1219,8 @@ html,body{overflow-anchor:none}
     <button class="pill hubbtn" id="link" type="button" aria-pressed="true" data-st="on" title="Turn the hub link on or off"><span class="orb" aria-hidden="true"></span><span id="linkText">Simulation on</span></button>
     <button class="estop" id="estop" type="button" aria-pressed="false" aria-label="Emergency stop">E-Stop</button>
   </div>
+  <button id="lockPad" type="button" hidden aria-label="Hold to unlock the board"><span class="lkp" aria-hidden="true"></span><span class="lkt">Hold to unlock</span></button>
+  <div id="lostBanner" role="alert" hidden>HUB LINK LOST \u00b7 motors stopped. Tap to dismiss.</div>
   <div class="bar-banner" id="esBanner" role="alert" hidden>E-Stop is on. Every channel is locked at 0. Tap Release E-Stop to continue.</div>
 </header>
 <div class="live" id="live" role="status" aria-live="polite"></div>
@@ -1348,6 +1367,7 @@ html,body{overflow-anchor:none}
         <button class="btn" id="dbReset" type="button" aria-label="Reset layout">Reset</button>
         <button class="btn" id="dbBack" type="button" aria-label="Put back the last removed widget" hidden>Back</button>
         <select id="dbModel" aria-label="Model"></select>
+        <button class="btn" id="dbLock" type="button" aria-label="Lock the board so nothing is touched by accident">Lock</button>
         <button class="btn" id="dbExit" type="button" aria-label="Exit dashboard">Exit</button>
       </div>
       <label class="check bd-dashchk" for="bdDash"><input id="bdDash" type="checkbox">Dashboard when the phone is sideways</label>
@@ -1551,6 +1571,9 @@ html,body{overflow-anchor:none}
         <button class="btn" id="ioApply" type="button" hidden style="margin-top:8px">Apply import</button>
         <label class="check" for="bkAuto" style="margin-top:12px"><input id="bkAuto" type="checkbox" checked>Back up automatically every week</label>
         <div class="rec-row" style="margin-top:8px"><button class="btn" id="bkNow" type="button" hidden>Back up now</button></div>
+        <div class="rec-label" style="margin-top:12px">Board history (this model, last 3)</div>
+        <div id="snapList" class="snaplist"></div>
+        <p class="note" id="snapNote">A copy of the board is kept every time you finish editing it. Restore one if the layout gets messed up.</p>
         <p class="note" id="bkMsg"></p>
         <p class="note" id="ioMsg">Exports every model, including recordings, as one file.</p>
       </section>
@@ -1770,7 +1793,7 @@ html,body{overflow-anchor:none}
         }
       }else if(x.k==='st'){
         var stc=Math.round(+x.c),sra=Math.round(+x.ra);
-        if(stc>=0&&stc<NMAX){var so={k:'st',c:stc,w:w};if([90,180,270].indexOf(sra)>=0) so.ra=sra;if(x.hold===true) so.hold=true;if(x.gy===1||x.gy===true) so.gy=1;out.push(so)}
+        if(stc>=0&&stc<NMAX){var so={k:'st',c:stc,w:w};if([90,180,270].indexOf(sra)>=0) so.ra=sra;if(x.hold===true) so.hold=true;if(x.gy===1||x.gy===true) so.gy=1;var sgz=Math.round(+x.gz),sgs=Math.round(+x.gs);if(x.gz!==undefined&&sgz>=0&&sgz<=10&&sgz!==3) so.gz=sgz;if([30,45,60].indexOf(sgs)>=0) so.gs=sgs;out.push(so)}
       }else if(x.k==='dp'){
         var dpa=Math.round(+x.c),dpb=Math.round(+x.d),dpp=Math.round(+x.p),dpr=Math.round(+x.rt*10)/10;
         if(dpa>=0&&dpa<NMAX&&dpb>=-1&&dpb<NMAX&&dpb!==dpa){
@@ -1800,6 +1823,7 @@ html,body{overflow-anchor:none}
           if(it0.k==='s'){var sn0=Math.round(+x.snap);if([5,10,25].indexOf(sn0)>=0) it0.snap=sn0}
           if(it0.k==='b'){var bp0=Math.round(+x.p);it0.p=(bp0>=30&&bp0<=100)?bp0:100;if(x.lock===true) it0.lock=true}
         }
+        if(['s','n','st'].indexOf(it0.k)>=0&&x.pc!==undefined){var pc0=Math.round(+x.pc);if(pc0>=0&&pc0<NMAX&&pc0!==it0.c){it0.pc=pc0;if(x.pi===1||x.pi===true) it0.pi=1}}
         if(typeof x.lbl==='string'&&it0.k!=='e'){var lb0=x.lbl.replace(/\s+/g,' ').trim().slice(0,20);if(lb0) it0.lbl=lb0}
       }
     });
@@ -1960,6 +1984,14 @@ html,body{overflow-anchor:none}
     return (t<0?-m:m)*(tb?100:C.limit)/100*f;
   }
 
+  // What the hub sends at a full 100% request (the power limit, speed and channel max); meters mark it with a tick
+  function hubMax(i){
+    if(C.ch[i].kind==='light') return 100;
+    var tb=!!S.turbo[i]||!!cal||testOn();
+    var f=(tb?1:(SPD[C.speed]||1))*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
+    return Math.min(100,powerFor(100,C.ch[i])*(tb?100:C.limit)/100*f);
+  }
+
   /* ---------- Channels ---------- */
   var refs=[], groups=[], wrap=$('#channels'), cols=$('#cols');
   var runBlk=[], runSince=[];
@@ -2015,13 +2047,14 @@ html,body{overflow-anchor:none}
       m.seg=[];for(i=0;i<24;i++) m.seg.push(sv('path',{fill:'none',stroke:TRK},svg));
       m.req=sv('path',{fill:'none','stroke-linecap':'round','stroke-width':5,stroke:th[3]},svg);
       m.zt=sv('line',{stroke:TXT,'stroke-width':2.5,'stroke-linecap':'round'},svg);
+      m.hq=[sv('line',{stroke:'#fff','stroke-width':2.5,'stroke-linecap':'round',visibility:'hidden'},svg),sv('line',{stroke:'#fff','stroke-width':2.5,'stroke-linecap':'round',visibility:'hidden'},svg)];
       m.val=T({'class':'mv','text-anchor':'middle','font-weight':700,fill:TXT});
       m.sub=T({'text-anchor':'middle','font-size':11,fill:MUT});
       m.lay=function(cw,ch){
         m.cmp=ch<112;
         var dh=m.nch>1?(m.cmp?12:18):0, R2=Math.max(16,Math.min((cw-12)/2,(ch-dh-7)/1.68));
         var w=Math.max(5,R2*.16), r=R2-w/2-1, total=1.707*R2+w/2+1, y0=Math.max(1,(ch-dh-total)/2), cx=cw/2, cy=y0+R2+1;
-        m.cx=cx;m.cy=cy;m.R2=R2;
+        m.cx=cx;m.cy=cy;m.R2=R2;m.rr=r;m.ww=w;m.hk='';
         for(var j=0;j<24;j++){m.seg[j].setAttribute('d',mArc(cx,cy,r,mAg(-100+j*200/24)-.8,mAg(-100+(j+1)*200/24)+.8));m.seg[j].setAttribute('stroke-width',w.toFixed(1))}
         m.zt.setAttribute('x1',cx);m.zt.setAttribute('x2',cx);m.zt.setAttribute('y1',cy-R2-1);m.zt.setAttribute('y2',cy-r+w/2);m.zt.setAttribute('display',it.ow?'none':'inline');
         var fs=Math.max(8,Math.min(60,r*.55,(r-w/2)*2*.86/2.75));
@@ -2033,13 +2066,14 @@ html,body{overflow-anchor:none}
       m.seg=[];for(i=0;i<20;i++) m.seg.push(sv('rect',{rx:1.5,fill:TRK},svg));
       m.rq=sv('rect',{rx:2,width:4,fill:th[3],visibility:'hidden'},svg);
       m.mid=sv('line',{stroke:TXT,'stroke-width':1.5},svg);
+      m.hq=[sv('line',{stroke:'#fff','stroke-width':2.5,'stroke-linecap':'round',visibility:'hidden'},svg),sv('line',{stroke:'#fff','stroke-width':2.5,'stroke-linecap':'round',visibility:'hidden'},svg)];
       m.lt=T({'text-anchor':'end','font-size':11,fill:MUT},it.ow?'100':'+100');
       m.lm=T({'text-anchor':'end','font-size':11,fill:MUT},it.ow?'50':'0');
       m.lb=T({'text-anchor':'end','font-size':11,fill:MUT},it.ow?'0':'-100');
       m.val=T({'class':'mv','text-anchor':'middle','font-size':15,'font-weight':700,fill:TXT});
       m.lay=function(cw,ch){
         var dh=m.nch>1?16:0, top=6, bot=Math.max(top+60,ch-dh-30), colw=Math.max(24,Math.min(100,cw*.38)), x0=(cw-(36+colw+10))/2+36;
-        var sh=(bot-top)/20, md=(top+bot)/2;m.md=md;m.half=(bot-top)/2;m.cx0=x0+colw+4;
+        var sh=(bot-top)/20, md=(top+bot)/2;m.md=md;m.half=(bot-top)/2;m.cx0=x0+colw+4;m.x0=x0;m.cw=colw;m.top=top;m.bot=bot;m.hk='';
         m.seg.forEach(function(r,j){r.setAttribute('x',x0.toFixed(1));r.setAttribute('width',colw.toFixed(1));r.setAttribute('y',(top+j*sh).toFixed(1));r.setAttribute('height',Math.max(2,sh-2).toFixed(1))});
         m.mid.setAttribute('display',it.ow?'none':'inline');m.mid.setAttribute('x1',x0-5);m.mid.setAttribute('x2',x0+colw+5);m.mid.setAttribute('y1',md);m.mid.setAttribute('y2',md);
         m.lt.setAttribute('x',x0-8);m.lt.setAttribute('y',top+10);m.lm.setAttribute('x',x0-8);m.lm.setAttribute('y',md+4);m.lb.setAttribute('x',x0-8);m.lb.setAttribute('y',bot-2);
@@ -2151,6 +2185,22 @@ html,body{overflow-anchor:none}
       if(m.lz!==undefined&&zn===2&&m.lz<2&&!bdEditing) dialBuzz();
       m.lz=zn;
       var diff=Math.abs(rq-hub)>=1;
+      // tick(s) on the scale at the hub's limit
+      var hlim=Math.round(hubMax(c)),hkey=hlim+'|'+(it.sh?1:0)+(it.ow?1:0);
+      if(m.hk!==hkey&&m.hq){
+        m.hk=hkey;var hon=hlim<99&&!it.sh,hv=it.ow?[hlim]:[hlim,-hlim];
+        m.hq.forEach(function(ln,qi){
+          if(!hon||qi>=hv.length){ln.setAttribute('visibility','hidden');return}
+          if(k==='f'){
+            var ha=it.ow?mAgF(hv[qi]):mAg(hv[qi]),p0=mPol(m.cx,m.cy,m.rr-m.ww/2-2,ha),p1=mPol(m.cx,m.cy,m.rr+m.ww/2+3,ha);
+            ln.setAttribute('x1',p0[0].toFixed(1));ln.setAttribute('y1',p0[1].toFixed(1));ln.setAttribute('x2',p1[0].toFixed(1));ln.setAttribute('y2',p1[1].toFixed(1));
+          }else{
+            var hy=it.ow?m.bot-hv[qi]/100*(m.bot-m.top):m.md-hv[qi]/100*m.half;
+            ln.setAttribute('x1',(m.x0-3).toFixed(1));ln.setAttribute('x2',(m.x0+m.cw+3).toFixed(1));ln.setAttribute('y1',hy.toFixed(1));ln.setAttribute('y2',hy.toFixed(1));
+          }
+          ln.setAttribute('visibility','visible');
+        });
+      }
       if(k==='f'){
         if(it.ow){out=Math.max(0,out);oth=Math.max(0,oth)}
         var tx2=it.ow?String(Math.round(out)):mSgn(out);if(m.val.textContent!==tx2) m.val.textContent=tx2;
@@ -2196,21 +2246,26 @@ html,body{overflow-anchor:none}
   var F_INV={k:'inv',l:'Reverse direction',ch:[0,1],lab:['Off','On'],only:true,def:0};
   var F_SH={k:'sh',l:'Main value',ch:[0,1],lab:['Widget','Hub output'],only:true,def:0};
   var F_TH={k:'th',l:'Colour theme',ch:[0,1,2],lab:['Default','Blue-orange','Mono'],only:true,def:0};
+  // Also drive a second channel of the same hub with the same value (or the opposite one, for a tank turn)
+  var F_PC={k:'pc',l:'Also drive channel (same hub)',ch:[-1,0,1,2,3,4,5],lab:['Off','A','B','C','D','E','F'],only:true,def:-1,g:function(it){return it.pc===undefined?-1:it.pc%PER},s:function(it,v){if(v<0||v===it.c%PER){delete it.pc;delete it.pi}else it.pc=Math.floor(it.c/PER)*PER+v}};
+  var F_PI={k:'pi',l:'Second channel direction',ch:[0,1],lab:['Same','Opposite'],only:true,def:0,g:function(it){return it.pi?1:0},s:function(it,v){if(v&&it.pc!==undefined) it.pi=1; else delete it.pi}};
   var F_CAP={k:'cap',l:'Power limit',u:'%',min:10,max:100,st:5,ch:[25,50,75,100],def:100};
   var WSPEC={
-    s:{t:'Slider settings',f:[F_INV,F_CAP,{k:'snap',l:'Snap to',ch:[0,5,10,25],lab:['Off','5%','10%','25%'],only:true,def:0}]},
+    s:{t:'Slider settings',f:[F_INV,F_CAP,F_PC,F_PI,{k:'snap',l:'Snap to',ch:[0,5,10,25],lab:['Off','5%','10%','25%'],only:true,def:0}]},
     m:{t:'Mix settings',f:[F_INV,F_CAP]},
     rs:{t:'Selector settings',f:[{k:'p',l:'Output power',u:'%',min:5,max:100,st:5,ch:[25,50,75,100],def:100},
       {k:'ns',l:'Positions',ch:[4,6],only:true,def:6},
       {k:'hb',l:'Hub',ch:[0,1,2],lab:['Hub 1','Hub 2','Hub 3'],only:true,def:0,g:function(it){return it.hb||0},s:function(it,v){if(v) it.hb=v; else delete it.hb}},
       {k:'rt',l:'On/off ramp time (0 = instant)',u:'s',min:0,max:10,st:0.5,ch:[0,1,3,5],def:3}]},
-    n:{t:'Dial settings',f:[F_INV,F_CAP,{k:'rt',l:'On/off ramp time (0 = instant)',u:'s',min:0,max:10,st:0.5,ch:[0,1,3,5],def:3},F_TH,{k:'ow',l:'Direction',ch:[0,1],lab:['Both ways','Forward only'],only:true,def:0},
+    n:{t:'Dial settings',f:[F_INV,F_CAP,F_PC,F_PI,{k:'rt',l:'On/off ramp time (0 = instant)',u:'s',min:0,max:10,st:0.5,ch:[0,1,3,5],def:3},F_TH,{k:'ow',l:'Direction',ch:[0,1],lab:['Both ways','Forward only'],only:true,def:0},
       {k:'sw',l:'Swipe to other channels',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.sw?1:0},s:function(it,v){if(v) it.sw=1; else delete it.sw}}]},
     g:{t:'Direction & limit',f:[F_INV,F_CAP]},
     lv:{t:'Direction & limit',f:[F_INV,F_CAP]},
-    st:{t:'Steering wheel settings',f:[F_INV,F_CAP,{k:'ra',l:'Full lock at',ch:[90,180,270],lab:['90\u00b0','180\u00b0','270\u00b0'],only:true,def:180},
+    st:{t:'Steering wheel settings',f:[F_INV,F_CAP,F_PC,F_PI,{k:'ra',l:'Full lock at',ch:[90,180,270],lab:['90\u00b0','180\u00b0','270\u00b0'],only:true,def:180},
       {k:'hold',l:'On release',ch:[0,1],lab:['Return to centre','Stay'],only:true,def:0,g:function(it){return it.hold?1:0},s:function(it,v){if(v) it.hold=true; else delete it.hold}},
-      {k:'gy',l:'Gyro (hold the wheel and tilt the phone)',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.gy?1:0},s:function(it,v){if(v) it.gy=1; else delete it.gy}}]},
+      {k:'gy',l:'Gyro (hold the wheel and tilt the phone)',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.gy?1:0},s:function(it,v){if(v) it.gy=1; else delete it.gy}},
+      {k:'gs',l:'Gyro: tilt for full lock',ch:[0,30,45,60],lab:['Phone setting','High (30\u00b0)','Medium (45\u00b0)','Low (60\u00b0)'],only:true,def:0,g:function(it){return it.gs||0},s:function(it,v){if(v) it.gs=v; else delete it.gs}},
+      {k:'gz',l:'Gyro: dead zone (hand shake is ignored)',only:true,ch:[0,3,5,8],lab:['Off','3\u00b0','5\u00b0','8\u00b0'],def:3,g:function(it){return it.gz===undefined?3:it.gz},s:function(it,v){if(v===3) delete it.gz; else it.gz=v}}]},
     dp:{t:'D-pad settings',f:[{k:'p',l:'Power',u:'%',min:10,max:100,st:5,ch:[40,70,100],def:70},
       {k:'m',l:'Drive mode',ch:[0,1],lab:['Tank (2 motors)','Car (drive + steer)'],only:true,def:0,g:function(it){return it.m==='car'?1:0},s:function(it,v){it.m=v?'car':'tank'}},
       {k:'rt',l:'Ramp time (0 = instant)',u:'s',min:0,max:3,st:0.1,ch:[0,0.3,1],def:0.3},
@@ -2506,7 +2561,7 @@ html,body{overflow-anchor:none}
     return Math.atan2(sx,sy)*180/Math.PI;
   }
   function tiltActive(){return !!(C.tilt&&C.tilt.on&&TILT.has)}
-  function tiltVal(){
+  function tiltVal(sn,dz){
     var a=tiltAngle();
     if(a===null) return 0;
     if(TILT.zero===null) TILT.zero=a;
@@ -2514,16 +2569,19 @@ html,body{overflow-anchor:none}
     while(d>180) d-=360;
     while(d<-180) d+=360;
     TILT.deg=C.tilt.inv?d:-d;
-    var v=-d/C.tilt.sens;
+    var sv=sn||C.tilt.sens, v=-d/sv;
     if(C.tilt.inv) v=-v;
     v=Math.max(-1,Math.min(1,v));
-    return Math.abs(v)<0.08?0:v;
+    if(dz===undefined) return Math.abs(v)<0.08?0:v;
+    // custom dead zone in degrees: nothing inside it, then a smooth start so the value does not jump
+    var dd=Math.min(.9,dz/sv),av=Math.abs(v);
+    return av<=dd?0:(v<0?-1:1)*(av-dd)/(1-dd);
   }
   function tiltStep(){
     var st=sticks[0], held=false;
     if(st&&st.id!==null&&tiltActive()){applyStick(0,tiltVal(),st.y||0);held=true}
     if(BD_TILT.cur&&(BD_TILT.cur.st?TILT.has:tiltActive())){
-      var bt=BD_TILT.cur, tv=tiltVal();
+      var bt=BD_TILT.cur, tv=bt.st?tiltVal(bt.it.gs||undefined,bt.it.gz===undefined?3:bt.it.gz):tiltVal();
       if(bt.st){
         // Steering wheel with gyro on: the phone's tilt turns the wheel while it is held.
         var gv=Math.round(tv*20)*5;noteInput();
@@ -2749,6 +2807,7 @@ html,body{overflow-anchor:none}
     prof.value=store.active;
     profName.value=activeProfile().name;
     profDel.disabled=store.profiles.length<=1;
+    if(typeof snapPaint==='function') snapPaint();
   }
   function syncAll(){
     refs.forEach(function(r,i){syncChannel(i)});
@@ -3088,6 +3147,9 @@ html,body{overflow-anchor:none}
     var hs=$('#hubStat');if(hs){hs.setAttribute('data-st',!S.connected?'off':(hubMsg==='Pairing…'?'busy':'on'));hs.querySelector('span').textContent=t}
     link.setAttribute('data-st',!S.connected?'off':(hubMsg==='Pairing…'?'busy':'on'));
     link.setAttribute('aria-label',S.connected?'Disconnect hub':'Connect hub');paintBt();
+    // dashboard: widgets dim while the hub is not active; the lost banner goes away once the hub is back
+    document.documentElement.classList.toggle('nolink',!S.connected);
+    var lb=$('#lostBanner');if(lb&&S.connected) lb.hidden=true;
     // While the hub is active, the dashboard's Edit / Reset / model picker are locked so they cannot be hit by accident
     ['#dbEdit','#dbReset','#dbModel'].forEach(function(q){var b=$(q);if(b) b.disabled=!!S.connected&&!!NB&&!bdEditing});
     if(!S.connected) refs.forEach(function(r){r.sent.textContent='not sent'});
@@ -3121,10 +3183,11 @@ html,body{overflow-anchor:none}
       wantLink=false;
       var was=S.connected&&(s==='error');
       S.connected=false;hubMsg=HUB_TEXT[s]||'Error';live.textContent=hubMsg;stopPlay(true);feedback('lost');
-      if(was) toast('Hub link lost. Motors stopped.',6000);
+      if(was){toast('Hub link lost. Motors stopped.',6000);var lb2=$('#lostBanner');if(lb2) lb2.hidden=false}
     }
     paintLink();
   };
+  (function(){var lb=$('#lostBanner');if(lb) lb.addEventListener('click',function(){lb.hidden=true})})();
   var es=$('#estop'), banner=$('#esBanner');
   function paintEstop(){
     es.setAttribute('aria-pressed',String(S.estop));
@@ -3630,6 +3693,41 @@ html,body{overflow-anchor:none}
     if(!(NB&&NB.autoBackup)||!store.prefs.autoBackup) return;
     if(Date.now()-store.prefs.lastBackup>BK_MS) bkRun(false);
   }
+  // ---- Board history: the last 3 boards of the current model, saved whenever editing finishes ----
+  var SNAPK='mk6.boardsnaps';
+  function snapLoad(){try{var a=JSON.parse(localStorage.getItem(SNAPK)||'[]');return Array.isArray(a)?a.filter(function(x){return x&&typeof x.p==='string'&&Array.isArray(x.b)&&isFinite(+x.t)}):[]}catch(e){return []}}
+  function snapBoard(){
+    try{
+      if(!C.board||!C.board.length) return;
+      var all=snapLoad(),pid=store.active,js=JSON.stringify(C.board),mine=all.filter(function(x){return x.p===pid});
+      if(mine.length&&JSON.stringify(mine[0].b)===js) return;
+      var rest=all.filter(function(x){return x.p!==pid});
+      mine.unshift({p:pid,t:Date.now(),b:JSON.parse(js)});
+      localStorage.setItem(SNAPK,JSON.stringify(mine.slice(0,3).concat(rest).slice(0,24)));
+    }catch(e){}
+    snapPaint();
+  }
+  function snapPaint(){
+    var box=$('#snapList');if(!box) return;
+    box.innerHTML='';
+    var mine=snapLoad().filter(function(x){return x.p===store.active}).slice(0,3);
+    if(!mine.length){var e=document.createElement('div');e.className='note';e.textContent='No saved boards yet.';box.appendChild(e);return}
+    mine.forEach(function(x,i){
+      var row=document.createElement('div');row.className='snaprow';
+      var d=new Date(+x.t),tx=document.createElement('span');
+      tx.textContent=(i===0?'Latest':'Earlier '+i)+' ';
+      var sm=document.createElement('small');sm.textContent=d.toLocaleDateString([], {day:'numeric',month:'short'})+' '+d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+' \u00b7 '+x.b.length+' widgets';
+      tx.appendChild(sm);
+      var b=document.createElement('button');b.type='button';b.className='btn';b.textContent='Restore';
+      b.addEventListener('click',function(){
+        C.board=cleanBoard(x.b);bdEditing=false;dashAdd=false;save();syncBoard();toast('Board restored.');feedback('ok');
+      });
+      row.appendChild(tx);row.appendChild(b);box.appendChild(row);
+    });
+  }
+  window.__snap={take:snapBoard,list:snapLoad};
+  snapPaint();
+  setTimeout(snapBoard,5000);
   bkAuto.addEventListener('change',function(){store.prefs.autoBackup=bkAuto.checked;save()});
   bkNow.addEventListener('click',function(){bkRun(true)});
   setInterval(bkCheck,3600000);
@@ -4045,7 +4143,13 @@ html,body{overflow-anchor:none}
   function bdHead(el,text,it,withOut){
     if(!text&&!bdEditing&&!withOut) return null;
     var head=document.createElement('div');head.className='bdw-h';
-    var nm=document.createElement('span');nm.textContent=(it&&it.lbl)||text||'';if(it&&it.lbl) nm.title=text||'';head.appendChild(nm);
+    var nm=document.createElement('span');nm.textContent=(it&&it.lbl)||text||'';if(it&&it.lbl) nm.title=text||'';
+    else if(text){
+      // "Dial · A · Left wheel" becomes a channel chip plus the channel name; the full text stays as the tooltip
+      var cm=/^(?:(.+?)\s\u00b7\s)?([A-F])\s\u00b7\s(.+)$/.exec(text);
+      if(cm){nm.title=text;nm.textContent='';var ch0=document.createElement('i');ch0.className='bdw-chip';ch0.textContent=cm[2];nm.appendChild(ch0);nm.appendChild(document.createTextNode(cm[3]))}
+    }
+    head.appendChild(nm);
     var out=null;
     if(bdEditing) head.appendChild(bdToolbar(it));
     else if(withOut){out=document.createElement('output');out.textContent='0';head.appendChild(out)}
@@ -4611,8 +4715,17 @@ html,body{overflow-anchor:none}
     bdNote.textContent=C.board.length?'':'The board is empty. Tap Edit board to add controls.';
     paintBoard();tiltNative();
   }
+  function mirrorPairs(){
+    if(S.estop||S.play||!C.board) return;
+    C.board.forEach(function(it){
+      if(typeof it.pc!=='number'||it.pc===it.c) return;
+      var v=(it.pi?-1:1)*(rt.t[it.c]||0);
+      if((rt.t[it.pc]||0)!==(v||0)) setT(it.pc,v,false);
+    });
+  }
   function paintBoard(){
     if(!bdW||!bdW.length) return;
+    mirrorPairs();
     paintPads();
     bdW.forEach(function(w){
       if(w.es){
@@ -4661,8 +4774,11 @@ html,body{overflow-anchor:none}
         var rtxt='ABCDEF'.charAt(rd0.ch(rsel)%PER)+(ron?' ON':'');if(w.out&&w.out.textContent!==rtxt) w.out.textContent=rtxt;
         var rlv=ron?Math.min(1,Math.abs(rt.t[rd0.ch(rsel)])/100):0;
         rd0.dots.forEach(function(q,qi){
-          var lv=qi===rsel?Math.round(rlv*20)/20:0;if(q.st===lv) return;q.st=lv;
-          q.c.setAttribute('opacity',String(.3+.7*lv));
+          var sel=qi===rsel,lv=sel?Math.round(rlv*20)/20:0,sk=(sel?'s':'o')+lv;if(q.st===sk) return;q.st=sk;
+          // like the arc meter: the current position is a bigger red dot, the others small grey dots
+          q.c.setAttribute('fill',sel?'var(--danger,#E03E3E)':'#8a93a0');
+          q.c.setAttribute('r',sel?'3.6':'2.4');
+          q.c.setAttribute('opacity',sel?String(.7+.3*lv):'.55');
           q.h.setAttribute('opacity',String(.35*lv));
         });
       }else if(w.stw){
@@ -4724,10 +4840,15 @@ html,body{overflow-anchor:none}
         if(w.out) w.out.textContent=fmt(v);
         if(w.rng&&!w.drag&&+w.rng.value!==vu) w.rng.value=String(vu);
       }
+      // a widget that is sending something gets a soft yellow glow
+      var gch=[],git=w.it;
+      if(w.rsd) gch.push(w.rsd.ch(w.rsd.cur())); else if(w.mix) w.mix.forEach(function(z){gch.push(z.c)}); else{if(typeof git.c==='number') gch.push(git.c);if(typeof git.d==='number'&&git.d>=0&&git.k!=='y') gch.push(git.d)}
+      var gact=!bdEditing&&!S.estop&&git.k!=='f'&&git.k!=='i'&&git.k!=='k'&&gch.some(function(q){return Math.abs(rt.t[q]||0)>=1});
+      if(w.el&&w.gl!==gact){w.gl=gact;w.el.classList.toggle('bdw-act',gact)}
     });
   }
-  bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;syncBoard()});
-  $('#dbEdit').addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing) dashAdd=false;syncBoard()});
+  bdEditBtn.addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing) snapBoard();syncBoard()});
+  $('#dbEdit').addEventListener('click',function(){bdEditing=!bdEditing;if(!bdEditing){dashAdd=false;snapBoard()}syncBoard()});
   $('#dbAdd').addEventListener('click',function(){dashAdd=!dashAdd;syncBoard()});
   var rstT=0;
   $('#dbReset').addEventListener('click',function(){
@@ -4979,6 +5100,14 @@ html,body{overflow-anchor:none}
     }
     prof.value=v;switchProfile(v);
   });
+  (function(){
+    var pad=$('#lockPad'),tm=0;
+    function setLock(on){document.documentElement.classList.toggle('locked',on);pad.hidden=!on;pad.classList.remove('hold');clearTimeout(tm);if(on) feedback('ok')}
+    $('#dbLock').addEventListener('click',function(){bdEditing=false;dashAdd=false;syncBoard();setLock(true);toast('Board locked. Hold the lock button to unlock.',3000)});
+    pad.addEventListener('pointerdown',function(e){e.preventDefault();pad.classList.add('hold');clearTimeout(tm);tm=setTimeout(function(){setLock(false);feedback('hold');toast('Board unlocked.')},1000)});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(ev){pad.addEventListener(ev,function(){clearTimeout(tm);pad.classList.remove('hold')})});
+    window.__lock=function(){return document.documentElement.classList.contains('locked')};
+  })();
   $('#dbExit').addEventListener('click',function(){C.dash=false;bdEditing=false;dashAdd=false;save();syncLayout()});
   $('#bdDash').addEventListener('change',function(){C.dash=$('#bdDash').checked;save();syncLayout()});
   var dashLastK=dashLand()?'g':'gp';
