@@ -2465,8 +2465,8 @@ html,body{overflow-anchor:none}
 
     r.rng.addEventListener('input',function(){
       var v=+r.rng.value,mg=C.ch[i].mag||0;
-      // magnet: close to 0 the thumb snaps to 0 (one small tick when it catches)
-      if(mg&&Math.abs(v)<=mg){if(v!==0){v=0;r.rng.value=0}if(!r.mgOn){r.mgOn=true;if(v===0&&typeof dialBuzz==='function') dialBuzz()}}else r.mgOn=false;
+      // magnet: close to 0 the thumb snaps to 0 (the slider's own 0-crossing tick is the only vibration)
+      if(mg&&Math.abs(v)<=mg){if(v!==0){v=0;r.rng.value=0}}
       setT(i,v,true);
       if(+r.rng.value!==rt.t[i]) r.rng.value=rt.t[i];
     });
@@ -2582,8 +2582,9 @@ html,body{overflow-anchor:none}
     var r=refs[i];if(!r.act) return;
     var show=false;
     if(C.ch[i].kind==='slider'&&!S.estop){
+      // only while the output is still ramping towards its goal (a power cap or limit is not a ramp)
       var av=valueOfOut(i,o);
-      if(Math.abs(av-rt.t[i])>=3){show=true;r.act.style.left='calc(34px + (100% - 68px) * '+((av+100)/200)+')'}
+      if(Math.abs(o-goalOf(i))>=3&&Math.abs(av-rt.t[i])>=3){show=true;r.act.style.left='calc(34px + (100% - 68px) * '+((av+100)/200)+')'}
     }
     var disp=show?'block':'none';
     if(r.act.style.display!==disp) r.act.style.display=disp;

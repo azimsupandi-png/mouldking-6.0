@@ -120,6 +120,12 @@ def main():
         txt = ev("[...document.querySelectorAll('.padbox')[0].querySelectorAll('.axb output')].map(o=>+o.textContent)")
         pg.mouse.up(); pg.wait_for_timeout(150)
         check('axis bars: show drive/steer values, no peak marker', txt[0] > 20 and txt[1] > 20 and not ev("document.querySelector('.abp')"), txt)
+        # a power cap is not a ramp: no white marker once the output has settled
+        ev("__t.C.ch[0].max=80;__t.C.ch[0].lo=-100;__t.C.ch[0].hi=100;__t.C.ramp=0;__t.rt.t[0]=0")
+        ev("document.querySelector('.pre .btn[data-v=\"100\"]').click()"); pg.wait_for_timeout(1500)
+        capact = ev("getComputedStyle(document.querySelector('.track .act')).display")
+        ev("__t.C.ch[0].max=100")
+        check('actual-output marker hidden when the output is only capped', capact == 'none', capact)
         # slider limit controls are real inputs that drive the config
         ev("document.querySelector('#lStd').click()"); pg.wait_for_timeout(200)
         lim = ev("""(()=>{const e=document.querySelector('.adv input.lo');e.value=-40;e.dispatchEvent(new Event('input',{bubbles:true}));
