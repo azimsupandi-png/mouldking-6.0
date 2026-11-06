@@ -509,7 +509,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .track .limz{position:absolute;top:0;bottom:0;width:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(45deg,rgba(226,75,74,.42) 0 5px,rgba(226,75,74,.14) 5px 10px)}
 .track .limz.lo{left:34px}
 .track .limz.hi{right:34px}
-.track .act{position:absolute;top:3px;bottom:3px;width:4px;margin-left:-2px;border-radius:2px;background:#fff;box-shadow:0 0 8px rgba(255,255,255,.75);z-index:3;pointer-events:none;display:none}
 .pre{display:flex;gap:6px;margin-top:8px}
 .pre[hidden]{display:none}
 .pre .btn{flex:1 1 0;min-width:0;padding:6px 0;font-size:13px;border-radius:999px}
@@ -2438,7 +2437,7 @@ html,body{overflow-anchor:none}
   function buildChannel(i){
     var el=document.createElement('article');el.className='ch';
     el.innerHTML='<div class="ch-head"><span class="tag"></span><input class="name" maxlength="16" aria-label="Channel name"><button class="btn inv" type="button" aria-pressed="false">Reverse</button></div>'+
-      '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"><button class="stp dec" type="button" aria-label="Decrease 5%"></button><button class="stp inc" type="button" aria-label="Increase 5%"></button><i class="limz lo"></i><i class="limz hi"></i><i class="act"></i></div>'+
+      '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"><button class="stp dec" type="button" aria-label="Decrease 5%"></button><button class="stp inc" type="button" aria-label="Increase 5%"></button><i class="limz lo"></i><i class="limz hi"></i></div>'+
       '<div class="pre" role="group" aria-label="Quick values"><button class="btn" type="button" data-v="-100">\u2212100</button><button class="btn" type="button" data-v="-50">\u221250</button><button class="btn" type="button" data-v="0">0</button><button class="btn" type="button" data-v="50">+50</button><button class="btn" type="button" data-v="100">+100</button></div>'+
       '<div class="holds" hidden><button class="hold rev" type="button">Reverse</button><button class="hold fwd" type="button">Forward</button></div>'+
       '<div class="lights" hidden>'+
@@ -2460,7 +2459,7 @@ html,body{overflow-anchor:none}
     var r={el:el,tag:$('.tag',el),name:$('.name',el),inv:$('.inv',el),track:$('.track',el),fill:$('.fill',el),rng:$('.pwr',el),
       holds:$('.holds',el),hRev:$('.hold.rev',el),hFwd:$('.hold.fwd',el),val:$('.val',el),mw:$('.meter-wrap',el),meter:$('.meter',el),sent:$('.sent',el),
       lock:$('.lock',el),max:$('.max',el),maxOut:$('.maxOut',el),off:$('.off',el),offOut:$('.offOut',el),expo:$('.expo',el),expOut:$('.expOut',el),
-      pre:$('.pre',el),preB:[].slice.call(el.querySelectorAll('.pre .btn')),lzLo:$('.limz.lo',el),lzHi:$('.limz.hi',el),act:$('.act',el),st1:$('.st1',el),st5:$('.st5',el),st10:$('.st10',el),mag:$('.mag',el),magOut:$('.magOut',el),lo:$('input.lo',el),loOut:$('.loOut',el),hi:$('input.hi',el),hiOut:$('.hiOut',el),
+      pre:$('.pre',el),preB:[].slice.call(el.querySelectorAll('.pre .btn')),lzLo:$('.limz.lo',el),lzHi:$('.limz.hi',el),st1:$('.st1',el),st5:$('.st5',el),st10:$('.st10',el),mag:$('.mag',el),magOut:$('.magOut',el),lo:$('input.lo',el),loOut:$('.loOut',el),hi:$('input.hi',el),hiOut:$('.hiOut',el),
       cv:$('.cv',el),kS:$('.kS',el),kH:$('.kH',el),kL:$('.kL',el),lights:$('.lights',el),ltOn:$('.lt-on',el),ltB:$('.lt-bright',el),ltOut:$('.ltOut',el),ltBl:$('.lt-blink',el)};
     refs.push(r);
 
@@ -2568,27 +2567,6 @@ html,body{overflow-anchor:none}
     var c=C.ch[i],r=refs[i];
     r.lzLo.style.width='calc((100% - 68px) * '+((c.lo+100)/200)+')';
     r.lzHi.style.width='calc((100% - 68px) * '+((100-c.hi)/200)+')';
-  }
-  // Where the hub output really is, in slider terms (the thumb is the request, the white bar is the actual output while it ramps)
-  function valueOfOut(i,o){
-    var m=Math.abs(o);if(m<1) return 0;
-    var tb=!!S.turbo[i]||!!cal||testOn();
-    var f=(tb?1:(SPD[C.speed]||1))*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
-    var sc=(tb?100:C.limit)/100*f;if(sc<=0) return 0;
-    var tg=m/sc,a=0;
-    while(a<100&&powerFor(a,C.ch[i])<tg) a++;
-    return o<0?-a:a;
-  }
-  function actPaint(i,o){
-    var r=refs[i];if(!r.act) return;
-    var show=false;
-    if(C.ch[i].kind==='slider'&&!S.estop){
-      // only while the output is still ramping towards its goal (a power cap or limit is not a ramp)
-      var av=valueOfOut(i,o);
-      if(Math.abs(o-goalOf(i))>=3&&Math.abs(av-rt.t[i])>=3){show=true;r.act.style.left='calc(34px + (100% - 68px) * '+((av+100)/200)+')'}
-    }
-    var disp=show?'block':'none';
-    if(r.act.style.display!==disp) r.act.style.display=disp;
   }
   function syncChannel(i){
     var c=C.ch[i], r=refs[i], hold=c.kind==='hold', light=c.kind==='light';
@@ -3334,7 +3312,6 @@ html,body{overflow-anchor:none}
       var r=refs[i];
       var rk=o+'|'+(S.estop?1:0)+(S.play?1:0)+(r.locked?1:0)+(S.connected?v:'')+(C.ch[i].kind==='light'?(rt.t[i]>0?'L':'l'):'');
       if(r._rk===rk) continue;r._rk=rk;
-      actPaint(i,o);
       r.track.classList.toggle('dis',!!(S.estop||S.play||r.locked));
       r.fill.style.setProperty('--lf',String((50+Math.min(0,o)/2)/100));
       r.fill.style.setProperty('--wf',String(Math.abs(o)/200));
