@@ -158,7 +158,6 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .axb .abt{position:relative;height:10px;border-radius:5px;background:rgba(150,160,175,.22);overflow:hidden}
 .axb .abf{position:absolute;top:0;bottom:0;left:50%;width:0;background:#1D9E75}
 .axb .abz{position:absolute;top:-1px;bottom:-1px;left:50%;width:2px;margin-left:-1px;background:rgba(255,255,255,.55)}
-.axb .abp{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:#E24B4A;display:none}
 .axb output{text-align:right;font-variant-numeric:tabular-nums;color:inherit}
 .pad::before{content:"";position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(var(--acc) calc(var(--m)*360deg),transparent 0);
   -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));pointer-events:none}
@@ -2460,7 +2459,7 @@ html,body{overflow-anchor:none}
     var r={el:el,tag:$('.tag',el),name:$('.name',el),inv:$('.inv',el),track:$('.track',el),fill:$('.fill',el),rng:$('.pwr',el),
       holds:$('.holds',el),hRev:$('.hold.rev',el),hFwd:$('.hold.fwd',el),val:$('.val',el),mw:$('.meter-wrap',el),meter:$('.meter',el),sent:$('.sent',el),
       lock:$('.lock',el),max:$('.max',el),maxOut:$('.maxOut',el),off:$('.off',el),offOut:$('.offOut',el),expo:$('.expo',el),expOut:$('.expOut',el),
-      pre:$('.pre',el),preB:[].slice.call(el.querySelectorAll('.pre .btn')),lzLo:$('.limz.lo',el),lzHi:$('.limz.hi',el),act:$('.act',el),st1:$('.st1',el),st5:$('.st5',el),st10:$('.st10',el),mag:$('.mag',el),magOut:$('.magOut',el),lo:$('.lo',el),loOut:$('.loOut',el),hi:$('.hi',el),hiOut:$('.hiOut',el),
+      pre:$('.pre',el),preB:[].slice.call(el.querySelectorAll('.pre .btn')),lzLo:$('.limz.lo',el),lzHi:$('.limz.hi',el),act:$('.act',el),st1:$('.st1',el),st5:$('.st5',el),st10:$('.st10',el),mag:$('.mag',el),magOut:$('.magOut',el),lo:$('input.lo',el),loOut:$('.loOut',el),hi:$('input.hi',el),hiOut:$('.hiOut',el),
       cv:$('.cv',el),kS:$('.kS',el),kH:$('.kH',el),kL:$('.kL',el),lights:$('.lights',el),ltOn:$('.lt-on',el),ltB:$('.lt-bright',el),ltOut:$('.ltOut',el),ltBl:$('.lt-blink',el)};
     refs.push(r);
 
@@ -2692,7 +2691,7 @@ html,body{overflow-anchor:none}
     if(cf.b>=0) setT(cf.b,vb*100,false);
     axbPaint(k,va*100,vb*100);
   }
-  // Axis bars under the pad: current value from the centre, red peak marker held for 3 s
+  // Axis bars under the pad: current value from the centre
   function axbPaint(k,a,b){
     var st=sticks[k];if(!st||!st.axb) return;
     [a,b].forEach(function(v,q){
@@ -2700,8 +2699,6 @@ html,body{overflow-anchor:none}
       var lo=Math.min(0,v),w=Math.abs(v)/2;
       r.f.style.left=(50+lo/2)+'%';r.f.style.width=w+'%';
       r.f.style.background=m>=90?'#E24B4A':m>=60?'#EF9F27':'#1D9E75';
-      if(m>=r.pk){r.pk=m;r.sg=v<0?-1:1;r.p.style.left=(50+r.sg*m/2)+'%';r.p.style.display=m>=5?'block':'none';
-        clearTimeout(r.t);r.t=setTimeout(function(){r.pk=0;r.p.style.display='none'},3000)}
       var tx=(v>0?'+':'')+v;if(r.o.textContent!==tx) r.o.textContent=tx;
     });
   }
@@ -2710,13 +2707,13 @@ html,body{overflow-anchor:none}
     box.innerHTML='<h3 class="pb-title"></h3>'+
       '<div class="seg" role="group" aria-label="Stick mode"><button class="btn mA" type="button" aria-pressed="true">Axis</button><button class="btn mT" type="button" aria-pressed="false">Tank</button></div>'+
       '<div class="pad"><div class="knob rest"></div></div>'+
-      '<div class="axb"><div class="ab"><span class="abl"></span><span class="abt"><i class="abf"></i><i class="abz"></i><i class="abp"></i></span><output>0</output></div><div class="ab"><span class="abl"></span><span class="abt"><i class="abf"></i><i class="abz"></i><i class="abp"></i></span><output>0</output></div></div>'+
+      '<div class="axb"><div class="ab"><span class="abl"></span><span class="abt"><i class="abf"></i><i class="abz"></i></span><output>0</output></div><div class="ab"><span class="abl"></span><span class="abt"><i class="abf"></i><i class="abz"></i></span><output>0</output></div></div>'+
       '<div class="maprow"><label><span class="la"></span><select class="selA"></select></label><label><span class="lb"></span><select class="selB"></select></label></div>'+
       '<label class="check spr-row"><input class="spr" type="checkbox" checked><span>Return to 0 when released</span></label>';
     $('#pads').appendChild(box);
     var st={box:box,title:$('.pb-title',box),mA:$('.mA',box),mT:$('.mT',box),pad:$('.pad',box),knob:$('.knob',box),
       spr:$('.spr',box),y:0,la:$('.la',box),lb:$('.lb',box),selA:$('.selA',box),selB:$('.selB',box),id:null};
-    st.axb=[].map.call(box.querySelectorAll('.ab'),function(e){return {l:$('.abl',e),f:$('.abf',e),p:$('.abp',e),o:$('output',e),pk:0,sg:1,t:0}});
+    st.axb=[].map.call(box.querySelectorAll('.ab'),function(e){return {l:$('.abl',e),f:$('.abf',e),o:$('output',e)}});
     sticks.push(st);
     st.spr.addEventListener('change',function(){
       cfgOf(k).hold=!st.spr.checked;save();

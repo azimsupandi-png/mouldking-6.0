@@ -119,8 +119,13 @@ def main():
         pg.mouse.move(cx, cy); pg.mouse.down(); pg.mouse.move(cx + pb['width'] * 0.3, cy - pb['height'] * 0.3, steps=4); pg.wait_for_timeout(150)
         txt = ev("[...document.querySelectorAll('.padbox')[0].querySelectorAll('.axb output')].map(o=>+o.textContent)")
         pg.mouse.up(); pg.wait_for_timeout(150)
-        pk = ev("getComputedStyle(document.querySelectorAll('.padbox')[0].querySelector('.abp')).display")
-        check('axis bars: show drive/steer values and keep a peak marker after release', txt[0] > 20 and txt[1] > 20 and pk == 'block', (txt, pk))
+        check('axis bars: show drive/steer values, no peak marker', txt[0] > 20 and txt[1] > 20 and not ev("document.querySelector('.abp')"), txt)
+        # slider limit controls are real inputs that drive the config
+        ev("document.querySelector('#lStd').click()"); pg.wait_for_timeout(200)
+        lim = ev("""(()=>{const e=document.querySelector('.adv input.lo');e.value=-40;e.dispatchEvent(new Event('input',{bubbles:true}));
+          const h=document.querySelector('.adv input.hi');h.value=60;h.dispatchEvent(new Event('input',{bubbles:true}));
+          return [e.tagName,__t.C.ch[0].lo,__t.C.ch[0].hi]})()""")
+        check('slider min/max controls are range inputs and change the limits', lim == ['INPUT', -40, 60], lim)
         check('no script errors', not errs, errs)
         b.close()
     print('All tests passed' if not fails else '%d failed' % len(fails))
