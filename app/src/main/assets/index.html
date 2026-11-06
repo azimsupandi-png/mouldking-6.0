@@ -2611,6 +2611,11 @@ html,body{overflow-anchor:none}
     r.lo.value=c.lo;r.loOut.textContent=c.lo+'%';r.hi.value=c.hi;r.hiOut.textContent=c.hi+'%';
     limZones(i);
     drawCurve(i);
+    // Settings that only make sense for a slider are hidden for Hold and Light (Hold still uses Maximum power)
+    var sl=!hold&&!light;
+    [[r.max,!light],[r.off,sl],[r.expo,sl],[r.mag,sl],[r.lo,sl],[r.hi,sl]].forEach(function(q){var lb=q[0].closest('label');if(lb) lb.hidden=!q[1]});
+    r.st1.parentNode.hidden=!sl;
+    var cvs=r.el.querySelector('svg.curve');if(cvs) cvs.setAttribute('display',sl?'inline':'none');
   }
 
   /* ---------- Sticks ---------- */
