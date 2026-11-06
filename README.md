@@ -66,8 +66,6 @@ The hub only listens, so the app cannot show battery level or motor state.
 ### Slider and joystick extras
 - **Quick values**: a row of chips (−100, −50, 0, +50, +100) under every slider channel.
 - **Step size**: in a channel's settings, pick 1, 5 or 10 for the ◀ ▶ buttons (hold to repeat).
-- **Magnet at 0**: the slider snaps to 0 when you come within the chosen range, with one light tick.
-- **Slider minimum / maximum**: limits the travel; the blocked part is striped red.
 - **Joystick axis bars**: two bars under each pad show Drive/Steer (or Left/Right).
 
 - **Swipe joystick pairs** (Board): in a joystick's settings turn on "Swipe to other pairs". Swipe the card sideways (not on the pad) to move between channel pairs (A+B, C+D, E+F). Dots show the pair (3 + 3 + 3 with three hubs), and the old pair is set to 0.

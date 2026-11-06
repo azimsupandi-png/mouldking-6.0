@@ -93,7 +93,7 @@ def main():
         check('board history: restore brings the older board back', after == before + 1, (before, after))
         # ---- main screen: slider upgrades + joystick axis bars
         ev("document.querySelector('#lStd').click()"); pg.wait_for_timeout(300)
-        ev("__t.S.connected=true;__t.C.ch[0].kind='slider';__t.C.ch[0].stp=10;__t.C.ch[0].mag=0;__t.C.ch[0].lo=-100;__t.C.ch[0].hi=100;__t.rt.t[0]=0")
+        ev("__t.S.connected=true;__t.C.ch[0].kind='slider';__t.C.ch[0].stp=10;__t.rt.t[0]=0")
         tap = "(s)=>{const b=document.querySelector(s);b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:7}));b.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:7}))}"
         pg.evaluate(tap, '.stp.inc'); pg.wait_for_timeout(100)
         a10 = ev("__t.rt.t[0]")
@@ -103,14 +103,8 @@ def main():
         ev("document.querySelector('.pre .btn[data-v=\"50\"]').click()"); pg.wait_for_timeout(100)
         pr = ev("[__t.rt.t[0], document.querySelector('.pre .btn[data-v=\"50\"]').classList.contains('on')]")
         check('preset chip sets the value and highlights', pr == [50, True], pr)
-        ev("__t.C.ch[0].lo=-40;__t.C.ch[0].hi=60")
-        ev("document.querySelector('.pre .btn[data-v=\"-100\"]').click()"); lo = ev("__t.rt.t[0]")
-        ev("document.querySelector('.pre .btn[data-v=\"100\"]').click()"); hi = ev("__t.rt.t[0]")
-        check('slider limits clamp the requested value', lo == -40 and hi == 60, (lo, hi))
-        ev("__t.C.ch[0].lo=-100;__t.C.ch[0].hi=100;__t.C.ch[0].mag=6")
-        near = ev("""(()=>{const r=document.querySelector('.track input.pwr');r.value=4;r.dispatchEvent(new Event('input',{bubbles:true}));return [__t.rt.t[0],+r.value]})()""")
-        far = ev("""(()=>{const r=document.querySelector('.track input.pwr');r.value=20;r.dispatchEvent(new Event('input',{bubbles:true}));return __t.rt.t[0]})()""")
-        check('magnet: values close to 0 snap to 0, others pass', near == [0, 0] and far == 20, (near, far))
+        gone = ev("[...document.querySelectorAll('.adv label')].map(l=>l.textContent).filter(x=>/Magnet|Slider minimum|Slider maximum/.test(x)).length+document.querySelectorAll('.limz,.adv input.lo,.adv input.hi,.adv input.mag').length")
+        check('channel settings: magnet, slider minimum and maximum are gone', gone == 0, gone)
         # axis bars
         ev("document.querySelector('#lJoy').click()"); pg.wait_for_timeout(300)
         pg.locator('.padbox .pad').first.scroll_into_view_if_needed(); pg.wait_for_timeout(200)
@@ -121,19 +115,13 @@ def main():
         pg.mouse.up(); pg.wait_for_timeout(150)
         check('axis bars: show drive/steer values, no peak marker', txt[0] > 20 and txt[1] > 20 and not ev("document.querySelector('.abp')"), txt)
         check('no white chasing marker on the slider', ev("!document.querySelector('.track .act')"), '')
-        # slider limit controls are real inputs that drive the config
-        ev("document.querySelector('#lStd').click()"); pg.wait_for_timeout(200)
-        lim = ev("""(()=>{const e=document.querySelector('.adv input.lo');e.value=-40;e.dispatchEvent(new Event('input',{bubbles:true}));
-          const h=document.querySelector('.adv input.hi');h.value=60;h.dispatchEvent(new Event('input',{bubbles:true}));
-          return [e.tagName,__t.C.ch[0].lo,__t.C.ch[0].hi]})()""")
-        check('slider min/max controls are range inputs and change the limits', lim == ['INPUT', -40, 60], lim)
-        # Slider maximum limits only the slider: a dial selector still reaches its full output
+        # A dial selector reaches its full output
         pg2, errs2 = W.boot(b, {'width': 900, 'height': 500}, True, [{'k': 'rs', 'w': 1, 'p': 100, 'ns': 6, 's': 0, 'rt': 0.3}])
-        pg2.evaluate("__t.C.ch[0].kind='slider';__t.C.ch[0].hi=60;__t.C.ch[0].lo=-60;__t.rt.t[0]=0")
+        pg2.evaluate("__t.C.ch[0].kind='slider';__t.rt.t[0]=0")
         kb = pg2.locator('.dialk').first.bounding_box()
         pg2.mouse.move(kb['x'] + kb['width'] / 2, kb['y'] + kb['height'] / 2); pg2.mouse.down(); pg2.wait_for_timeout(1100); pg2.mouse.up(); pg2.wait_for_timeout(1500)
         sel = pg2.evaluate("__t.rt.t[0]")
-        check('selector output is not capped by the slider maximum', sel == 100, sel)
+        check('selector reaches its full output', sel == 100, sel)
         check('no script errors (selector)', not errs2, errs2)
         # joystick card: swipe to the next pair of channels
         pg3, errs3 = W.boot(b, {'width': 1000, 'height': 447}, True, [{'k': 'j', 'c': 0, 'd': 1, 'm': 'axis', 'w': 2, 'sw': 1}])
