@@ -185,6 +185,24 @@ def main():
         e5("__t.save();__t.syncBoard()"); pg5.wait_for_timeout(300)
         check('LED meter horizontal: saved layout survives a reload of the board', e5("__t.cleanBoard(JSON.parse(JSON.stringify(__t.C.board)))[0].hz") == 1 and e5("JSON.stringify(__t.cleanBoard(JSON.parse(JSON.stringify(__t.C.board)))[0].g)") == e5("JSON.stringify(__t.C.board[0].g)"))
         check('no script errors (LED meter layout)', not errs5, errs5)
+
+        # horizontal LED bar: value text, bar, scale and pager dots never overlap, at any card height (including with two hubs)
+        pg6, errs6 = W.boot(b, {'width': 1000, 'height': 447}, True, [
+            {'k': 'i', 'c': 0, 'w': 1, 'hz': 1, 'g': [0, 0, 16, 5]}, {'k': 'i', 'c': 0, 'w': 1, 'hz': 1, 'g': [16, 0, 16, 6]},
+            {'k': 'i', 'c': 0, 'w': 1, 'hz': 1, 'g': [0, 6, 16, 7]}, {'k': 'i', 'c': 0, 'w': 1, 'hz': 1, 'ow': 1, 'g': [16, 6, 10, 5]}, {'k': 'i', 'c': 0, 'w': 1, 'hz': 1, 'g': [0, 13, 24, 9]}])
+        pg6.evaluate("__t.C.hubs=[0,1,-1];__t.C.limit=100;__t.rt.t[0]=100;__t.save();__t.syncBoard()"); pg6.wait_for_timeout(800)
+        bad6 = pg6.evaluate("""(()=>{const out=[];document.querySelectorAll('.bdw').forEach((w,n)=>{
+          const s=w.querySelector('svg.mtr'),bx=a=>a.getBoundingClientRect(),R=s.getBoundingClientRect();
+          const bar=[...s.querySelectorAll('rect')].filter(r=>r.getAttribute('rx')==='1.5').map(bx);
+          const bl=Math.min(...bar.map(r=>r.left)),br=Math.max(...bar.map(r=>r.right)),bt=Math.min(...bar.map(r=>r.top)),bb=Math.max(...bar.map(r=>r.bottom));
+          const txt=[...s.querySelectorAll('text')].map(bx),dots=[...s.querySelectorAll('circle')].map(bx);
+          const hit=(a)=>a.left<br&&a.right>bl&&a.top<bb-0.5&&a.bottom>bt+0.5;
+          if(txt.some(hit)) out.push(n+':text-on-bar');
+          if(dots.some(hit)) out.push(n+':dots-on-bar');
+          const labs=txt;for(let i=0;i<labs.length;i++)for(let j=i+1;j<labs.length;j++){const a=labs[i],c=labs[j];if(a.left<c.right-1&&c.left<a.right-1&&a.top<c.bottom-1&&c.top<a.bottom-1) out.push(n+':text-overlap')}
+          if(txt.concat(dots).some(a=>a.bottom>R.bottom+1||a.top<R.top-1||a.left<R.left-1||a.right>R.right+1)) out.push(n+':outside')});return out})()""")
+        check('horizontal LED bar: nothing overlaps or falls outside at any card height', not bad6, bad6)
+        check('no script errors (horizontal LED bar)', not errs6, errs6)
         check('no script errors', not errs, errs)
         b.close()
     print('All tests passed' if not fails else '%d failed' % len(fails))

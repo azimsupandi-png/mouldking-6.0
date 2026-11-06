@@ -2095,16 +2095,18 @@ html,body{overflow-anchor:none}
       m.val=T({'class':'mv','text-anchor':'middle','font-size':15,'font-weight':700,fill:TXT});
       m.lay=function(cw,ch){
         if(it.hz){
-          var hdh=m.nch>1?16:0, avail=ch-hdh, hL=14, hR=cw-14, hbw=Math.max(40,hR-hL), hty=26, hbh=Math.max(10,Math.min(70,avail-26-18)), hsw=hbw/20;
-          m.hzOn=true;m.bx0=hL;m.bw=hbw;m.by0=hty;m.bh=hbh;m.hk='';
-          m.seg.forEach(function(r,j){r.setAttribute('y',hty);r.setAttribute('height',hbh.toFixed(1));r.setAttribute('x',(hL+j*hsw).toFixed(1));r.setAttribute('width',Math.max(2,hsw-2).toFixed(1))});
-          var hcx=hL+hbw/2;
-          m.mid.setAttribute('display',it.ow?'none':'inline');m.mid.setAttribute('x1',hcx);m.mid.setAttribute('x2',hcx);m.mid.setAttribute('y1',hty-5);m.mid.setAttribute('y2',hty+hbh+5);
-          var hly=Math.min(avail-3,hty+hbh+15);
-          m.lb.setAttribute('text-anchor','start');m.lb.setAttribute('x',hL);m.lb.setAttribute('y',hly);
+          // Tall card: value on top, bar, scale underneath. Short card: value on the left, bar and scale to its right.
+          var hdh=m.nch>1?16:0, avail=ch-hdh, hL=14, hR=cw-14, stk=avail>=58, hbL, hbw, hty, hbh, hly, vx, vy;
+          if(stk){hbL=hL;hbw=Math.max(40,hR-hL);hty=24;hly=avail-3;hbh=Math.max(10,Math.min(70,hly-12-hty));vx=cw/2;vy=15}
+          else{hbL=hL+68;hbw=Math.max(40,hR-hbL);hbh=Math.max(8,Math.min(44,avail-22));hty=Math.max(2,(avail-hbh-14)/2);hly=hty+hbh+12;vx=hL+32;vy=Math.max(14,avail/2+5)}
+          var hsw=hbw/20, hcx=hbL+hbw/2;
+          m.hzOn=true;m.bx0=hbL;m.bw=hbw;m.by0=hty;m.bh=hbh;m.hk='';
+          m.seg.forEach(function(r,j){r.setAttribute('y',hty.toFixed(1));r.setAttribute('height',hbh.toFixed(1));r.setAttribute('x',(hbL+j*hsw).toFixed(1));r.setAttribute('width',Math.max(2,hsw-2).toFixed(1))});
+          m.mid.setAttribute('display',it.ow?'none':'inline');m.mid.setAttribute('x1',hcx);m.mid.setAttribute('x2',hcx);m.mid.setAttribute('y1',hty-2);m.mid.setAttribute('y2',hty+hbh+2);
+          m.lb.setAttribute('text-anchor','start');m.lb.setAttribute('x',hbL);m.lb.setAttribute('y',hly);
           m.lm.setAttribute('text-anchor','middle');m.lm.setAttribute('x',hcx);m.lm.setAttribute('y',hly);
           m.lt.setAttribute('text-anchor','end');m.lt.setAttribute('x',hR);m.lt.setAttribute('y',hly);
-          m.val.setAttribute('x',cw/2);m.val.setAttribute('y',17);
+          m.val.setAttribute('x',vx);m.val.setAttribute('y',vy);
           m.rq.setAttribute('x',-9999);dots(cw,ch);return;
         }
         m.hzOn=false;m.lt.setAttribute('text-anchor','end');m.lm.setAttribute('text-anchor','end');m.lb.setAttribute('text-anchor','end');
@@ -2232,7 +2234,7 @@ html,body{overflow-anchor:none}
             ln.setAttribute('x1',p0[0].toFixed(1));ln.setAttribute('y1',p0[1].toFixed(1));ln.setAttribute('x2',p1[0].toFixed(1));ln.setAttribute('y2',p1[1].toFixed(1));
           }else if(m.hzOn){
             var hx=it.ow?m.bx0+hv[qi]/100*m.bw:m.bx0+m.bw/2+hv[qi]/100*m.bw/2;
-            ln.setAttribute('x1',hx.toFixed(1));ln.setAttribute('x2',hx.toFixed(1));ln.setAttribute('y1',(m.by0-3).toFixed(1));ln.setAttribute('y2',(m.by0+m.bh+3).toFixed(1));
+            ln.setAttribute('x1',hx.toFixed(1));ln.setAttribute('x2',hx.toFixed(1));ln.setAttribute('y1',(m.by0-2).toFixed(1));ln.setAttribute('y2',(m.by0+m.bh+2).toFixed(1));
           }else{
             var hy=it.ow?m.bot-hv[qi]/100*(m.bot-m.top):m.md-hv[qi]/100*m.half;
             ln.setAttribute('x1',(m.x0-3).toFixed(1));ln.setAttribute('x2',(m.x0+m.cw+3).toFixed(1));ln.setAttribute('y1',hy.toFixed(1));ln.setAttribute('y2',hy.toFixed(1));
