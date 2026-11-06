@@ -141,6 +141,14 @@ def main():
           const h=document.querySelector('.adv input.hi');h.value=60;h.dispatchEvent(new Event('input',{bubbles:true}));
           return [e.tagName,__t.C.ch[0].lo,__t.C.ch[0].hi]})()""")
         check('slider min/max controls are range inputs and change the limits', lim == ['INPUT', -40, 60], lim)
+        # Slider maximum limits only the slider: a dial selector still reaches its full output
+        pg2, errs2 = W.boot(b, {'width': 900, 'height': 500}, True, [{'k': 'rs', 'w': 1, 'p': 100, 'ns': 6, 's': 0, 'rt': 0.3}])
+        pg2.evaluate("__t.C.ch[0].kind='slider';__t.C.ch[0].hi=60;__t.C.ch[0].lo=-60;__t.rt.t[0]=0")
+        kb = pg2.locator('.dialk').first.bounding_box()
+        pg2.mouse.move(kb['x'] + kb['width'] / 2, kb['y'] + kb['height'] / 2); pg2.mouse.down(); pg2.wait_for_timeout(1100); pg2.mouse.up(); pg2.wait_for_timeout(1500)
+        sel = pg2.evaluate("__t.rt.t[0]")
+        check('selector output is not capped by the slider maximum', sel == 100, sel)
+        check('no script errors (selector)', not errs2, errs2)
         check('no script errors', not errs, errs)
         b.close()
     print('All tests passed' if not fails else '%d failed' % len(fails))

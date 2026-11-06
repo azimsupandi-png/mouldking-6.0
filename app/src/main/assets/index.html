@@ -2415,11 +2415,12 @@ html,body{overflow-anchor:none}
     if(typeof paintBoard==='function'&&C.board&&C.board.some(function(o){return o.k==='z'})) paintBoard();
   }
   setInterval(sessTick,500);
+  // Slider minimum / maximum only limit the channel's own slider, never other widgets (selector, dial, joystick ...)
+  function limSl(i,v){var c=C.ch[i];return c.kind==='slider'?clamp(Math.round(v),c.lo,c.hi):v}
   function setT(i,v,fromUI,force){
     if(runBlk&&runBlk[i]&&!force){ if(v===0||S.estop) runBlk[i]=false; else return }
     if(S.estop) v=0; else if(S.play&&!force) return;
-    var cl=C.ch[i];
-    rt.t[i]=(cl.kind==='slider'?clamp(Math.round(v),cl.lo,cl.hi):clamp(Math.round(v),-100,100))||0;
+    rt.t[i]=clamp(Math.round(v),-100,100)||0;
     if(!fromUI||S.estop) refs[i].rng.value=rt.t[i];
     refs[i].val.textContent=fmt(rt.t[i]);
     if(refs[i].preB) refs[i].preB.forEach(function(b){b.classList.toggle('on',+b.dataset.v===rt.t[i])});
@@ -2467,12 +2468,12 @@ html,body{overflow-anchor:none}
       var v=+r.rng.value,mg=C.ch[i].mag||0;
       // magnet: close to 0 the thumb snaps to 0 (the slider's own 0-crossing tick is the only vibration)
       if(mg&&Math.abs(v)<=mg){if(v!==0){v=0;r.rng.value=0}}
-      setT(i,v,true);
+      setT(i,limSl(i,v),true);
       if(+r.rng.value!==rt.t[i]) r.rng.value=rt.t[i];
     });
     r.preB.forEach(function(b){b.addEventListener('click',function(){
       if(S.estop||S.play||r.locked) return;
-      setT(i,+b.dataset.v,false);
+      setT(i,limSl(i,+b.dataset.v),false);
     })});
     (function(){
       var tm=0,rp=0;
@@ -2480,7 +2481,7 @@ html,body{overflow-anchor:none}
         if(S.estop||S.play||r.locked) return;
         var sp=C.ch[i].stp||5;
         var v=Math.max(-100,Math.min(100,Math.round((rt.t[i]+(d<0?-sp:sp))/sp)*sp));
-        setT(i,v,false);
+        setT(i,limSl(i,v),false);
       }
       function stop(){clearTimeout(tm);clearInterval(rp);tm=0;rp=0}
       [['.dec',-5],['.inc',5]].forEach(function(q){
@@ -2539,9 +2540,9 @@ html,body{overflow-anchor:none}
     [[r.st1,1],[r.st5,5],[r.st10,10]].forEach(function(q){q[0].addEventListener('click',function(){C.ch[i].stp=q[1];syncChannel(i);save()})});
     r.mag.addEventListener('input',function(){C.ch[i].mag=+r.mag.value;r.magOut.textContent=C.ch[i].mag?'\u00b1'+C.ch[i].mag:'Off'});
     r.mag.addEventListener('change',save);
-    r.lo.addEventListener('input',function(){C.ch[i].lo=+r.lo.value;r.loOut.textContent=C.ch[i].lo+'%';limZones(i);setT(i,rt.t[i],false)});
+    r.lo.addEventListener('input',function(){C.ch[i].lo=+r.lo.value;r.loOut.textContent=C.ch[i].lo+'%';limZones(i);if(C.ch[i].kind==='slider'&&!S.play) setT(i,limSl(i,rt.t[i]),false)});
     r.lo.addEventListener('change',save);
-    r.hi.addEventListener('input',function(){C.ch[i].hi=+r.hi.value;r.hiOut.textContent=C.ch[i].hi+'%';limZones(i);setT(i,rt.t[i],false)});
+    r.hi.addEventListener('input',function(){C.ch[i].hi=+r.hi.value;r.hiOut.textContent=C.ch[i].hi+'%';limZones(i);if(C.ch[i].kind==='slider'&&!S.play) setT(i,limSl(i,rt.t[i]),false)});
     r.hi.addEventListener('change',save);
     function setKind(k){C.ch[i].kind=k;r.rng.value=0;setT(i,0,true);syncChannel(i);save()}
     r.kS.addEventListener('click',function(){setKind('slider')});
