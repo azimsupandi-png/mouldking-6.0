@@ -167,12 +167,20 @@ def main():
         geo = "(()=>{const r=[...document.querySelectorAll('svg.mtr[data-k=i] rect')].filter(x=>x.getAttribute('rx')==='1.5');const g=r.map(x=>[+x.getAttribute('x'),+x.getAttribute('y'),x.getAttribute('fill')]);return g})()"
         v = e5(geo)
         check('LED meter: vertical by default (segments stacked, same x)', len(v) == 20 and len({q[0] for q in v}) == 1 and len({q[1] for q in v}) == 20, v[:2])
+        fill = lambda: e5("""(()=>{const s=document.querySelector('svg.mtr[data-k=i]'),R=s.getBoundingClientRect(),b=[...s.querySelectorAll('rect')].filter(r=>r.getAttribute('rx')==='1.5').map(r=>r.getBoundingClientRect());
+          const l=Math.min(...b.map(r=>r.left)),r2=Math.max(...b.map(r=>r.right)),tp=Math.min(...b.map(r=>r.top)),bt=Math.max(...b.map(r=>r.bottom));
+          const o=s.closest('.bdw').querySelector('.bdw-h output');
+          return {w:(r2-l)/R.width,h:(bt-tp)/R.height,val:o?o.textContent:null,col:o?getComputedStyle(o).color:null,white:s.querySelectorAll('text.mv').length,pos:o?o.getBoundingClientRect().right>R.right-30&&o.getBoundingClientRect().bottom<R.top+4:false}})()""")
+        fv = fill()
+        check('LED meter vertical: no white value inside, small yellow value at top right, bar fills the card', fv['white'] == 0 and fv['val'] == '+60' and fv['col'] == 'rgb(255, 216, 74)' and fv['pos'] and fv['w'] > .6 and fv['h'] > .72, fv)
         e5("__t.wsEdit(__t.C.board.find(o=>o.k==='i'))"); pg5.wait_for_timeout(200)
         has = pg5.locator('#gEdit .wsf', has_text='Bar layout').count()
         pg5.locator('#gEdit .wsf', has_text='Bar layout').locator('.wsc button[data-v="1"]').click()
         pg5.locator('#gEdit .gact button', has_text='Save').click(); pg5.wait_for_timeout(500)
         e5("__t.paintBoard()"); pg5.wait_for_timeout(300)
         h = e5(geo)
+        fh = fill()
+        check('LED meter horizontal: no white value inside, yellow value up top right, bar fills the width and most of the height', fh['white'] == 0 and fh['val'] == '+60' and fh['pos'] and fh['w'] > .88 and fh['h'] > .45, fh)
         lit = [i for i, q in enumerate(h) if q[2] != 'rgba(150,160,175,.32)']
         check('LED meter: setting "Bar layout" exists and switches to horizontal (one row, left to right)', has == 1 and len(h) == 20 and len({q[1] for q in h}) == 1 and len({q[0] for q in h}) == 20 and e5("__t.C.board[0].hz") == 1, (has, h[:2]))
         check('LED meter horizontal: +60% lights the right side from the centre, none on the left', lit and min(lit) >= 10 and max(lit) == 15, lit)

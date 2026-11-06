@@ -64,6 +64,7 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 The hub only listens, so the app cannot show battery level or motor state.
 
 ### LED meter layout
+- The LED bar fills the whole card. Its value is a small yellow number at the top right of the card (no big white value inside).
 - In an LED meter's settings, "Bar layout" switches the LED bar between vertical and horizontal. Horizontal runs left to right (both ways: -100 on the left, +100 on the right).
 
 ### Slider and joystick extras

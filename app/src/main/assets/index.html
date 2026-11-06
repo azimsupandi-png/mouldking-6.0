@@ -2093,17 +2093,13 @@ html,body{overflow-anchor:none}
       m.lm=T({'text-anchor':'end','font-size':11,fill:MUT},it.ow?'50':'0');
       m.lb=T({'text-anchor':'end','font-size':11,fill:MUT},it.ow?'0':'-100');
       m.val=T({'class':'mv','text-anchor':'middle','font-size':15,'font-weight':700,fill:TXT});
+      svg.removeChild(m.val); // the LED meter shows its value as small yellow text in the card header instead
       m.lay=function(cw,ch){
         if(it.hz){
-          // Tall card: value on top, bar, scale underneath. Short card: value on the left, bar and scale to its right.
-          var hdh=m.nch>1?16:0, avail=ch-hdh, hL=14, hR=cw-14, stk=avail>=58, noLab=false, hbL, hbw, hty, hbh, hly, vx, vy;
-          if(stk){hbL=hL;hbw=Math.max(40,hR-hL);hty=24;hly=avail-3;hbh=Math.max(10,Math.min(70,hly-12-hty));vx=cw/2;vy=15}
-          else{
-            hbL=hL+68;hbw=Math.max(40,hR-hbL);vx=hL+32;
-            if(avail>=26){hbh=Math.max(8,Math.min(44,avail-22));hty=Math.max(2,(avail-hbh-14)/2);hly=hty+hbh+11;noLab=false}
-            else{hbh=Math.max(6,Math.min(44,avail-2));hty=Math.max(1,(avail-hbh)/2);hly=0;noLab=true}
-            vy=Math.max(15,hty+hbh/2+5);
-          }
+          // The bar fills the card. The scale goes underneath when there is room, otherwise it is left out.
+          var hdh=m.nch>1?16:0, avail=ch-hdh, hbL=14, hR=cw-14, hbw=Math.max(40,hR-hbL), noLab=avail<30, hty, hbh, hly=0;
+          if(noLab){hbh=Math.max(6,avail-4);hty=Math.max(1,(avail-hbh)/2)}
+          else{hty=4;hly=avail-2;hbh=Math.max(10,hly-12-hty)}
           var hsw=hbw/20, hcx=hbL+hbw/2;
           m.hzOn=true;m.bx0=hbL;m.bw=hbw;m.by0=hty;m.bh=hbh;m.hk='';
           m.seg.forEach(function(r,j){r.setAttribute('y',hty.toFixed(1));r.setAttribute('height',hbh.toFixed(1));r.setAttribute('x',(hbL+j*hsw).toFixed(1));r.setAttribute('width',Math.max(2,hsw-2).toFixed(1))});
@@ -2112,16 +2108,14 @@ html,body{overflow-anchor:none}
           m.lb.setAttribute('text-anchor','start');m.lb.setAttribute('x',hbL);m.lb.setAttribute('y',hly);
           m.lm.setAttribute('text-anchor','middle');m.lm.setAttribute('x',hcx);m.lm.setAttribute('y',hly);
           m.lt.setAttribute('text-anchor','end');m.lt.setAttribute('x',hR);m.lt.setAttribute('y',hly);
-          m.val.setAttribute('x',vx);m.val.setAttribute('y',vy);
           m.rq.setAttribute('x',-9999);dots(cw,ch);return;
         }
         m.hzOn=false;[m.lb,m.lm,m.lt].forEach(function(q){q.setAttribute('display','inline')});m.lt.setAttribute('text-anchor','end');m.lm.setAttribute('text-anchor','end');m.lb.setAttribute('text-anchor','end');
-        var dh=m.nch>1?16:0, top=6, bot=Math.max(top+60,ch-dh-30), colw=Math.max(24,Math.min(100,cw*.38)), x0=(cw-(36+colw+10))/2+36;
+        var dh=m.nch>1?16:0, top=6, bot=Math.max(top+60,ch-dh-4), x0=36, colw=Math.max(24,cw-x0-12);
         var sh=(bot-top)/20, md=(top+bot)/2;m.md=md;m.half=(bot-top)/2;m.cx0=x0+colw+4;m.x0=x0;m.cw=colw;m.top=top;m.bot=bot;m.hk='';
         m.seg.forEach(function(r,j){r.setAttribute('x',x0.toFixed(1));r.setAttribute('width',colw.toFixed(1));r.setAttribute('y',(top+j*sh).toFixed(1));r.setAttribute('height',Math.max(2,sh-2).toFixed(1))});
         m.mid.setAttribute('display',it.ow?'none':'inline');m.mid.setAttribute('x1',x0-5);m.mid.setAttribute('x2',x0+colw+5);m.mid.setAttribute('y1',md);m.mid.setAttribute('y2',md);
         m.lt.setAttribute('x',x0-8);m.lt.setAttribute('y',top+10);m.lm.setAttribute('x',x0-8);m.lm.setAttribute('y',md+4);m.lb.setAttribute('x',x0-8);m.lb.setAttribute('y',bot-2);
-        m.val.setAttribute('x',cw/2);m.val.setAttribute('y',ch-dh-6);
         m.rq.setAttribute('x',m.cx0);dots(cw,ch);
       };
     }else{
@@ -2256,7 +2250,7 @@ html,body{overflow-anchor:none}
         var rd='';if(m.rd!==rd){m.rd=rd;m.req.setAttribute('d',rd)}
       }else{
         if(it.ow){out=Math.max(0,out);oth=Math.max(0,oth)}
-        var tx3=(it.ow?String(Math.round(out)):mSgn(out))+'%';if(m.val.textContent!==tx3) m.val.textContent=tx3;
+        var tx3=it.ow?String(Math.round(out)):mSgn(out);if(m.hd&&m.hd.textContent!==tx3) m.hd.textContent=tx3;
         for(j=0;j<20;j++){var vv=it.hz?(it.ow?(j+.5)*5:-100+(j+.5)*10):(it.ow?100-(j+.5)*5:100-(j+.5)*10),on2=it.ow?(out>0&&vv<=out):((vv>0&&vv<=out)||(vv<0&&vv>=out));var cl=on2?mCol(vv,th):TRK;if(m.seg[j].getAttribute('fill')!==cl) m.seg[j].setAttribute('fill',cl)}
         m.rq.setAttribute('visibility','hidden');
       }
@@ -4432,9 +4426,9 @@ html,body{overflow-anchor:none}
       }else if(it.k==='f'||it.k==='i'||it.k==='k'){
         var mtc=it.c;
         if(!isActive(mtc)) return;
-        bdHead(el,(it.k==='f'?'Arc meter':it.k==='i'?'LED meter':'Scope')+' \u00b7 '+tagOf(mtc)+' \u00b7 '+C.ch[mtc].name,it,false);
+        var mhd=bdHead(el,(it.k==='f'?'Arc meter':it.k==='i'?'LED meter':'Scope')+' \u00b7 '+tagOf(mtc)+' \u00b7 '+C.ch[mtc].name,it,it.k==='i');
         el.classList.add('mtrw');
-        w.mtr=meterBuild(el,it);
+        w.mtr=meterBuild(el,it);w.mtr.hd=mhd;
       }else if(it.k==='n'){
         var nc=it.c;
         if(!isActive(nc)) return;
