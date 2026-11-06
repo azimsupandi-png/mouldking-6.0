@@ -757,6 +757,8 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .mtr-box{position:relative;width:100%;min-width:0;min-height:150px}
 .mtr-box>svg{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 .bdw.mtrw{grid-template-rows:auto minmax(150px,1fr);align-content:stretch}
+:root:not(.dash) .bdw.mtrw.hzw{grid-template-rows:auto minmax(56px,1fr);align-self:start}
+:root:not(.dash) .bdw.hzw .mtr-box{min-height:56px}
 :root.dash .dw .mtr-box{flex:1 1 auto;min-height:0;height:auto}
 :root.dash .dw.sel .bdw-ed{animation:edIn .15s steps(1,end)}
 @keyframes edIn{from{pointer-events:none;opacity:.35}to{pointer-events:auto;opacity:1}}
@@ -4427,7 +4429,7 @@ html,body{overflow-anchor:none}
         var mtc=it.c;
         if(!isActive(mtc)) return;
         var mhd=bdHead(el,(it.k==='f'?'Arc meter':it.k==='i'?'LED meter':'Scope')+' \u00b7 '+tagOf(mtc)+' \u00b7 '+C.ch[mtc].name,it,it.k==='i');
-        el.classList.add('mtrw');
+        el.classList.add('mtrw');if(it.k==='i'&&it.hz) el.classList.add('hzw');
         w.mtr=meterBuild(el,it);w.mtr.hd=mhd;
       }else if(it.k==='n'){
         var nc=it.c;

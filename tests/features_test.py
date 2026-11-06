@@ -231,6 +231,16 @@ def main():
           }return out})()""")
         check('horizontal LED bar: no overlap at any svg height from 26 to 140 px', not sw, sw)
         check('no script errors (horizontal LED bar)', not errs6, errs6)
+
+        # board (non-dashboard) layout: the horizontal LED bar card is half the height of the vertical one
+        pg7, errs7 = W.boot(b, {'width': 412, 'height': 900}, False, [
+            {'k': 'i', 'c': 0, 'w': 1}, {'k': 'i', 'c': 0, 'w': 1, 'hz': 1}, {'k': 'i', 'c': 0, 'w': 1, 'hz': 1, 'ow': 1}, {'k': 'f', 'c': 0, 'w': 1}])
+        pg7.click('#lBoard'); pg7.wait_for_timeout(300)
+        pg7.evaluate("__t.rt.t[0]=60;__t.paintBoard()"); pg7.wait_for_timeout(500)
+        hh = pg7.evaluate("[...document.querySelectorAll('.bdw')].map(w=>Math.round(w.getBoundingClientRect().height))")
+        fit7 = pg7.evaluate("[...document.querySelectorAll('.bdw.hzw')].map(w=>{const s=w.querySelector('svg.mtr').getBoundingClientRect(),b=[...w.querySelectorAll('svg.mtr rect')].filter(r=>r.getAttribute('rx')==='1.5').map(r=>r.getBoundingClientRect());return b.length===20&&Math.min(...b.map(r=>r.top))>=s.top&&Math.max(...b.map(r=>r.bottom))<=s.bottom})")
+        check('board layout: horizontal LED bar card is about half the height of the vertical one', hh[0] > 150 and hh[1] <= hh[0] * .58 and hh[2] <= hh[0] * .58 and all(fit7), (hh, fit7))
+        check('no script errors (horizontal LED bar size)', not errs7, errs7)
         check('no script errors', not errs, errs)
         b.close()
     print('All tests passed' if not fails else '%d failed' % len(fails))
