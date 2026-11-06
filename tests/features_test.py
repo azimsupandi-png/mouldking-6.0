@@ -136,10 +136,12 @@ def main():
         check('selector output is not capped by the slider maximum', sel == 100, sel)
         check('no script errors (selector)', not errs2, errs2)
         # joystick card: swipe to the next pair of channels
-        pg3, errs3 = W.boot(b, {'width': 900, 'height': 500}, True, [{'k': 'j', 'c': 0, 'd': 1, 'm': 'axis', 'w': 2, 'sw': 1}])
+        pg3, errs3 = W.boot(b, {'width': 1000, 'height': 447}, True, [{'k': 'j', 'c': 0, 'd': 1, 'm': 'axis', 'w': 2, 'sw': 1}])
         kept = pg3.evaluate("__t.C.board[0].sw")
         dots = pg3.evaluate("document.querySelectorAll('.bdw .dialdots i').length")
         check('joystick swipe: option kept, one dot per pair', kept == 1 and dots >= 2, (kept, dots))
+        fitchk = pg3.evaluate("(()=>{const w=document.querySelector('.bdw');const p=w.querySelector('.pad').getBoundingClientRect(),d=w.querySelector('.dialdots').getBoundingClientRect(),c=w.getBoundingClientRect();return [p.bottom<=d.top+1, d.bottom<=c.bottom+1]})()")
+        check('joystick swipe: pad leaves room so the dots are not clipped', fitchk == [True, True], fitchk)
         pg3.evaluate("__t.rt.t[0]=40;__t.rt.t[1]=-30")
         hb = pg3.locator('.bdw .bdw-h').first.bounding_box()
         y = hb['y'] + hb['height'] / 2

@@ -1140,6 +1140,8 @@ html,body{overflow-anchor:none}
 #jcDlg .jcst .btn{width:40px;height:34px;min-height:34px;padding:0;align-items:center;justify-content:center;font-size:20px;font-weight:700}
 #jcDlg .jcst output{min-width:48px;text-align:center;font-size:16px}
 #jcDlg .seglbl{font-size:13px;opacity:.85;margin-top:2px}
+#jcSwBox{display:grid;gap:6px;margin-top:8px}
+#jcSwBox .seglbl{margin-top:0}
 #jcDlg .seg{gap:6px}
 #jcDlg .seg .btn{min-height:36px;padding:0 8px;font-size:14px;flex:1 1 0;min-width:0}
 .dtpl-in .seg .btn{align-items:center;text-align:center;justify-content:center}
@@ -4086,6 +4088,7 @@ html,body{overflow-anchor:none}
       if(el.__rsz) el.__rsz();
       var hh=0, hd2=el.querySelector('.bdw-h');
       if(hd2) hh=hd2.offsetHeight+3;
+      var ddt=el.querySelector('.dialdots');if(ddt&&el.querySelector('.pad')) hh+=ddt.offsetHeight+3;
       var aw=el.clientWidth-14, ah=el.clientHeight-10-hh;
       var esb=el.querySelector('.dw-es');
       if(esb){var es0=Math.max(20,Math.floor(Math.min(el.clientWidth,el.clientHeight)-4));esb.style.width=es0+'px';esb.style.height=es0+'px';esb.style.alignSelf='center'}
