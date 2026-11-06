@@ -195,13 +195,33 @@ def main():
           const s=w.querySelector('svg.mtr'),bx=a=>a.getBoundingClientRect(),R=s.getBoundingClientRect();
           const bar=[...s.querySelectorAll('rect')].filter(r=>r.getAttribute('rx')==='1.5').map(bx);
           const bl=Math.min(...bar.map(r=>r.left)),br=Math.max(...bar.map(r=>r.right)),bt=Math.min(...bar.map(r=>r.top)),bb=Math.max(...bar.map(r=>r.bottom));
-          const txt=[...s.querySelectorAll('text')].map(bx),dots=[...s.querySelectorAll('circle')].map(bx);
+          const txt=[...s.querySelectorAll('text')].filter(q=>q.getAttribute('display')!=='none').map(bx),dots=[...s.querySelectorAll('circle')].map(bx);
           const hit=(a)=>a.left<br&&a.right>bl&&a.top<bb-0.5&&a.bottom>bt+0.5;
           if(txt.some(hit)) out.push(n+':text-on-bar');
           if(dots.some(hit)) out.push(n+':dots-on-bar');
           const labs=txt;for(let i=0;i<labs.length;i++)for(let j=i+1;j<labs.length;j++){const a=labs[i],c=labs[j];if(a.left<c.right-1&&c.left<a.right-1&&a.top<c.bottom-1&&c.top<a.bottom-1) out.push(n+':text-overlap')}
           if(txt.concat(dots).some(a=>a.bottom>R.bottom+1||a.top<R.top-1||a.left<R.left-1||a.right>R.right+1)) out.push(n+':outside')});return out})()""")
         check('horizontal LED bar: nothing overlaps or falls outside at any card height', not bad6, bad6)
+
+        # sweep the card height: texts, bar and pager dots never touch, however short the card is
+        sw = pg6.evaluate("""(()=>{
+          const w=document.querySelector('.bdw:last-child')||document.querySelectorAll('.bdw')[4], box=w.querySelector('.mtr-box'), s=w.querySelector('svg.mtr'), out=[];
+          for(let h=26;h<=140;h+=4){
+            box.style.cssText='flex:none;height:'+h+'px;position:relative';__t.paintBoard();
+            const R=s.getBoundingClientRect(),bx=a=>a.getBoundingClientRect();
+            const bar=[...s.querySelectorAll('rect')].filter(r=>r.getAttribute('rx')==='1.5').map(bx);
+            const bt=Math.min(...bar.map(r=>r.top)),bb=Math.max(...bar.map(r=>r.bottom)),bl=Math.min(...bar.map(r=>r.left)),br=Math.max(...bar.map(r=>r.right));
+            const txt=[...s.querySelectorAll('text')].filter(t=>t.getAttribute('display')!=='none').map(bx),dots=[...s.querySelectorAll('circle')].map(bx);
+            const ov=(a,c)=>a.left<c.right-.5&&c.left<a.right-.5&&a.top<c.bottom-.5&&c.top<a.bottom-.5;
+            const barR={left:bl,right:br,top:bt,bottom:bb};
+            let bad=[];
+            if(txt.some(a=>ov(a,barR))) bad.push('text/bar');
+            if(dots.some(a=>ov(a,barR))) bad.push('dots/bar');
+            if(txt.some(a=>dots.some(d=>ov(a,d)))) bad.push('text/dots');
+            for(let i=0;i<txt.length;i++)for(let j=i+1;j<txt.length;j++) if(ov(txt[i],txt[j])) bad.push('text/text');
+            if(bad.length) out.push(h+':'+[...new Set(bad)].join(','));
+          }return out})()""")
+        check('horizontal LED bar: no overlap at any svg height from 26 to 140 px', not sw, sw)
         check('no script errors (horizontal LED bar)', not errs6, errs6)
         check('no script errors', not errs, errs)
         b.close()
