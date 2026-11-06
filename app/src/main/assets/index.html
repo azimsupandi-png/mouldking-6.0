@@ -954,15 +954,6 @@ html,body{overflow-anchor:none}
 .bdw-h{position:relative}
 .bdw-h .bdw-lbl{position:absolute;left:0;right:0;top:-2px;z-index:9;height:36px;min-height:36px;padding:0 12px;font-size:14px;border-radius:18px;box-sizing:border-box}
 :root.dash .dw .bdw-h .bdw-lbl{left:-4px;right:-4px;top:-2px}
-.bdw .wmrow{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;width:100%}
-.bdw .wmb{min-height:46px;border-radius:12px;border:2px solid #0d1015;background:linear-gradient(#444c5c,#2a303b 50%,#1b2028);color:#aeb6c2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer;font:inherit}
-.bdw .wmb b{font-size:20px;line-height:1}.bdw .wmb small{font-size:10px;opacity:.85}
-.bdw .wmb[aria-pressed=true]{background:linear-gradient(#f4b800,#c98f00);color:#1b1500;border-color:#7a5a00}
-.bdw .pmax{flex-direction:column;gap:2px}.bdw .pmax .pms{font-size:10px;opacity:.85}.bdw .pmax.cool{opacity:.55}
-.bdw .asl{display:grid;gap:5px;width:100%}.bdw .asr{display:flex;align-items:center;gap:8px;font-size:12px;color:#c8cdd4;min-width:0}
-.bdw .asr i{width:10px;height:10px;border-radius:50%;background:#1D9E75;flex:none}.bdw .asr.l1 i{background:#EF9F27}.bdw .asr.l2 i{background:#E24B4A}
-.bdw .asr small{margin-left:auto;color:#8a93a0;font-size:11px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bdw .cmv{width:100%;flex:1 1 auto;min-height:0}.bdw .cmsvg{display:block;width:100%;height:100%;max-height:100%}
 .bdw .sesst{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%;min-height:46px;border-radius:14px;border:2px solid #0d1015;background:linear-gradient(#444c5c,#2a303b 50%,#1b2028);color:#aeb6c2;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer}
 .bdw .sesst b{font-size:26px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .bdw .sesst small{font-size:10px;letter-spacing:.05em;opacity:.8}
@@ -1428,12 +1419,6 @@ html,body{overflow-anchor:none}
           <button class="btn" id="bdTDP" type="button" aria-pressed="false">D-pad</button>
           <button class="btn" id="bdTZ" type="button" aria-pressed="false">Session timer</button>
           <button class="btn" id="bdTE" type="button" aria-pressed="false">E-Stop</button>
-          <button class="btn" id="bdTWM" type="button" aria-pressed="false">Work mode</button>
-          <button class="btn" id="bdTPM" type="button" aria-pressed="false">Power Max</button>
-          <button class="btn" id="bdTCT" type="button" aria-pressed="false">Auto-stop timer</button>
-          <button class="btn" id="bdTAS" type="button" aria-pressed="false">Service alerts</button>
-          <button class="btn" id="bdTRP" type="button" aria-pressed="false">Response</button>
-          <button class="btn" id="bdTCM" type="button" aria-pressed="false">Cab monitor</button>
         </div>
         <div class="bd-fields">
           <label id="bdF1"><span id="bdL1">Channel</span><select id="bdTarget"></select></label>
@@ -1659,8 +1644,7 @@ html,body{overflow-anchor:none}
   var MAX_REC_MS=90000, MAX_PTS=1800, MAX_RECS=10, MAX_MODELS=30;
   var NB=window.MK6Bridge||null;
   if(typeof document.addEventListener==='function') document.addEventListener('contextmenu',function(e){var t=e.target&&e.target.tagName;if(t==='INPUT'&&e.target.type!=='range'&&e.target.type!=='checkbox')return;if(t==='TEXTAREA')return;e.preventDefault()});
-  var S={connected:!NB,estop:false,rec:null,play:null,loop:false,turbo:[],wm:3,rsp:1};
-  var WMN=['I','F','G','H'], WMDEF=[30,40,70,100], RSPN=['Soft','Normal','Fast'], PM={on:false,t0:0,cd:0,h:10,c:3};
+  var S={connected:!NB,estop:false,rec:null,play:null,loop:false,turbo:[]};
   var $=function(s,r){return (r||document).querySelector(s)};
   var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
   var fmt=function(n){return n>0?'+'+n:String(n)};
@@ -1762,7 +1746,7 @@ html,body{overflow-anchor:none}
     if(!g.every(function(q){return isFinite(q)})||g[0]<0||g[1]<0||g[2]<mn[0]||g[3]<mn[1]||g[0]+g[2]>gx||g[1]+g[3]>gy) return null;
     return g;
   }
-  var DMIN={rs:[8,8],st:[8,8],lv:[6,12],dp:[10,10],s:[12,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],e:[6,6],g:[12,6],z:[8,6],n:[8,8],w:[12,6],a:[10,6],y:[12,6],f:[10,8],i:[6,10],k:[12,8],wm:[10,6],pm:[6,6],ct:[6,6],as:[10,8],rp:[10,6],cm:[14,10]};
+  var DMIN={rs:[8,8],st:[8,8],lv:[6,12],dp:[10,10],s:[12,6],j:[10,12],d:[20,12],m:[12,6],l:[6,6],t:[6,6],b:[6,6],e:[6,6],g:[12,6],z:[8,6],n:[8,8],w:[12,6],a:[10,6],y:[12,6],f:[10,8],i:[6,10],k:[12,8]};
   function ci(v,lo,hi,def){v=Math.round(+v);return (v>=lo&&v<=hi)?v:def}
   function cleanJc(j){
     if(!j||typeof j!=='object') return null;
@@ -1851,25 +1835,13 @@ html,body{overflow-anchor:none}
       }else if(x.k==='z'){
         var za=Math.round(+x.a);
         out.push({k:'z',w:w,a:(za>=0&&za<=240)?za:15});
-      }else if(x.k==='wm'){
-        var wmo={k:'wm',w:w};
-        if(Array.isArray(x.cp)){
-          var wcp=[0,1,2].map(function(q){var v=Math.round(+x.cp[q]/5)*5;return (v>=10&&v<=100)?v:WMDEF[q]});
-          if(wcp.some(function(v,q){return v!==WMDEF[q]})) wmo.cp=wcp;
-        }
-        out.push(wmo);
-      }else if(x.k==='pm'){
-        var pmh=Math.round(+x.h), pmc=Math.round(+x.cd);
-        out.push({k:'pm',w:w,h:(pmh>=1&&pmh<=60)?pmh:10,cd:(pmc>=0&&pmc<=30)?pmc:3});
-      }else if(x.k==='ct'||x.k==='as'||x.k==='rp'||x.k==='cm'){
-        out.push({k:x.k,w:w});
       }else if(x.k==='e'){
         out.push({k:'e',w:1});
       }
       if(out.length>n0){
         var it0=out[out.length-1], g1=cleanG(x.g,it0.k,48,24,it0.v);
         if(g1) it0.g=g1;
-        if(['e','z','a','l','j','d','w','f','i','k','rs','dp','wm','pm','ct','as','rp','cm'].indexOf(it0.k)<0){
+        if(['e','z','a','l','j','d','w','f','i','k','rs','dp'].indexOf(it0.k)<0){
           if(x.inv===1||x.inv===true) it0.inv=1;
           var cp0=Math.round(+x.cap);if(cp0>=10&&cp0<100) it0.cap=cp0;
           if(it0.k==='s'){var sn0=Math.round(+x.snap);if([5,10,25].indexOf(sn0)>=0) it0.snap=sn0}
@@ -2032,26 +2004,19 @@ html,body{overflow-anchor:none}
   }
   /* The LEDs only light from about 40% hub power, so any brightness above 0 is mapped into 40..100%. */
   function ledOut(b){return b<=0?0:40+60*Math.pow(Math.min(b,100)/100,1.5)}
-  /* Cab widgets: work mode caps every channel, Power Max overrides the caps for a short hold, Response changes the ramp.
-     All three only act while their widget is on the board, so removing the widget can never leave a hidden limit behind. */
-  function bdFind(k){var b=C.board||[];for(var q=0;q<b.length;q++) if(b[q].k===k) return b[q];return null}
-  function wmCaps(){var w=bdFind('wm'),c=(w&&w.cp)||WMDEF;return [c[0],c[1],c[2],100]}
-  function wmFactor(){return bdFind('wm')?wmCaps()[S.wm]/100:1}
-  function pmaxOn(){return PM.on&&!S.estop&&!!bdFind('pm')}
-  function rspStep(step){var r=bdFind('rp')?S.rsp:1;return r===0?Math.max(1,step*0.25):r===2?1e9:step}
   function goalOf(i){
     if(C.ch[i].kind==='light'){var lt=rt.t[i];return lt>0?Math.round(ledOut(lt*blinkF(C.ch[i].blink,performance.now()))):0}
     var t=rt.t[i], m=powerFor(Math.abs(t),C.ch[i]);
-    var tb=!!S.turbo[i]||!!cal||testOn()||pmaxOn();
-    var f=(tb?1:(SPD[C.speed]||1)*wmFactor())*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
+    var tb=!!S.turbo[i]||!!cal||testOn();
+    var f=(tb?1:(SPD[C.speed]||1))*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
     return (t<0?-m:m)*(tb?100:C.limit)/100*f;
   }
 
   // What the hub sends at a full 100% request (the power limit, speed and channel max); meters mark it with a tick
   function hubMax(i){
     if(C.ch[i].kind==='light') return 100;
-    var tb=!!S.turbo[i]||!!cal||testOn()||pmaxOn();
-    var f=(tb?1:(SPD[C.speed]||1)*wmFactor())*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
+    var tb=!!S.turbo[i]||!!cal||testOn();
+    var f=(tb?1:(SPD[C.speed]||1))*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
     return Math.min(100,powerFor(100,C.ch[i])*(tb?100:C.limit)/100*f);
   }
 
@@ -2061,10 +2026,6 @@ html,body{overflow-anchor:none}
   var AUTOT={}, RAMP={}, HIST={}, HCNT={}, RECS={}, MPK={}, RAMPLAST={};
   function autoTick(){
     var now=performance.now();
-    if(PM.on&&(S.estop||now-PM.t0>=PM.h*1000)){
-      var pex=!S.estop;PM.on=false;
-      if(pex){PM.cd=now+PM.c*1000;toast('Power Max ended.'+(PM.c?' Cooling down '+PM.c+' s.':''),3000);feedback('warn')}
-    }
     (C.board||[]).forEach(function(it){
       if(it.k==='a'){
         var c=it.c;
@@ -2350,9 +2311,6 @@ html,body{overflow-anchor:none}
       {k:'mid',l:'Centre off position',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.mid?1:0},s:function(it,v){if(v) it.mid=1; else delete it.mid}},
       {k:'ra',l:'Reverse output A',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.ra?1:0},s:function(it,v){if(v) it.ra=1; else delete it.ra}},
       {k:'rb',l:'Reverse output B',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.rb?1:0},s:function(it,v){if(v) it.rb=1; else delete it.rb}}]},
-    wm:{t:'Work mode settings',f:[0,1,2].map(function(q){return {k:'c'+q,l:'Mode '+WMN[q]+' power limit',u:'%',min:10,max:100,st:5,ch:[[20,30,40],[30,40,50],[60,70,80]][q],def:WMDEF[q],g:function(it){return (it.cp||WMDEF)[q]},s:function(it,v){var c=(it.cp||WMDEF).slice();c[q]=v;if(c[0]===WMDEF[0]&&c[1]===WMDEF[1]&&c[2]===WMDEF[2]) delete it.cp; else it.cp=c.slice(0,3)}}})},
-    pm:{t:'Power Max settings',f:[{k:'h',l:'Longest hold',u:'s',min:1,max:60,st:1,ch:[5,10,20,30],def:10},{k:'cd',l:'Cool-down after the limit',u:'s',min:0,max:30,st:1,ch:[0,3,5,10],def:3}]},
-    ct:{t:'Auto-stop timer settings',f:[{k:'idle',l:'Stop after no input (same as Safety)',ch:[0,10,30,60,120],lab:['Off','10 s','30 s','60 s','2 min'],only:true,def:60,g:function(){return C.safety.idle},s:function(it,v){C.safety.idle=v;syncSafety()}}]},
     a:{t:'Auto-stop settings',f:[{k:'s',l:'Stop after',u:'s',min:1,max:300,st:1,ch:[5,10,20,30,60]}]},
     z:{t:'Timer settings',f:[{k:'a',l:'Alert after (0 = off)',u:'min',min:0,max:240,st:1,ch:[0,5,10,15,20,30]}]}
   };
@@ -3354,7 +3312,7 @@ html,body{overflow-anchor:none}
     var now=performance.now();
     stepRecord(now);stepPlay(now);
     safetyStep(now);
-    var step=rspStep(Math.max(2,200*Math.pow(1-C.ramp/100,2))), vals=new Array(NMAX);
+    var step=Math.max(2,200*Math.pow(1-C.ramp/100,2)), vals=new Array(NMAX);
     for(var i=0;i<NMAX;i++){
       if(!isActive(i)){vals[i]=0;continue}
       var goal=S.estop?0:goalOf(i);
@@ -3879,7 +3837,7 @@ html,body{overflow-anchor:none}
   var bdSel=[$('#bdTarget'),$('#bdTarget2'),$('#bdTarget3'),$('#bdTarget4')];
   var bdFields=[$('#bdF1'),$('#bdF2'),$('#bdF3'),$('#bdF4')], bdLbl=[$('#bdL1'),$('#bdL2'),$('#bdL3'),$('#bdL4')];
   var bdModeF=$('#bdFM'), bdMode=$('#bdMode'), bdWideChk=$('#bdWideChk'), bdSpring=$('#bdSpring'), bdSpringL=$('#bdSpringL');
-  var bdTypes=[['s',$('#bdTS')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['w',$('#bdTW')],['a',$('#bdTA')],['y',$('#bdTY')],['f',$('#bdTF')],['i',$('#bdTI')],['k',$('#bdTK')],['n',$('#bdTN')],['rs',$('#bdTRS')],['g',$('#bdTG')],['st',$('#bdTST')],['lv',$('#bdTLV')],['dp',$('#bdTDP')],['z',$('#bdTZ')],['e',$('#bdTE')],['wm',$('#bdTWM')],['pm',$('#bdTPM')],['ct',$('#bdTCT')],['as',$('#bdTAS')],['rp',$('#bdTRP')],['cm',$('#bdTCM')]];
+  var bdTypes=[['s',$('#bdTS')],['j',$('#bdTJ')],['d',$('#bdTD')],['m',$('#bdTM')],['l',$('#bdTL')],['t',$('#bdTT')],['b',$('#bdTB')],['w',$('#bdTW')],['a',$('#bdTA')],['y',$('#bdTY')],['f',$('#bdTF')],['i',$('#bdTI')],['k',$('#bdTK')],['n',$('#bdTN')],['rs',$('#bdTRS')],['g',$('#bdTG')],['st',$('#bdTST')],['lv',$('#bdTLV')],['dp',$('#bdTDP')],['z',$('#bdTZ')],['e',$('#bdTE')]];
   var bdRat=(typeof document.querySelectorAll==='function')?[].slice.call(document.querySelectorAll('.bdRat')):[$('.bdRat'),$('.bdRat'),$('.bdRat'),$('.bdRat')], bdMixRow=$('#bdMixRow');
   bdRat.forEach(function(sel){[100,75,50,25,-25,-50,-75,-100].forEach(function(v){bdOpt(sel,String(v),(v>0?'+':'')+v+'%')});sel.value='100'});
   var bdK='s', bdEditing=false, bdPick=null, bdPickAt=0, bdW=[], dashAdd=false;
@@ -3888,11 +3846,10 @@ html,body{overflow-anchor:none}
     activeIdx().forEach(function(i){if(n<4){C.board.push({k:'s',c:i,w:C.ch[i].kind==='hold'?2:1,hold:C.ch[i].kind==='hold'});n++}});
   }
   function bdOpt(sel,v,t){var o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}
-  var GLOBW=['e','z','rs','wm','pm','ct','as','rp','cm'];
   function bdFill(){
     if(!bdSel[0]) return;
     var chans=activeIdx(), tank=bdMode.value==='tank';
-    var n=(GLOBW.indexOf(bdK)>=0)?0:(bdK==='j'||bdK==='w'||bdK==='dp')?2:(bdK==='d'||bdK==='m'?4:1);
+    var n=(bdK==='e'||bdK==='z'||bdK==='rs')?0:(bdK==='j'||bdK==='w'||bdK==='dp')?2:(bdK==='d'||bdK==='m'?4:1);
     var L=bdK==='w'?['Output A','Output B']:(bdK==='l'||bdK==='t'||bdK==='b'||bdK==='g'||bdK==='st'||bdK==='lv'||bdK==='n'||bdK==='a'||bdK==='y'||bdK==='f'||bdK==='i'||bdK==='k')?[bdK==='l'?'Light channel':'Channel']:bdK==='m'?['Channel 1','Channel 2','Channel 3','Channel 4']:((bdK==='s')?['Channel']:
       (bdK==='dp'?(tank?['Left motor','Right motor']:['Drive','Steer']):
       (bdK==='j'?(tank?['Left motor','Right motor']:['Drive','Steer']):
@@ -3921,7 +3878,7 @@ html,body{overflow-anchor:none}
   function bdSetKind(k){
     bdK=k;
     bdTypes.forEach(function(t){t[1].setAttribute('aria-pressed',String(t[0]===k))});
-    bdWideChk.checked=(k==='j'||k==='d'||k==='m'||k==='wm'||k==='rp'||k==='as'||k==='cm');
+    bdWideChk.checked=(k==='j'||k==='d'||k==='m');
     bdWideChk.disabled=(k==='d');
     if(k==='d') bdWideChk.checked=true;
     bdFill();
@@ -4046,10 +4003,6 @@ html,body{overflow-anchor:none}
     if(k==='dp') return L?[12,14]:[16,14];
     if(k==='g') return L?[24,6]:[24,7];
     if(k==='z') return L?[10,6]:[16,6];
-    if(k==='wm'||k==='rp') return L?[16,6]:[24,6];
-    if(k==='pm'||k==='ct') return L?[10,6]:[16,6];
-    if(k==='as') return L?[14,9]:[24,9];
-    if(k==='cm') return L?[20,12]:[24,12];
     return L?[8,6]:[12,6];
   }
   function dashHitsG(a,b){return a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]}
@@ -4295,7 +4248,7 @@ html,body{overflow-anchor:none}
   function syncBoard(){
     if(!bdGrid||!C.board) return;
     bdFill();
-    bdGrid.innerHTML='';bdW=[];BD_PADS=[];PM.on=false;
+    bdGrid.innerHTML='';bdW=[];BD_PADS=[];
     var dash0=dashOn();
     bdEditor.hidden=dash0?!(bdEditing&&dashAdd):!bdEditing;
     $('#dbAdd').hidden=!bdEditing;
@@ -4753,79 +4706,6 @@ html,body{overflow-anchor:none}
         });
         var dph=document.createElement('div');dph.className='dphub';dbx.appendChild(dph);
         dww.appendChild(dbx);el.appendChild(dww);w.dpd={bs:dbs,r:function(){return dpr},clr:dpClear};
-      }else if(it.k==='wm'){
-        bdHead(el,'Work mode',it,false);
-        var wmr=document.createElement('div');wmr.className='wmrow';wmr.setAttribute('role','group');wmr.setAttribute('aria-label','Work mode');
-        var wmbs=WMN.map(function(n,q){
-          var b=document.createElement('button');b.type='button';b.className='wmb';b.setAttribute('aria-pressed','false');
-          b.innerHTML='<b>'+n+'</b><small></small>';
-          b.addEventListener('click',function(){noteInput();S.wm=q;feedback('ok');paintBoard()});
-          wmr.appendChild(b);return b;
-        });
-        el.appendChild(wmr);w.vw={k:'wm',it:it,bs:wmbs};
-      }else if(it.k==='rp'){
-        bdHead(el,'Response',it,false);
-        var rpr=document.createElement('div');rpr.className='wmrow';rpr.setAttribute('role','group');rpr.setAttribute('aria-label','Response');
-        var rpbs=RSPN.map(function(n,q){
-          var b=document.createElement('button');b.type='button';b.className='wmb';b.setAttribute('aria-pressed','false');
-          b.innerHTML='<b>'+n+'</b><small>'+['slow ramp','your ramp','instant'][q]+'</small>';
-          b.addEventListener('click',function(){noteInput();S.rsp=q;feedback('ok');paintBoard()});
-          rpr.appendChild(b);return b;
-        });
-        el.appendChild(rpr);w.vw={k:'rp',it:it,bs:rpbs};
-      }else if(it.k==='pm'){
-        bdHead(el,'Power Max',it,false);
-        var pbn=document.createElement('button');pbn.type='button';pbn.className='qbtn turbo pmax';
-        var pbt=document.createElement('span');pbt.textContent='POWER MAX';pbn.appendChild(pbt);
-        pbn.addEventListener('pointerdown',function(e){
-          e.preventDefault();try{pbn.setPointerCapture(e.pointerId)}catch(_){}
-          var now=performance.now();
-          if(PM.on||S.estop||S.play) return;
-          if(now<PM.cd){toast('Power Max is cooling down.',2000);feedback('warn');return}
-          noteInput();PM.on=true;PM.t0=now;PM.h=it.h||10;PM.c=it.cd===undefined?3:it.cd;feedback('ok');paintBoard();
-        });
-        ['pointerup','pointercancel','lostpointercapture','blur'].forEach(function(ev){pbn.addEventListener(ev,function(){if(PM.on){PM.on=false;paintBoard()}})});
-        pbn.addEventListener('contextmenu',function(e){e.preventDefault()});
-        el.appendChild(pbn);w.vw={k:'pm',it:it,b:pbn,s:pbt};
-      }else if(it.k==='ct'){
-        bdHead(el,'Auto-stop timer',it,false);
-        var cb=document.createElement('button');cb.type='button';cb.className='sesst';
-        var ctt=document.createElement('b'),cts=document.createElement('small');cb.appendChild(ctt);cb.appendChild(cts);
-        cb.addEventListener('click',function(){noteInput();feedback('ok');paintBoard()});
-        el.appendChild(cb);w.vw={k:'ct',it:it,b:cb,t:ctt,s:cts};
-      }else if(it.k==='as'){
-        bdHead(el,'Service alerts',it,false);
-        var asl=document.createElement('div');asl.className='asl';
-        var asr=svcAlerts().map(function(a){
-          var r=document.createElement('div');r.className='asr';
-          r.innerHTML='<i></i><span></span><small></small>';r.children[1].textContent=a.n;asl.appendChild(r);return r;
-        });
-        el.appendChild(asl);w.vw={k:'as',it:it,rs:asr};
-      }else if(it.k==='cm'){
-        bdHead(el,'Cab monitor',it,false);
-        var cmv=document.createElement('div');cmv.className='cmv';
-        var csvg=sv('svg',{viewBox:'0 0 240 120',class:'cmsvg',role:'img','aria-label':'Cab monitor'},cmv);
-        var cm={};
-        sv('path',{d:mArc(60,66,40,210,-30),fill:'none',stroke:'#2a303b','stroke-width':9,'stroke-linecap':'round'},csvg);
-        cm.arc=sv('path',{d:'',fill:'none',stroke:'#1D9E75','stroke-width':9,'stroke-linecap':'round'},csvg);
-        cm.pct=sv('text',{x:60,y:74,'text-anchor':'middle','font-size':20,'font-weight':700,fill:'#e6e9ee'},csvg);
-        sv('text',{x:60,y:92,'text-anchor':'middle','font-size':8,fill:'#8a93a0'},csvg).textContent='LOAD';
-        cm.mode=sv('text',{x:60,y:20,'text-anchor':'middle','font-size':13,'font-weight':700,fill:'#f4b800'},csvg);
-        cm.ic=['LINK','STOP','MAX','AUTO'].map(function(n,q){
-          var g=sv('g',{},csvg);
-          cm['r'+q]=sv('rect',{x:116+q*31,y:6,width:28,height:14,rx:3,fill:'#1b2028',stroke:'#2a303b'},g);
-          sv('text',{x:130+q*31,y:16,'text-anchor':'middle','font-size':7.5,fill:'#c8cdd4'},g).textContent=n;
-          return cm['r'+q];
-        });
-        cm.bars=[];
-        for(var cq=0;cq<6;cq++){
-          sv('rect',{x:116+cq*20,y:30,width:14,height:48,rx:2,fill:'#1b2028'},csvg);
-          cm.bars.push(sv('rect',{x:116+cq*20,y:78,width:14,height:0,rx:2,fill:'#378ADD'},csvg));
-          cm['bl'+cq]=sv('text',{x:123+cq*20,y:89,'text-anchor':'middle','font-size':8,fill:'#8a93a0'},csvg);
-        }
-        cm.al=sv('text',{x:12,y:112,'font-size':9,fill:'#8a93a0'},csvg);
-        cm.au=sv('text',{x:228,y:112,'text-anchor':'end','font-size':9,fill:'#8a93a0'},csvg);
-        el.appendChild(cmv);w.vw={k:'cm',it:it,cm:cm};
       }else if(it.k==='z'){
         bdHead(el,'Session timer',it,false);
         var zd=document.createElement('button');zd.type='button';zd.className='sesst';
@@ -4953,73 +4833,6 @@ html,body{overflow-anchor:none}
       if((rt.t[it.pc]||0)!==(v||0)) setT(it.pc,v,false);
     });
   }
-  function svcAlerts(){
-    var hot=[],blk=[];
-    for(var q=0;q<NMAX;q++) if(isActive(q)){if(hotWarned[q]) hot.push(tagOf(q));if(runBlk[q]) blk.push(tagOf(q))}
-    return [
-      {n:'Link',l:S.connected?0:1,s:S.connected?'Connected':'Not connected'},
-      {n:'E-stop',l:S.estop?2:0,s:S.estop?'Pressed':'Released'},
-      {n:'Motor heat',l:hot.length?1:0,s:hot.length?hot.join(' ')+' near full power':'OK'},
-      {n:'Run limit',l:blk.length?2:0,s:blk.length?blk.join(' ')+' stopped':'OK'}];
-  }
-  function idleLeft(){
-    var sf=C.safety, any=false;
-    for(var i=0;i<NMAX;i++) if(isActive(i)&&C.ch[i].kind!=='light'&&(rt.t[i]!==0||rt.o[i]!==0)) any=true;
-    if(!sf.idle) return {s:'Off',n:null,any:any};
-    if(!any||S.estop) return {s:'Ready',n:sf.idle,any:false};
-    var left=Math.max(0,Math.ceil(sf.idle-(performance.now()-lastInput)/1000));
-    return {s:Math.floor(left/60)+':'+('0'+left%60).slice(-2),n:left,any:true};
-  }
-  function paintVw(v){
-    var i, pr;
-    if(v.k==='wm'||v.k==='rp'){
-      var cur=v.k==='wm'?S.wm:S.rsp, caps=wmCaps();
-      v.bs.forEach(function(b,q){
-        b.setAttribute('aria-pressed',String(q===cur));
-        if(v.k==='wm'){var tx=caps[q]+'%';if(b.lastChild.textContent!==tx) b.lastChild.textContent=tx}
-      });
-    }else if(v.k==='pm'){
-      var now=performance.now(), tx2;
-      if(PM.on) tx2=Math.max(0,(PM.h-(now-PM.t0)/1000)).toFixed(1)+' s';
-      else if(now<PM.cd) tx2='WAIT '+Math.ceil((PM.cd-now)/1000)+' s';
-      else tx2='POWER MAX';
-      if(v.s.textContent!==tx2) v.s.textContent=tx2;
-      v.b.classList.toggle('on',PM.on);v.b.classList.toggle('cool',!PM.on&&now<PM.cd);
-      v.b.disabled=!!(S.estop||S.play);
-    }else if(v.k==='ct'){
-      var il=idleLeft(), sf=C.safety;
-      if(v.t.textContent!==il.s) v.t.textContent=il.s;
-      var st=sf.idle?(il.any?'No input stops all motors':'Starts when a motor runs')+' · tap to reset':'Auto-stop is off';
-      if(v.s.textContent!==st) v.s.textContent=st;
-      v.b.classList.toggle('over',il.any&&il.n!==null&&il.n<=Math.min(10,sf.warn||10));
-      v.b.classList.toggle('run',il.any);
-    }else if(v.k==='as'){
-      var al=svcAlerts();
-      v.rs.forEach(function(r,q){
-        r.className='asr l'+al[q].l;
-        if(r.children[2].textContent!==al[q].s) r.children[2].textContent=al[q].s;
-      });
-    }else if(v.k==='cm'){
-      var cm=v.cm, mx=0, act=activeIdx().filter(function(c){return C.ch[c].kind!=='light'}), alr=svcAlerts().filter(function(a){return a.l>0}).length;
-      act.forEach(function(c){mx=Math.max(mx,Math.abs(rt.o[c]))});
-      mx=Math.min(100,Math.round(mx));
-      cm.arc.setAttribute('d',mx>0?mArc(60,66,40,210,210-mx/100*240):'');
-      cm.arc.setAttribute('stroke',mx>80?'#E24B4A':mx>55?'#EF9F27':'#1D9E75');
-      cm.pct.textContent=mx+'%';
-      cm.mode.textContent=bdFind('wm')?'MODE '+WMN[S.wm]:'';
-      var flags=[S.connected,!!S.estop,pmaxOn(),C.safety.idle>0], cols=['#1D9E75','#E24B4A','#EF9F27','#378ADD'];
-      cm.ic.forEach(function(r,q){r.setAttribute('fill',flags[q]?cols[q]:'#1b2028');r.setAttribute('stroke',flags[q]?cols[q]:'#2a303b')});
-      for(i=0;i<6;i++){
-        var c=act[i], h=c===undefined?0:Math.round(Math.min(100,Math.abs(rt.o[c]))/100*48);
-        cm.bars[i].setAttribute('height',h);cm.bars[i].setAttribute('y',78-h);
-        var lb=c===undefined?'':tagOf(c);if(cm['bl'+i].textContent!==lb) cm['bl'+i].textContent=lb;
-      }
-      cm.al.textContent=alr?alr+' alert'+(alr>1?'s':''):'No alerts';
-      cm.al.setAttribute('fill',alr?'#EF9F27':'#8a93a0');
-      var il2=idleLeft();
-      cm.au.textContent='Auto-stop '+(il2.n===null?'off':(il2.any?il2.s:'ready'));
-    }
-  }
   function paintBoard(){
     if(!bdW||!bdW.length) return;
     mirrorPairs();
@@ -5105,8 +4918,6 @@ html,body{overflow-anchor:none}
         if(gbest>8) gi0=-1;
         if(w.out) w.out.textContent=fmt(rt.t[w.gear.c]);
         w.gear.bs.forEach(function(b,i){b.classList.toggle('on',i===gi0);b.disabled=S.estop||!!S.play});
-      }else if(w.vw){
-        paintVw(w.vw);
       }else if(w.sess){
         var sm=SESS.ms, tx0=fmtSess(sm), aMs=(w.it.a||0)*60000;
         if(w.sess.t.textContent!==tx0) w.sess.t.textContent=tx0;
@@ -5423,7 +5234,7 @@ html,body{overflow-anchor:none}
   $('#bdAdd').addEventListener('click',function(){
     if(C.board.length>=16){bdNote.textContent='The board is full (16 controls).';return}
     var v=bdSel.map(function(s){return s.value});
-    if(!v[0]&&GLOBW.indexOf(bdK)<0){bdNote.textContent='Nothing to add.';return}
+    if(!v[0]&&bdK!=='e'&&bdK!=='z'&&bdK!=='rs'){bdNote.textContent='Nothing to add.';return}
     var ww=bdWideChk.checked?2:1, m=bdMode.value==='tank'?'tank':'axis', n=v.map(function(x){return Math.round(+x)});
     var hd=!bdSpring.checked;
     if(bdK==='w'){
@@ -5444,8 +5255,6 @@ html,body{overflow-anchor:none}
       C.board.push({k:'dp',c:n[0],d:n[1],w:ww,m:m==='tank'?'tank':'car',p:70});
     }
     else if(bdK==='z') C.board.push({k:'z',w:ww,a:15});
-    else if(bdK==='wm'||bdK==='rp'||bdK==='ct'||bdK==='as'||bdK==='cm') C.board.push({k:bdK,w:ww});
-    else if(bdK==='pm') C.board.push({k:'pm',w:ww,h:10,cd:3});
     else if(bdK==='rs') C.board.push({k:'rs',w:ww,p:100,ns:6,s:0});
     else if(bdK==='t'){
       var tsy=$('#bdTgStyle').value;
@@ -5478,7 +5287,7 @@ html,body{overflow-anchor:none}
     bdNote.textContent='';save();syncBoard();
   });
   bdSetKind('s');
-  if(/[?&]mk6test\b/.test(location.search)) window.__t={C:C,S:S,rt:rt,store:store,cleanBoard:cleanBoard,save:save,syncBoard:syncBoard,paintBoard:paintBoard,WSPEC:WSPEC,wsEdit:wsEdit,goalOf:goalOf,hubMax:hubMax,PM:PM,safetyStep:safetyStep};
+  if(/[?&]mk6test\b/.test(location.search)) window.__t={C:C,S:S,rt:rt,store:store,cleanBoard:cleanBoard,save:save,syncBoard:syncBoard,paintBoard:paintBoard,WSPEC:WSPEC,wsEdit:wsEdit};
   var sfIdle=$('#sfIdle'), sfWarn=$('#sfWarn');
   function syncSafety(){if(!sfIdle) return;sfIdle.value=String(C.safety.idle);sfWarn.value=String(C.safety.warn);if(sfRun)sfRun.value=String(C.safety.run)}
   sfIdle.addEventListener('change',function(){C.safety.idle=pickOf(sfIdle.value,[0,10,30,60,120],60);save()});
