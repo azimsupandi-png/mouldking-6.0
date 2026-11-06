@@ -72,6 +72,15 @@ The hub only listens, so the app cannot show battery level or motor state.
 
 - **Swipe joystick pairs** (Board): in a joystick's settings turn on "Swipe to other pairs". Swipe the card sideways (not on the pad) to move between channel pairs (A+B, C+D, E+F). Dots show the pair (3 + 3 + 3 with three hubs), and the old pair is set to 0.
 
+### Cab widgets (Board, inspired by a Volvo excavator cab)
+- **Work mode**: buttons I / F / G / H cap the power of every channel (defaults 30 / 40 / 70 / 100%; I, F and G are editable in the gear). Only active while the widget is on the board.
+- **Power Max**: hold to ignore the work mode and the power limit for a short time (default longest hold 10 s, then 3 s cool-down). Letting go stops it at once.
+- **Auto-stop timer**: counts down the Safety "auto-stop when idle" time while a motor runs. Tap to reset. The gear changes the same Safety setting.
+- **Service alerts**: Link, E-stop, Motor heat (long full power) and Run limit. These come from what the app knows; there are no real motor sensors.
+- **Response**: Soft (slower ramp), Normal (your ramp) or Fast (instant) for all channels.
+- **Cab monitor**: one card with the work mode, load arc, status chips, channel bars A to F, alert count and auto-stop time.
+- The work mode and response choices are not saved; the app starts with H and Normal.
+
 ## Notes
 
 - The signing key (`app/release.keystore`) is committed on purpose so updates install over older builds.
