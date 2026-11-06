@@ -152,6 +152,21 @@ def main():
         pg3.mouse.move(pb3['x'] + pb3['width'] - 8, pb3['y'] + pb3['height'] / 2); pg3.mouse.down(); pg3.mouse.move(pb3['x'] + 8, pb3['y'] + pb3['height'] / 2, steps=6); pg3.mouse.up(); pg3.wait_for_timeout(400)
         still = pg3.evaluate("[__t.C.board[0].c,__t.C.board[0].d]")
         check('joystick swipe: dragging on the pad does not change the pair', still == [2, 3], still)
+        # three hubs: nine pairs, nine dots, swiping walks through all of them and wraps
+        pg3.evaluate("__t.C.hubs=[0,1,2];__t.C.board[0].c=0;__t.C.board[0].d=1;__t.C.board[0].sw=1;__t.save();__t.syncBoard()"); pg3.wait_for_timeout(300)
+        n9 = pg3.evaluate("document.querySelectorAll('.bdw .dialdots i').length")
+        seen = []
+        for _ in range(9):
+            hb = pg3.locator('.bdw .bdw-h').first.bounding_box(); y = hb['y'] + hb['height'] / 2
+            pg3.mouse.move(hb['x'] + hb['width'] - 10, y); pg3.mouse.down(); pg3.mouse.move(hb['x'] + 10, y + 2, steps=5); pg3.mouse.up(); pg3.wait_for_timeout(350)
+            seen.append(pg3.evaluate("[__t.C.board[0].c,__t.C.board[0].d]"))
+        check('3 hubs: nine dots, swiping visits every pair once and wraps to the first', n9 == 9 and seen == [[2,3],[4,5],[6,7],[8,9],[10,11],[12,13],[14,15],[16,17],[0,1]], (n9, seen))
+        hb = pg3.locator('.bdw .bdw-h').first.bounding_box(); y = hb['y'] + hb['height'] / 2
+        pg3.mouse.move(hb['x'] + 10, y); pg3.mouse.down(); pg3.mouse.move(hb['x'] + hb['width'] - 10, y + 2, steps=5); pg3.mouse.up(); pg3.wait_for_timeout(350)
+        back = pg3.evaluate("[__t.C.board[0].c,__t.C.board[0].d]")
+        fit9 = pg3.evaluate("(()=>{const w=document.querySelector('.bdw'),d=w.querySelector('.dialdots').getBoundingClientRect(),c=w.getBoundingClientRect();return d.left>=c.left&&d.right<=c.right&&d.bottom<=c.bottom+1})()")
+        check('3 hubs: right swipe wraps back to the last pair, nine dots fit the card', back == [16, 17] and fit9, (back, fit9))
+        pg3.evaluate("__t.C.hubs=[0,-1,-1];__t.C.board[0].c=0;__t.C.board[0].d=1;__t.save();__t.syncBoard()"); pg3.wait_for_timeout(200)
         pg3.evaluate("__t.C.board[0].sw=0;delete __t.C.board[0].sw;__t.syncBoard()"); pg3.wait_for_timeout(300)
         nodots = pg3.evaluate("document.querySelectorAll('.bdw .dialdots i').length")
         check('joystick swipe: off by default, no dots', nodots == 0, nodots)

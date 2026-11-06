@@ -4294,7 +4294,7 @@ html,body{overflow-anchor:none}
         if(it.sw&&jprs.length>1&&jcur>=0){
           // Swipe sideways on the card (outside the pad) to move the joystick to the next pair of channels.
           var jdg=document.createElement('div');jdg.className='dialdots';
-          jprs.forEach(function(pr,qi){var di=document.createElement('i');if(qi===jcur) di.className='on';di.title=tagOf(pr[0])+(pr[1]>=0?'+'+tagOf(pr[1]):'');jdg.appendChild(di)});
+          jprs.forEach(function(pr,qi){var di=document.createElement('i');if(qi===jcur) di.className='on';di.title=tagOf(pr[0])+(pr[1]>=0?'+'+tagOf(pr[1]):'');if(qi>0&&((pr[0]/PER)|0)!==((jprs[qi-1][0]/PER)|0)) di.style.marginLeft='6px';jdg.appendChild(di)});
           el.appendChild(jdg);
           var jsx=null,jsy=0;el.style.touchAction='pan-y';
           el.addEventListener('pointerdown',function(e){if(bdEditing||(e.target.closest&&e.target.closest('.pad'))){jsx=null;return}jsx=e.clientX;jsy=e.clientY});
