@@ -63,6 +63,9 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 
 The hub only listens, so the app cannot show battery level or motor state.
 
+### LED meter layout
+- In an LED meter's settings, "Bar layout" switches the LED bar between vertical and horizontal. Horizontal runs left to right (both ways: -100 on the left, +100 on the right).
+
 ### Slider and joystick extras
 - **Quick values**: a row of chips (−100, −50, 0, +50, +100) under every slider channel.
 - **Step size**: in a channel's settings, pick 1, 5 or 10 for the ◀ ▶ buttons (hold to repeat).

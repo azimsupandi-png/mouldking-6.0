@@ -159,6 +159,32 @@ def main():
         nodots = pg3.evaluate("document.querySelectorAll('.bdw .dialdots i').length")
         check('joystick swipe: off by default, no dots', nodots == 0, nodots)
         check('no script errors (joystick swipe)', not errs3, errs3)
+
+        # ---- LED meter: vertical / horizontal bar ----
+        pg5, errs5 = W.boot(b, {'width': 1000, 'height': 447}, True, [{'k': 'i', 'c': 0, 'w': 1}, {'k': 's', 'c': 0, 'w': 1}])
+        e5 = pg5.evaluate
+        e5("__t.C.limit=100;__t.rt.t[0]=60;__t.paintBoard()"); pg5.wait_for_timeout(400)
+        geo = "(()=>{const r=[...document.querySelectorAll('svg.mtr[data-k=i] rect')].filter(x=>x.getAttribute('rx')==='1.5');const g=r.map(x=>[+x.getAttribute('x'),+x.getAttribute('y'),x.getAttribute('fill')]);return g})()"
+        v = e5(geo)
+        check('LED meter: vertical by default (segments stacked, same x)', len(v) == 20 and len({q[0] for q in v}) == 1 and len({q[1] for q in v}) == 20, v[:2])
+        e5("__t.wsEdit(__t.C.board.find(o=>o.k==='i'))"); pg5.wait_for_timeout(200)
+        has = pg5.locator('#gEdit .wsf', has_text='Bar layout').count()
+        pg5.locator('#gEdit .wsf', has_text='Bar layout').locator('.wsc button[data-v="1"]').click()
+        pg5.locator('#gEdit .gact button', has_text='Save').click(); pg5.wait_for_timeout(500)
+        e5("__t.paintBoard()"); pg5.wait_for_timeout(300)
+        h = e5(geo)
+        lit = [i for i, q in enumerate(h) if q[2] != 'rgba(150,160,175,.32)']
+        check('LED meter: setting "Bar layout" exists and switches to horizontal (one row, left to right)', has == 1 and len(h) == 20 and len({q[1] for q in h}) == 1 and len({q[0] for q in h}) == 20 and e5("__t.C.board[0].hz") == 1, (has, h[:2]))
+        check('LED meter horizontal: +60% lights the right side from the centre, none on the left', lit and min(lit) >= 10 and max(lit) == 15, lit)
+        e5("__t.rt.t[0]=-30;__t.paintBoard()"); pg5.wait_for_timeout(300)
+        h2 = e5(geo); lit2 = [i for i, q in enumerate(h2) if q[2] != 'rgba(150,160,175,.32)']
+        check('LED meter horizontal: -30% lights the left side of the centre', lit2 and max(lit2) <= 9 and min(lit2) == 7, lit2)
+        g5 = e5("__t.C.board[0].g")
+        clip5 = e5("(()=>{const w=document.querySelector('.bdw');return w.scrollHeight>w.clientHeight+2||w.scrollWidth>w.clientWidth+2})()")
+        check('LED meter horizontal: card is wide and not clipped', g5 and g5[2] > g5[3] and not clip5, (g5, clip5))
+        e5("__t.save();__t.syncBoard()"); pg5.wait_for_timeout(300)
+        check('LED meter horizontal: saved layout survives a reload of the board', e5("__t.cleanBoard(JSON.parse(JSON.stringify(__t.C.board)))[0].hz") == 1 and e5("JSON.stringify(__t.cleanBoard(JSON.parse(JSON.stringify(__t.C.board)))[0].g)") == e5("JSON.stringify(__t.C.board[0].g)"))
+        check('no script errors (LED meter layout)', not errs5, errs5)
         check('no script errors', not errs, errs)
         b.close()
     print('All tests passed' if not fails else '%d failed' % len(fails))
