@@ -70,6 +70,8 @@ The hub only listens, so the app cannot show battery level or motor state.
 - **Slider minimum / maximum**: limits the travel; the blocked part is striped red.
 - **Joystick axis bars**: two bars under each pad show Drive/Steer (or Left/Right).
 
+- **Swipe joystick pairs** (Board): in a joystick's settings turn on "Swipe to other pairs". Swipe the card sideways (not on the pad) to move between channel pairs (A+B, C+D, E+F). Dots show the pair, and the old pair is set to 0.
+
 ## Notes
 
 - The signing key (`app/release.keystore`) is committed on purpose so updates install over older builds.

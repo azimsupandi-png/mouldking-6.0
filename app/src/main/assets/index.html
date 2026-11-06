@@ -993,6 +993,11 @@ html,body{overflow-anchor:none}
 @keyframes dialPop{from{transform:scale(1.06)}to{transform:scale(1)}}
 .bdw .dialbox>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .bdw .dialbox .dialk{position:absolute;inset:14%;height:auto;max-height:none;max-width:none;width:auto;aspect-ratio:auto}
+.bdw.slL>:not(.dialdots):not(.bdw-h){animation:slInL .28s ease-out}
+.bdw.slR>:not(.dialdots):not(.bdw-h){animation:slInR .28s ease-out}
+@keyframes slInL{from{transform:translateX(46px);opacity:0}to{transform:none;opacity:1}}
+@keyframes slInR{from{transform:translateX(-46px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.bdw.slL>*,.bdw.slR>*{animation:none!important}}
 .bdw .dialdots{display:flex;gap:6px;justify-content:center;flex:none;padding:3px 0 1px}
 .bdw .dialdots{align-items:center;gap:8px;width:calc(100% + 12px);margin:0 -6px;padding:5px 4px 3px;box-sizing:border-box}
 .bdw .dialdots i{flex:0 1 6px;min-width:0;max-width:6px;aspect-ratio:1;border-radius:50%;background:var(--muted);opacity:.55}
@@ -1333,6 +1338,11 @@ html,body{overflow-anchor:none}
             <button class="btn" type="button" data-ax="x" aria-pressed="false">Left / right</button>
             <button class="btn" type="button" data-ax="y" aria-pressed="false">Up / down</button>
           </div>
+          <div id="jcSwBox"><div class="seglbl">Swipe to other pairs</div>
+          <div class="seg" id="jcSw" role="group" aria-label="Swipe to other pairs">
+            <button class="btn" type="button" data-sw="0" aria-pressed="true">Off</button>
+            <button class="btn" type="button" data-sw="1" aria-pressed="false">On</button>
+          </div></div>
           <div class="seg"><button class="btn" type="button" id="jcReset">Reset</button><button class="btn" type="button" id="jcDone">Done</button></div>
         </div>
       </div>
@@ -1753,7 +1763,7 @@ html,body{overflow-anchor:none}
         if(c>=0&&c<NMAX) out.push({k:x.k,c:c,w:w,hold:x.hold===true,v:x.v===true});
       }else if(x.k==='j'){
         var ja=Math.round(+x.c), jb=Math.round(+x.d);
-        if(ja>=0&&ja<NMAX&&jb>=-1&&jb<NMAX){var jo={k:'j',c:ja,d:jb,m:x.m==='tank'?'tank':'axis',w:w,hold:x.hold===true},jj=cleanJc(x.jc);if(jj) jo.jc=jj;out.push(jo)}
+        if(ja>=0&&ja<NMAX&&jb>=-1&&jb<NMAX){var jo={k:'j',c:ja,d:jb,m:x.m==='tank'?'tank':'axis',w:w,hold:x.hold===true},jj=cleanJc(x.jc);if(jj) jo.jc=jj;if(x.sw===1||x.sw===true) jo.sw=1;out.push(jo)}
       }else if(x.k==='d'){
         var da=Math.round(+x.c), db=Math.round(+x.d), dc=Math.round(+x.e), dd=Math.round(+x.f);
         if(da>=0&&da<NMAX&&dc>=0&&dc<NMAX&&db>=-1&&db<NMAX&&dd>=-1&&dd<NMAX){var dobj={k:'d',c:da,d:db,e:dc,f:dd,m:x.m==='tank'?'tank':'axis',w:2,hold:x.hold===true},dj=cleanJc(x.jc);if(dj) dobj.jc=dj;out.push(dobj)}
@@ -3878,7 +3888,7 @@ html,body{overflow-anchor:none}
     setT(it.c,va*100,false);
     if(it.d>=0) setT(it.d,vb*100,false);
   }
-  var BD_UNDO=[], BD_PADS=[];
+  var BD_UNDO=[], BD_PADS=[], BD_SL=null;
   var LMODES=[{t:'OFF',v:0},{t:'LOW',v:30},{t:'MID',v:60},{t:'FULL',v:100},{t:'BLINK',v:100,blink:true}];
   function lightMode(c){
     var v=rt.t[c]||0;
@@ -4274,6 +4284,27 @@ html,body{overflow-anchor:none}
         bdHead(el,(it.m==='tank'?'Tank':'Stick')+' · '+tagOf(it.c)+(it.d>=0?'+'+tagOf(it.d):''),it,false);
         var tp=C.tilt.all||!tiltTaken;tiltTaken=true;
         el.appendChild(bdPad(it.c,it.d,it.m,it.hold,tp,it));
+        if(BD_SL&&BD_SL.it===it){el.classList.add(BD_SL.d>0?'slL':'slR');BD_SL=null}
+        var jch=activeIdx(),jprs=[];
+        for(var jq=0;jq<jch.length;jq+=2) jprs.push([jch[jq],jch[jq+1]===undefined?-1:jch[jq+1]]);
+        var jcur=-1;jprs.forEach(function(pr,qi){if(pr[0]===it.c) jcur=qi});
+        if(it.sw&&jprs.length>1&&jcur>=0){
+          // Swipe sideways on the card (outside the pad) to move the joystick to the next pair of channels.
+          var jdg=document.createElement('div');jdg.className='dialdots';
+          jprs.forEach(function(pr,qi){var di=document.createElement('i');if(qi===jcur) di.className='on';di.title=tagOf(pr[0])+(pr[1]>=0?'+'+tagOf(pr[1]):'');jdg.appendChild(di)});
+          el.appendChild(jdg);
+          var jsx=null,jsy=0;el.style.touchAction='pan-y';
+          el.addEventListener('pointerdown',function(e){if(bdEditing||(e.target.closest&&e.target.closest('.pad'))){jsx=null;return}jsx=e.clientX;jsy=e.clientY});
+          el.addEventListener('pointerup',function(e){
+            if(jsx===null) return;var dx=e.clientX-jsx,dy=e.clientY-jsy;jsx=null;
+            if(Math.abs(dx)>36&&Math.abs(dx)>1.6*Math.abs(dy)&&!S.estop&&!S.play){
+              var nx=(jcur+(dx<0?1:jprs.length-1))%jprs.length,np=jprs[nx];
+              [it.c,it.d].forEach(function(c){if(c>=0) setT(c,0,false)});
+              it.c=np[0];it.d=np[1];BD_SL={it:it,d:dx<0?1:-1};save();syncBoard();feedback('ok');
+            }
+          });
+          el.addEventListener('pointercancel',function(){jsx=null});
+        }
       }else if(it.k==='d'){
         var all=[it.c,it.d,it.e,it.f];
         for(var q=0;q<4;q++) if(all[q]>=0&&!isActive(all[q])) return;
@@ -4967,7 +4998,15 @@ html,body{overflow-anchor:none}
     $('#jcDzO').textContent=j.dz+'%';$('#jcSnO').textContent=j.sn+'%';$('#jcLmO').textContent=j.lm+'%';
     [].forEach.call($('#jcAx').querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-ax')===j.ax))});
   }
-  function jcShow(it){jcItem=it;jcPaint();$('#jcDlg').hidden=false}
+  function jcSwPaint(){
+    var it=jcItem;$('#jcSwBox').hidden=!(it&&it.k==='j');
+    [].forEach.call($('#jcSw').querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-sw')===(it&&it.sw?'1':'0')))});
+  }
+  [].forEach.call($('#jcSw').querySelectorAll('button'),function(b){b.addEventListener('click',function(){
+    if(!jcItem) return;if(b.getAttribute('data-sw')==='1') jcItem.sw=1; else delete jcItem.sw;
+    save();jcSwPaint();syncBoard();
+  })});
+  function jcShow(it){jcItem=it;jcPaint();jcSwPaint();$('#jcDlg').hidden=false}
   function jcRead(ax){
     if(!jcItem) return;
     var o=cleanJc({dz:+$('#jcDz').value,sn:+$('#jcSn').value,lm:+$('#jcLm').value,ax:ax||(jcItem.jc&&jcItem.jc.ax)||'f'});
