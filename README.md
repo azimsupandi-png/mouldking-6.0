@@ -72,10 +72,6 @@ The hub only listens, so the app cannot show battery level or motor state.
 
 - **Swipe joystick pairs** (Board): in a joystick's settings turn on "Swipe to other pairs". Swipe the card sideways (not on the pad) to move between channel pairs (A+B, C+D, E+F). Dots show the pair (3 + 3 + 3 with three hubs), and the old pair is set to 0.
 
-### Power Max and Auto-stop timer (Board)
-- **Power Max**: a round button. While you hold it, every channel ignores the power limit and speed setting, like Turbo. The LED ring fills as the hold time runs out (default 10 s), then it cools down for 3 s (blue ring). Both times are in the gear. Letting go stops it at once.
-- **Auto-stop timer**: three stages. NORMAL counts down the Safety "auto-stop when idle" time while a motor runs, SOON counts the last seconds (half the time, at most 30 s), STOPPED shows after the app has stopped everything. Tap the widget or move any control to reset. The gear changes the same Safety setting.
-
 ## Notes
 
 - The signing key (`app/release.keystore`) is committed on purpose so updates install over older builds.
