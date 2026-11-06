@@ -63,6 +63,14 @@ Each hub needs its own number (M1, M2 or M3) when you use more than one. Press t
 
 The hub only listens, so the app cannot show battery level or motor state.
 
+### Slider and joystick extras
+- **Quick values**: a row of chips (−100, −50, 0, +50, +100) under every slider channel.
+- **Step size**: in a channel's settings, pick 1, 5 or 10 for the ◀ ▶ buttons (hold to repeat).
+- **Magnet at 0**: the slider snaps to 0 when you come within the chosen range, with one light tick.
+- **Slider minimum / maximum**: limits the travel; the blocked part is striped red.
+- **Actual output marker**: a white bar shows where the output really is while it ramps towards the thumb.
+- **Joystick axis bars**: two bars under each pad show Drive/Steer (or Left/Right) with a red peak marker held for 3 s.
+
 ## Notes
 
 - The signing key (`app/release.keystore`) is committed on purpose so updates install over older builds.

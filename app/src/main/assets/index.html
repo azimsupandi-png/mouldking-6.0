@@ -153,6 +153,13 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 .cols.joy .pad{width:min(100%,360px)}
 .pad::after{content:"";position:absolute;inset:10%;border:1px dashed var(--line);border-radius:50%}
 .pad{--m:0}
+.axb{display:grid;gap:6px;margin:0 auto 12px;width:min(100%,300px)}
+.axb .ab{display:grid;grid-template-columns:44px 1fr 34px;align-items:center;gap:8px;font-size:12px;color:var(--muted,#9aa3b2)}
+.axb .abt{position:relative;height:10px;border-radius:5px;background:rgba(150,160,175,.22);overflow:hidden}
+.axb .abf{position:absolute;top:0;bottom:0;left:50%;width:0;background:#1D9E75}
+.axb .abz{position:absolute;top:-1px;bottom:-1px;left:50%;width:2px;margin-left:-1px;background:rgba(255,255,255,.55)}
+.axb .abp{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:#E24B4A;display:none}
+.axb output{text-align:right;font-variant-numeric:tabular-nums;color:inherit}
 .pad::before{content:"";position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(var(--acc) calc(var(--m)*360deg),transparent 0);
   -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));pointer-events:none}
 .knob{position:absolute;left:calc(50% - 28px);top:calc(50% - 28px);width:56px;height:56px;border-radius:50%;
@@ -500,6 +507,14 @@ textarea.txt{padding:8px;font-family:var(--f-mono);font-size:12px;line-height:1.
 :root[data-skin="studs"] .track::before{background:linear-gradient(#000,#000) center/calc(100% - 64px) 6px no-repeat,repeating-linear-gradient(90deg,#3a4049 0 2px,transparent 2px 12.5%) center/calc(100% - 64px) 20px no-repeat}
 .track .stp{position:absolute;top:0;bottom:0;width:48px;padding:0;border:0;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 14'%3E%3Cpath d='M9 1L1 7l8 6z' fill='%23f4b800'/%3E%3C/svg%3E") center/12px 17px no-repeat;cursor:pointer;z-index:4;touch-action:none;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 0 4px rgba(244,184,0,.45))}
 .track .stp.inc{right:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 14'%3E%3Cpath d='M1 1l8 6-8 6z' fill='%23f4b800'/%3E%3C/svg%3E")}
+.track .limz{position:absolute;top:0;bottom:0;width:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(45deg,rgba(226,75,74,.42) 0 5px,rgba(226,75,74,.14) 5px 10px)}
+.track .limz.lo{left:34px}
+.track .limz.hi{right:34px}
+.track .act{position:absolute;top:3px;bottom:3px;width:4px;margin-left:-2px;border-radius:2px;background:#fff;box-shadow:0 0 8px rgba(255,255,255,.75);z-index:3;pointer-events:none;display:none}
+.pre{display:flex;gap:6px;margin-top:8px}
+.pre[hidden]{display:none}
+.pre .btn{flex:1 1 0;min-width:0;padding:6px 0;font-size:13px;border-radius:999px}
+.pre .btn.on{background:var(--acc,#ffc400);color:#111;border-color:transparent}
 .track .stp:active{filter:drop-shadow(0 0 8px rgba(244,184,0,.95)) brightness(1.25);transform:scale(.9)}
 .ch.light .track .stp,.track[hidden] .stp{display:none}
 
@@ -1635,7 +1650,7 @@ html,body{overflow-anchor:none}
   function tr(s){return Object.prototype.hasOwnProperty.call(TR,s)?TR[s]:s}
   function baseCfg(names){
     var ch=[];
-    for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider',blink:'off',bright:100});
+    for(var i=0;i<NMAX;i++) ch.push({name:(names&&i<names.length)?names[i]:(i<PER?DEF[i]:'Channel '+L[i%PER]),inv:false,max:100,off:0,expo:0,kind:'slider',blink:'off',bright:100,stp:5,mag:0,lo:-100,hi:100});
     return {ch:ch,limit:100,ramp:60,zone:100,testPwr:60,dash:false,dgv:2,hubNames:['','',''],spring:true,s1:{mode:'axis',a:0,b:1,hold:false},s2:{mode:'axis',a:2,b:3,hold:false},hubs:[0,-1,-1],layout:'std',speed:'fast',board:[],tilt:{on:false,sens:45,inv:false,all:false},accent:0,accentV:2,theme:'studs',pad:{on:true,dead:12,trig:-1,map:{}},safety:{idle:60,warn:30,run:0},seq:[],rec:[]};
   }
   function cleanHubs(h){
@@ -1843,6 +1858,10 @@ html,body{overflow-anchor:none}
       o.kind=(x.kind==='hold'||x.kind==='light')?x.kind:'slider';
       o.blink=['off','slow','fast','pulse'].indexOf(x.blink)>=0?x.blink:'off';
       o.bright=Math.round(num(x.bright,0,100,100));
+      o.stp=pickOf(x.stp,[1,5,10],5);
+      o.mag=Math.round(num(x.mag,0,8,0));
+      o.lo=Math.round(num(x.lo,-100,0,-100));
+      o.hi=Math.round(num(x.hi,0,100,100));
     });
     d.limit=num(c.limit,10,100,100);
     d.ramp=num(c.ramp,0,100,60);
@@ -2400,9 +2419,11 @@ html,body{overflow-anchor:none}
   function setT(i,v,fromUI,force){
     if(runBlk&&runBlk[i]&&!force){ if(v===0||S.estop) runBlk[i]=false; else return }
     if(S.estop) v=0; else if(S.play&&!force) return;
-    rt.t[i]=clamp(Math.round(v),-100,100)||0;
+    var cl=C.ch[i];
+    rt.t[i]=(cl.kind==='slider'?clamp(Math.round(v),cl.lo,cl.hi):clamp(Math.round(v),-100,100))||0;
     if(!fromUI||S.estop) refs[i].rng.value=rt.t[i];
     refs[i].val.textContent=fmt(rt.t[i]);
+    if(refs[i].preB) refs[i].preB.forEach(function(b){b.classList.toggle('on',+b.dataset.v===rt.t[i])});
     if(refs[i].hRev){refs[i].hRev.classList.toggle('on',rt.t[i]<0);refs[i].hFwd.classList.toggle('on',rt.t[i]>0)}
   }
   function unlockCh(i){
@@ -2417,7 +2438,8 @@ html,body{overflow-anchor:none}
   function buildChannel(i){
     var el=document.createElement('article');el.className='ch';
     el.innerHTML='<div class="ch-head"><span class="tag"></span><input class="name" maxlength="16" aria-label="Channel name"><button class="btn inv" type="button" aria-pressed="false">Reverse</button></div>'+
-      '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"><button class="stp dec" type="button" aria-label="Decrease 5%"></button><button class="stp inc" type="button" aria-label="Increase 5%"></button></div>'+
+      '<div class="track"><div class="fill"></div><input class="pwr" type="range" min="-100" max="100" step="1" value="0" aria-label="Channel power"><button class="stp dec" type="button" aria-label="Decrease 5%"></button><button class="stp inc" type="button" aria-label="Increase 5%"></button><i class="limz lo"></i><i class="limz hi"></i><i class="act"></i></div>'+
+      '<div class="pre" role="group" aria-label="Quick values"><button class="btn" type="button" data-v="-100">\u2212100</button><button class="btn" type="button" data-v="-50">\u221250</button><button class="btn" type="button" data-v="0">0</button><button class="btn" type="button" data-v="50">+50</button><button class="btn" type="button" data-v="100">+100</button></div>'+
       '<div class="holds" hidden><button class="hold rev" type="button">Reverse</button><button class="hold fwd" type="button">Forward</button></div>'+
       '<div class="lights" hidden>'+
         '<label><span class="set-top"><span>Brightness</span><output class="ltOut">100%</output></span><input class="lt-bright" type="range" min="0" max="100" step="5"></label>'+
@@ -2427,6 +2449,10 @@ html,body{overflow-anchor:none}
         '<label><span class="set-top"><span>Maximum power</span><output class="maxOut"></output></span><input class="max" type="range" min="10" max="100" step="5"></label>'+
         '<label><span class="set-top"><span>Start power</span><output class="offOut"></output></span><input class="off" type="range" min="0" max="50" step="5"></label>'+
         '<label><span class="set-top"><span>Fine control (expo)</span><output class="expOut"></output></span><input class="expo" type="range" min="0" max="100" step="5"></label>'+
+        '<div class="seg stpseg" role="group" aria-label="Step size of the arrows"><button class="btn st1" type="button" aria-pressed="false">Step 1</button><button class="btn st5" type="button" aria-pressed="true">Step 5</button><button class="btn st10" type="button" aria-pressed="false">Step 10</button></div>'+
+        '<label><span class="set-top"><span>Magnet at 0</span><output class="magOut"></output></span><input class="mag" type="range" min="0" max="8" step="1"></label>'+
+        '<label><span class="set-top"><span>Slider minimum</span><output class="loOut"></output></span><input class="lo" type="range" min="-100" max="0" step="5"></label>'+
+        '<label><span class="set-top"><span>Slider maximum</span><output class="hiOut"></output></span><input class="hi" type="range" min="0" max="100" step="5"></label>'+
         '<svg class="curve" viewBox="0 0 100 60" role="img" aria-label="Response curve"><path class="cgrid" d="M0 59.5H100M0.5 0V60"/><polyline class="cv" points=""/></svg>'+
         '<div class="seg" role="group" aria-label="Control type"><button class="btn kS" type="button" aria-pressed="true">Slider</button><button class="btn kH" type="button" aria-pressed="false">Hold</button><button class="btn kL" type="button" aria-pressed="false">Light</button></div>'+
       '</div></details>';
@@ -2434,16 +2460,28 @@ html,body{overflow-anchor:none}
     var r={el:el,tag:$('.tag',el),name:$('.name',el),inv:$('.inv',el),track:$('.track',el),fill:$('.fill',el),rng:$('.pwr',el),
       holds:$('.holds',el),hRev:$('.hold.rev',el),hFwd:$('.hold.fwd',el),val:$('.val',el),mw:$('.meter-wrap',el),meter:$('.meter',el),sent:$('.sent',el),
       lock:$('.lock',el),max:$('.max',el),maxOut:$('.maxOut',el),off:$('.off',el),offOut:$('.offOut',el),expo:$('.expo',el),expOut:$('.expOut',el),
+      pre:$('.pre',el),preB:[].slice.call(el.querySelectorAll('.pre .btn')),lzLo:$('.limz.lo',el),lzHi:$('.limz.hi',el),act:$('.act',el),st1:$('.st1',el),st5:$('.st5',el),st10:$('.st10',el),mag:$('.mag',el),magOut:$('.magOut',el),lo:$('.lo',el),loOut:$('.loOut',el),hi:$('.hi',el),hiOut:$('.hiOut',el),
       cv:$('.cv',el),kS:$('.kS',el),kH:$('.kH',el),kL:$('.kL',el),lights:$('.lights',el),ltOn:$('.lt-on',el),ltB:$('.lt-bright',el),ltOut:$('.ltOut',el),ltBl:$('.lt-blink',el)};
     refs.push(r);
 
-    r.rng.addEventListener('input',function(){setT(i,+r.rng.value,true)});
+    r.rng.addEventListener('input',function(){
+      var v=+r.rng.value,mg=C.ch[i].mag||0;
+      // magnet: close to 0 the thumb snaps to 0 (one small tick when it catches)
+      if(mg&&Math.abs(v)<=mg){if(v!==0){v=0;r.rng.value=0}if(!r.mgOn){r.mgOn=true;if(v===0&&typeof dialBuzz==='function') dialBuzz()}}else r.mgOn=false;
+      setT(i,v,true);
+      if(+r.rng.value!==rt.t[i]) r.rng.value=rt.t[i];
+    });
+    r.preB.forEach(function(b){b.addEventListener('click',function(){
+      if(S.estop||S.play||r.locked) return;
+      setT(i,+b.dataset.v,false);
+    })});
     (function(){
       var tm=0,rp=0;
       function step(d){
         if(S.estop||S.play||r.locked) return;
-        var v=Math.max(-100,Math.min(100,Math.round((rt.t[i]+d)/5)*5));
-        r.rng.value=v;setT(i,v,true);
+        var sp=C.ch[i].stp||5;
+        var v=Math.max(-100,Math.min(100,Math.round((rt.t[i]+(d<0?-sp:sp))/sp)*sp));
+        setT(i,v,false);
       }
       function stop(){clearTimeout(tm);clearInterval(rp);tm=0;rp=0}
       [['.dec',-5],['.inc',5]].forEach(function(q){
@@ -2499,6 +2537,13 @@ html,body{overflow-anchor:none}
     r.off.addEventListener('change',save);
     r.expo.addEventListener('input',function(){C.ch[i].expo=+r.expo.value;r.expOut.textContent=C.ch[i].expo+'%';drawCurve(i)});
     r.expo.addEventListener('change',save);
+    [[r.st1,1],[r.st5,5],[r.st10,10]].forEach(function(q){q[0].addEventListener('click',function(){C.ch[i].stp=q[1];syncChannel(i);save()})});
+    r.mag.addEventListener('input',function(){C.ch[i].mag=+r.mag.value;r.magOut.textContent=C.ch[i].mag?'\u00b1'+C.ch[i].mag:'Off'});
+    r.mag.addEventListener('change',save);
+    r.lo.addEventListener('input',function(){C.ch[i].lo=+r.lo.value;r.loOut.textContent=C.ch[i].lo+'%';limZones(i);setT(i,rt.t[i],false)});
+    r.lo.addEventListener('change',save);
+    r.hi.addEventListener('input',function(){C.ch[i].hi=+r.hi.value;r.hiOut.textContent=C.ch[i].hi+'%';limZones(i);setT(i,rt.t[i],false)});
+    r.hi.addEventListener('change',save);
     function setKind(k){C.ch[i].kind=k;r.rng.value=0;setT(i,0,true);syncChannel(i);save()}
     r.kS.addEventListener('click',function(){setKind('slider')});
     r.kL.addEventListener('click',function(){setKind('light')});
@@ -2518,6 +2563,32 @@ html,body{overflow-anchor:none}
     for(var k=0;k<=20;k++){var m=powerFor(k*5,c);pts.push((k*5)+','+(60-m*0.6).toFixed(1))}
     refs[i].cv.setAttribute('points',pts.join(' '));
   }
+  // Red stripes over the part of the slider that is out of reach (slider minimum / maximum)
+  function limZones(i){
+    var c=C.ch[i],r=refs[i];
+    r.lzLo.style.width='calc((100% - 68px) * '+((c.lo+100)/200)+')';
+    r.lzHi.style.width='calc((100% - 68px) * '+((100-c.hi)/200)+')';
+  }
+  // Where the hub output really is, in slider terms (the thumb is the request, the white bar is the actual output while it ramps)
+  function valueOfOut(i,o){
+    var m=Math.abs(o);if(m<1) return 0;
+    var tb=!!S.turbo[i]||!!cal||testOn();
+    var f=(tb?1:(SPD[C.speed]||1))*((S.kid&&store.prefs.kidLimit)?store.prefs.kidLimit/100:1);
+    var sc=(tb?100:C.limit)/100*f;if(sc<=0) return 0;
+    var tg=m/sc,a=0;
+    while(a<100&&powerFor(a,C.ch[i])<tg) a++;
+    return o<0?-a:a;
+  }
+  function actPaint(i,o){
+    var r=refs[i];if(!r.act) return;
+    var show=false;
+    if(C.ch[i].kind==='slider'&&!S.estop){
+      var av=valueOfOut(i,o);
+      if(Math.abs(av-rt.t[i])>=3){show=true;r.act.style.left='calc(34px + (100% - 68px) * '+((av+100)/200)+')'}
+    }
+    var disp=show?'block':'none';
+    if(r.act.style.display!==disp) r.act.style.display=disp;
+  }
   function syncChannel(i){
     var c=C.ch[i], r=refs[i], hold=c.kind==='hold', light=c.kind==='light';
     r.tag.textContent=tagOf(i);
@@ -2533,6 +2604,12 @@ html,body{overflow-anchor:none}
     r.kH.setAttribute('aria-pressed',String(hold));
     r.kL.setAttribute('aria-pressed',String(light));
     r.ltB.value=c.bright;r.ltOut.textContent=c.bright+'%';r.ltBl.value=c.blink;
+    r.pre.hidden=hold||light;
+    r.st1.setAttribute('aria-pressed',String(c.stp===1));r.st5.setAttribute('aria-pressed',String(c.stp===5));r.st10.setAttribute('aria-pressed',String(c.stp===10));
+    var sdec=$('.dec',r.el),sinc=$('.inc',r.el);sdec.setAttribute('aria-label','Decrease '+c.stp+'%');sinc.setAttribute('aria-label','Increase '+c.stp+'%');
+    r.mag.value=c.mag;r.magOut.textContent=c.mag?'\u00b1'+c.mag:'Off';
+    r.lo.value=c.lo;r.loOut.textContent=c.lo+'%';r.hi.value=c.hi;r.hiOut.textContent=c.hi+'%';
+    limZones(i);
     drawCurve(i);
   }
 
@@ -2613,17 +2690,33 @@ html,body{overflow-anchor:none}
     va*=(C.zone||100)/100;vb*=(C.zone||100)/100;
     if(cf.a>=0) setT(cf.a,va*100,false);
     if(cf.b>=0) setT(cf.b,vb*100,false);
+    axbPaint(k,va*100,vb*100);
+  }
+  // Axis bars under the pad: current value from the centre, red peak marker held for 3 s
+  function axbPaint(k,a,b){
+    var st=sticks[k];if(!st||!st.axb) return;
+    [a,b].forEach(function(v,q){
+      var r=st.axb[q],m=Math.abs(v);v=Math.round(v);
+      var lo=Math.min(0,v),w=Math.abs(v)/2;
+      r.f.style.left=(50+lo/2)+'%';r.f.style.width=w+'%';
+      r.f.style.background=m>=90?'#E24B4A':m>=60?'#EF9F27':'#1D9E75';
+      if(m>=r.pk){r.pk=m;r.sg=v<0?-1:1;r.p.style.left=(50+r.sg*m/2)+'%';r.p.style.display=m>=5?'block':'none';
+        clearTimeout(r.t);r.t=setTimeout(function(){r.pk=0;r.p.style.display='none'},3000)}
+      var tx=(v>0?'+':'')+v;if(r.o.textContent!==tx) r.o.textContent=tx;
+    });
   }
   function buildStick(k){
     var box=document.createElement('div');box.className='padbox';
     box.innerHTML='<h3 class="pb-title"></h3>'+
       '<div class="seg" role="group" aria-label="Stick mode"><button class="btn mA" type="button" aria-pressed="true">Axis</button><button class="btn mT" type="button" aria-pressed="false">Tank</button></div>'+
       '<div class="pad"><div class="knob rest"></div></div>'+
+      '<div class="axb"><div class="ab"><span class="abl"></span><span class="abt"><i class="abf"></i><i class="abz"></i><i class="abp"></i></span><output>0</output></div><div class="ab"><span class="abl"></span><span class="abt"><i class="abf"></i><i class="abz"></i><i class="abp"></i></span><output>0</output></div></div>'+
       '<div class="maprow"><label><span class="la"></span><select class="selA"></select></label><label><span class="lb"></span><select class="selB"></select></label></div>'+
       '<label class="check spr-row"><input class="spr" type="checkbox" checked><span>Return to 0 when released</span></label>';
     $('#pads').appendChild(box);
     var st={box:box,title:$('.pb-title',box),mA:$('.mA',box),mT:$('.mT',box),pad:$('.pad',box),knob:$('.knob',box),
       spr:$('.spr',box),y:0,la:$('.la',box),lb:$('.lb',box),selA:$('.selA',box),selB:$('.selB',box),id:null};
+    st.axb=[].map.call(box.querySelectorAll('.ab'),function(e){return {l:$('.abl',e),f:$('.abf',e),p:$('.abp',e),o:$('output',e),pk:0,sg:1,t:0}});
     sticks.push(st);
     st.spr.addEventListener('change',function(){
       cfgOf(k).hold=!st.spr.checked;save();
@@ -2673,6 +2766,7 @@ html,body{overflow-anchor:none}
       st.la.textContent=cf.mode==='axis'?'Drive (up/down)':'Left motor';
       st.lb.textContent=cf.mode==='axis'?'Steer (left/right)':'Right motor';
       st.title.textContent=k?'Right stick':'Left stick';
+      st.axb[0].l.textContent=cf.mode==='axis'?'Drive':'Left';st.axb[1].l.textContent=cf.mode==='axis'?'Steer':'Right';
       [st.selA,st.selB].forEach(function(sel,q){
         var key=q?'b':'a';
         sel.innerHTML='';
@@ -3236,6 +3330,7 @@ html,body{overflow-anchor:none}
       var r=refs[i];
       var rk=o+'|'+(S.estop?1:0)+(S.play?1:0)+(r.locked?1:0)+(S.connected?v:'')+(C.ch[i].kind==='light'?(rt.t[i]>0?'L':'l'):'');
       if(r._rk===rk) continue;r._rk=rk;
+      actPaint(i,o);
       r.track.classList.toggle('dis',!!(S.estop||S.play||r.locked));
       r.fill.style.setProperty('--lf',String((50+Math.min(0,o)/2)/100));
       r.fill.style.setProperty('--wf',String(Math.abs(o)/200));
