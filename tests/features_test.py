@@ -325,6 +325,14 @@ def main():
         v_back = vis()
         check('start/stop gear: channel A-F choices show only for Output only', v_out == [1] * 8 and v_link == [1, 1, 0, 0, 0, 0, 0, 0] and v_back == [1] * 8, (v_out, v_link, v_back))
         pg9.evaluate("document.querySelector('#gEdit').remove();0")
+        # ---- one vibration only when the start/stop button fires inside the app ----
+        pgv, errsv = W.boot(b, {'width': 1000, 'height': 447}, True, [{'k': 'ps', 'w': 1, 'g': [0, 0, 9, 12], 'hd': 300}],
+                            init="window.__hz=[];window.MK6Bridge={haptic:function(k){window.__hz.push(k)},start:function(){},stop:function(){},isNative:function(){return true}};")
+        pgv.evaluate("__t.S.connected=false;0"); pgv.wait_for_timeout(1200)
+        bbv = pgv.locator('.psb').bounding_box()
+        pgv.mouse.move(bbv['x'] + bbv['width'] / 2, bbv['y'] + bbv['height'] / 2); pgv.mouse.down(); pgv.wait_for_timeout(700); pgv.mouse.up(); pgv.wait_for_timeout(300)
+        hz = pgv.evaluate("window.__hz")
+        check('start/stop: only one haptic when it fires in the app', len(hz) == 1, hz)
         check('no script errors (start/stop output only)', not errs9, errs9)
         check('no script errors', not errs, errs)
         b.close()

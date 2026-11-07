@@ -4750,10 +4750,9 @@ html,body{overflow-anchor:none}
           clearTimeout(pv.tm);
           pv.tm=setTimeout(function(){
             if(!pv.dn) return;
-            // held long enough: vibrate first, then the LEDs change colour one by one
+            // held long enough: one vibration (feedback() already vibrates in the app), then the LEDs change colour one by one
             if(store.prefs.haptic!==false&&!NB&&navigator.vibrate){try{navigator.vibrate(45)}catch(_){}}
             feedback('ok');
-            if(store.prefs.haptic!==false&&NB&&NB.haptic){try{NB.haptic('estop')}catch(_){}}
             pv.fired=true;if(it.md) toggleOut(it); else link.click();paintBoard();
           },it.hd||500);
         });

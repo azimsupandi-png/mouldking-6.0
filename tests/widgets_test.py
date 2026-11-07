@@ -48,8 +48,9 @@ def check(name, cond, extra=''):
     print(('PASS ' if cond else 'FAIL ') + name + ((' ' + str(extra)) if (extra != '' and not cond) else ''))
     if not cond: fails.append(name)
 
-def boot(b, vp, dash, samples):
+def boot(b, vp, dash, samples, init=None):
     pg = b.new_page(viewport=vp)
+    if init: pg.add_init_script(init)
     errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.route('http*://**/*', lambda r: r.abort())
