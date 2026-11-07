@@ -241,6 +241,56 @@ def main():
         fit7 = pg7.evaluate("[...document.querySelectorAll('.bdw.hzw')].map(w=>{const s=w.querySelector('svg.mtr').getBoundingClientRect(),b=[...w.querySelectorAll('svg.mtr rect')].filter(r=>r.getAttribute('rx')==='1.5').map(r=>r.getBoundingClientRect());return b.length===20&&Math.min(...b.map(r=>r.top))>=s.top&&Math.max(...b.map(r=>r.bottom))<=s.bottom})")
         check('board layout: horizontal LED bar card is about half the height of the vertical one', hh[0] > 150 and hh[1] <= hh[0] * .58 and hh[2] <= hh[0] * .58 and all(fit7), (hh, fit7))
         check('no script errors (horizontal LED bar size)', not errs7, errs7)
+
+        # ---- Start / stop push button (hub link): long press, vibrate, then the LEDs change one by one ----
+        pg8, errs8 = W.boot(b, {'width': 1000, 'height': 447}, True, [{'k': 'ps', 'w': 1, 'g': [0, 0, 9, 12]}, {'k': 's', 'c': 0, 'w': 1, 'g': [9, 0, 12, 4]}])
+        e8 = pg8.evaluate
+        e8("__t.S.connected=false;__t.hubMsgSet('');window.__vib=[];navigator.vibrate=function(x){window.__vib.push(x);return true};0")
+        pg8.wait_for_timeout(1300)
+        ring = lambda: e8("[...document.querySelectorAll('.pssvg > path')].map(p=>p.getAttribute('stroke'))")
+        cnt = lambda c: sum(1 for x in ring() if x == c)
+        check('start/stop: stopped = all 40 LEDs red after they lit up', len(ring()) == 40 and cnt('#E24B4A') == 40, cnt('#E24B4A'))
+        bb = pg8.locator('.psb').bounding_box(); cx, cy = bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] / 2
+        pg8.mouse.move(cx, cy); pg8.mouse.down(); pg8.wait_for_timeout(250); pg8.mouse.up(); pg8.wait_for_timeout(300)
+        check('start/stop: a short press does nothing (no vibration, still red, hub link unchanged)', not e8("__t.S.connected") and e8("window.__vib.length") == 0 and cnt('#E24B4A') == 40, (e8("__t.S.connected"), e8("window.__vib")))
+        pg8.mouse.down(); pg8.wait_for_timeout(350)
+        before = (e8("window.__vib.length"), cnt('#E24B4A'), e8("__t.S.connected"))
+        pg8.wait_for_timeout(250)
+        fired = (e8("window.__vib.length"), e8("__t.S.connected"))
+        pg8.wait_for_timeout(120)
+        mid_g, mid_r = cnt('#1D9E75'), cnt('#E24B4A')
+        pg8.wait_for_timeout(1000)
+        check('start/stop: nothing changes before the hold time; then it vibrates and the link turns on', before == (0, 40, False) and fired == (1, True), (before, fired))
+        check('start/stop: LEDs turn green one by one, replacing red', 0 < mid_g < 40 and mid_g + mid_r == 40 and cnt('#1D9E75') == 40, (mid_g, mid_r, cnt('#1D9E75')))
+        pg8.mouse.up(); pg8.wait_for_timeout(200)
+        check('start/stop: holding on does not toggle again', e8("__t.S.connected") and e8("window.__vib.length") == 1)
+        pg8.mouse.down(); pg8.wait_for_timeout(750); m2 = (cnt('#E24B4A'), cnt('#1D9E75')); pg8.wait_for_timeout(1000); pg8.mouse.up(); pg8.wait_for_timeout(200)
+        check('start/stop: a second long press stops the link and the LEDs go back to red one by one', not e8("__t.S.connected") and cnt('#E24B4A') == 40 and e8("window.__vib.length") == 2, (m2, cnt('#E24B4A')))
+        e8("__t.S.estop=true;window.__fr=[]"); fr = []
+        for _ in range(14):
+            pg8.wait_for_timeout(120); fr.append(sorted(set(ring())))
+        yel = [f for f in fr if f == ['#ffd84a']]; off = [f for f in fr if f == ['rgba(150,160,175,.32)']]
+        check('start/stop: E-Stop makes the whole ring flash yellow', len(yel) >= 2 and len(off) >= 2, fr[:6])
+        e8("__t.S.estop=false"); pg8.wait_for_timeout(300)
+        check('start/stop: ring returns to its colour when E-Stop is released', sorted(set(ring())) == ['#E24B4A'], sorted(set(ring())))
+        e8("__t.hubMsgSet('Permission denied')"); fr2 = []
+        for _ in range(10):
+            pg8.wait_for_timeout(120); fr2.append(sorted(set(ring())))
+        check('start/stop: a hub fault also flashes yellow', any(f == ['#ffd84a'] for f in fr2) and any(f != ['#ffd84a'] for f in fr2), fr2[:4])
+        e8("__t.hubMsgSet('')"); pg8.wait_for_timeout(300)
+        op = e8("getComputedStyle(document.querySelector('.bdw.psw')).opacity")
+        check('start/stop: the button is not dimmed while the hub is off', op == '1', op)
+        # hold time setting
+        e8("__t.wsEdit(__t.C.board.find(o=>o.k==='ps'))"); pg8.wait_for_timeout(200)
+        pg8.locator('#gEdit .wsc button[data-v="1200"]').click(); pg8.locator('#gEdit .gact button', has_text='Save').click(); pg8.wait_for_timeout(300)
+        bb = pg8.locator('.psb').bounding_box(); cx, cy = bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] / 2
+        pg8.mouse.move(cx, cy); pg8.mouse.down(); pg8.wait_for_timeout(900); short = e8("__t.S.connected"); pg8.wait_for_timeout(500); longp = e8("__t.S.connected"); pg8.mouse.up()
+        check('start/stop: hold time 1.2 s is respected', e8("__t.C.board.find(o=>o.k==='ps').hd") == 1200 and not short and longp, (short, longp))
+        cl = e8("__t.cleanBoard([{k:'ps',w:1,hd:77},{k:'ps',w:1,hd:800}])")
+        check('start/stop: sanitizer keeps a valid hold time and resets odd ones', cl[0]['hd'] == 500 and cl[1]['hd'] == 800, cl)
+        clip8 = e8("(()=>{const w=document.querySelector('.bdw.psw');const s=w.querySelector('.pssvg').getBoundingClientRect(),r=w.getBoundingClientRect();return s.bottom>r.bottom+1||s.right>r.right+1||s.left<r.left-1})()")
+        check('start/stop: nothing clipped inside the card', not clip8, clip8)
+        check('no script errors (start/stop button)', not errs8, errs8)
         check('no script errors', not errs, errs)
         b.close()
     print('All tests passed' if not fails else '%d failed' % len(fails))
