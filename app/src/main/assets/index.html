@@ -1841,7 +1841,7 @@ html,body{overflow-anchor:none}
         var za=Math.round(+x.a);
         out.push({k:'z',w:w,a:(za>=0&&za<=240)?za:15});
       }else if(x.k==='ps'){
-        out.push({k:'ps',w:w,hd:pickOf(x.hd,[300,500,800,1200],500)});
+        out.push({k:'ps',w:w,hd:pickOf(x.hd,[300,500,800,1200],500),md:pickOf(x.md,[0,1],0),o0:pickOf(x.o0,[0,1],1),o1:pickOf(x.o1,[0,1],1),o2:pickOf(x.o2,[0,1],1),o3:pickOf(x.o3,[0,1],1),o4:pickOf(x.o4,[0,1],1),o5:pickOf(x.o5,[0,1],1)});
       }else if(x.k==='e'){
         out.push({k:'e',w:1});
       }
@@ -2334,7 +2334,7 @@ html,body{overflow-anchor:none}
       {k:'mid',l:'Centre off position',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.mid?1:0},s:function(it,v){if(v) it.mid=1; else delete it.mid}},
       {k:'ra',l:'Reverse output A',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.ra?1:0},s:function(it,v){if(v) it.ra=1; else delete it.ra}},
       {k:'rb',l:'Reverse output B',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.rb?1:0},s:function(it,v){if(v) it.rb=1; else delete it.rb}}]},
-    ps:{t:'Start / stop button settings',f:[{k:'hd',l:'Hold time before it switches',ch:[300,500,800,1200],lab:['0.3 s','0.5 s','0.8 s','1.2 s'],only:true,def:500}]},
+    ps:{t:'Start / stop button settings',f:[{k:'hd',l:'Hold time before it switches',ch:[300,500,800,1200],lab:['0.3 s','0.5 s','0.8 s','1.2 s'],only:true,def:500},{k:'md',l:'What it controls',ch:[0,1],lab:['Hub link','Output only'],only:true,def:0}].concat('ABCDEF'.split('').map(function(c,j){return {k:'o'+j,l:'Output only: channel '+c,ch:[1,0],lab:['Stopped','Left running'],only:true,def:1}}))},
     a:{t:'Auto-stop settings',f:[{k:'s',l:'Stop after',u:'s',min:1,max:300,st:1,ch:[5,10,20,30,60]}]},
     z:{t:'Timer settings',f:[{k:'a',l:'Alert after (0 = off)',u:'min',min:0,max:240,st:1,ch:[0,5,10,15,20,30]}]}
   };
@@ -3288,6 +3288,14 @@ html,body{overflow-anchor:none}
     paintLamps();
     syncLock();paintRec();paintPlayer();
   }
+  // Start / stop button in 'Output only' mode: the hub link stays up, but every channel is held at 0 while outputs are off
+  function toggleOut(it){
+    S.outOff=!S.outOff;
+    S.outMsk=[it.o0,it.o1,it.o2,it.o3,it.o4,it.o5].map(function(x){return x!==0});
+    if(S.outOff){stopRecord();stopPlay(false);for(var i=0;i<NMAX;i++) if(isActive(i)&&S.outMsk[i%PER]) setT(i,0,false)}
+    last=null;tick();
+    live.textContent=S.outOff?'Hub output is off: the chosen channels are held at 0':'Hub output is on';
+  }
   function setEstop(on){
     if(S.estop===on) return;
     S.estop=on;
@@ -3319,8 +3327,9 @@ html,body{overflow-anchor:none}
     var step=Math.max(2,200*Math.pow(1-C.ramp/100,2)), vals=new Array(NMAX);
     for(var i=0;i<NMAX;i++){
       if(!isActive(i)){vals[i]=0;continue}
-      var goal=S.estop?0:goalOf(i);
-      if(S.estop) rt.o[i]=0;
+      var hold=S.estop||(S.outOff&&(!S.outMsk||S.outMsk[i%PER]));
+      var goal=hold?0:goalOf(i);
+      if(hold) rt.o[i]=0;
       var d=goal-rt.o[i];
       rt.o[i]=(C.ch[i].kind==='light'||Math.abs(d)<=step)?goal:rt.o[i]+(d<0?-1:1)*step;
       var o=Math.round(rt.o[i]), v=(C.ch[i].inv?-o:o)||0;
@@ -4714,7 +4723,7 @@ html,body{overflow-anchor:none}
       }else if(it.k==='ps'){
         el.classList.add('psw');
         bdHead(el,'',it,false);
-        var pb=document.createElement('button');pb.type='button';pb.className='psb';pb.setAttribute('aria-label','Hub link on/off (hold)');
+        var pb=document.createElement('button');pb.type='button';pb.className='psb';pb.setAttribute('aria-label',it.md?'Hub output on/off (hold)':'Hub link on/off (hold)');
         var psv=sv('svg',{viewBox:'0 0 120 138',class:'pssvg'},pb);
         var pdf=sv('defs',{},psv),pgr=sv('radialGradient',{id:'psg'+(MSEQ++),cx:'.35',cy:'.3',r:'.9'},pdf);
         var pgid=pgr.getAttribute('id');
@@ -4741,7 +4750,7 @@ html,body{overflow-anchor:none}
             if(store.prefs.haptic!==false&&!NB&&navigator.vibrate){try{navigator.vibrate(45)}catch(_){}}
             feedback('ok');
             if(store.prefs.haptic!==false&&NB&&NB.haptic){try{NB.haptic('estop')}catch(_){}}
-            pv.fired=true;link.click();paintBoard();
+            pv.fired=true;if(it.md) toggleOut(it); else link.click();paintBoard();
           },it.hd||500);
         });
         ['pointerup','pointercancel','lostpointercapture'].forEach(function(ev){pb.addEventListener(ev,function(){pv.dn=false;clearTimeout(pv.tm);pb.classList.remove('dn')})});
@@ -4886,7 +4895,7 @@ html,body{overflow-anchor:none}
     return !!S.estop||(!!hubMsg&&hubMsg!=='Pairing…')||!!(lb&&!lb.hidden);
   }
   function paintVw(v){
-    var now=performance.now(), n=v.ring.length, on=!!S.connected, T=on?'#ffd84a':'#E24B4A', flt=psFault();
+    var now=performance.now(), n=v.ring.length, on=v.it.md?!S.outOff:!!S.connected, T=on?'#ffd84a':'#E24B4A', flt=psFault();
     if(v.tgt!==T){v.tgt=T;v.ai=0;v.t=now}
     // one more LED changes every ~22 ms, clockwise from the top
     var steps=Math.max(1,Math.floor((now-v.t)/22));
@@ -5331,7 +5340,7 @@ html,body{overflow-anchor:none}
       C.board.push({k:'dp',c:n[0],d:n[1],w:ww,m:m==='tank'?'tank':'car',p:70});
     }
     else if(bdK==='z') C.board.push({k:'z',w:ww,a:15});
-    else if(bdK==='ps') C.board.push({k:'ps',w:ww,hd:500});
+    else if(bdK==='ps') C.board.push({k:'ps',w:ww,hd:500,md:0,o0:1,o1:1,o2:1,o3:1,o4:1,o5:1});
     else if(bdK==='rs') C.board.push({k:'rs',w:ww,p:100,ns:6,s:0});
     else if(bdK==='t'){
       var tsy=$('#bdTgStyle').value;
