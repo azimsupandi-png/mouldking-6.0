@@ -75,7 +75,7 @@ The hub only listens, so the app cannot show battery level or motor state.
 - **Swipe joystick pairs** (Board): in a joystick's settings turn on "Swipe to other pairs". Swipe the card sideways (not on the pad) to move between channel pairs (A+B, C+D, E+F). Dots show the pair (3 + 3 + 3 with three hubs), and the old pair is set to 0.
 
 ### Start / stop button (Board)
-- A round push button with a 40-LED ring and START / STOP wording on the centre button (red ring, white START and red STOP when stopped; all yellow when started). It turns the hub link on and off, like the green button at the top. It has no title and no hint text, only a small ON / OFF word under the ring.
+- A round push button with a 40-LED ring and START / STOP wording on the centre button (stopped: red ring, big white START, small red STOP; started: yellow ring, small yellow START, big white STOP). It turns the hub link on and off, like the green button at the top. It has no title and no hint text, no ON / OFF word (a small E-STOP or FAULT word shows under the ring only when that happens).
 - Hold it (0.5 s by default; 0.3 / 0.5 / 0.8 / 1.2 s in the gear). When the time is up the phone vibrates, and only then do the LEDs change: red turns to glowing yellow one by one when starting, and back to red one by one when stopping. A short tap does nothing.
 - The whole ring flashes yellow while E-Stop is on or the hub has a fault (Bluetooth off, link lost, permission denied).
 - The button is not dimmed when the hub is off, so you can always start it again.

@@ -4896,14 +4896,14 @@ html,body{overflow-anchor:none}
       var c=flt?(blink?'#ffd84a':OFFC):(v.col[i]||OFFC);
       if(v.ring[i]._c!==c){v.ring[i]._c=c;v.ring[i].setAttribute('stroke',c);v.glow[i].setAttribute('stroke',c==='rgba(150,160,175,.32)'?'transparent':c)}
     }
-    var word=S.estop?'E-STOP':flt?'FAULT':on?'ON':'OFF', wc=flt?'#ffd84a':on?'#ffd84a':'#E24B4A';
+    var word=S.estop?'E-STOP':flt?'FAULT':'', wc=flt?'#ffd84a':on?'#ffd84a':'#E24B4A';
     if(v.st.textContent!==word){v.st.textContent=word}
     v.st.setAttribute('fill',wc);
     // centre button: red ring + white/red wording when stopped, all yellow when started
     v.ic.setAttribute('stroke',on?'#ffd84a':'#E24B4A');
-    v.t1.setAttribute('fill',on?'#ffd84a':'#e8e8ea');
-    v.t2.setAttribute('fill',on?'#ffd84a':'#E24B4A');
-    v.t2.setAttribute('opacity',on?.75:1);
+    // stopped: big white START, small red STOP; started: small yellow START, big white STOP
+    v.t1.setAttribute('fill',on?'#ffd84a':'#e8e8ea');v.t1.setAttribute('font-size',on?10:14);v.t1.setAttribute('y',on?53:58);
+    v.t2.setAttribute('fill',on?'#fff':'#E24B4A');v.t2.setAttribute('font-size',on?14:10);v.t2.setAttribute('y',on?69:71);
     v.glowg.setAttribute('opacity',on&&!flt?.95:.55);
     v.b.classList.toggle('flt',flt);
   }

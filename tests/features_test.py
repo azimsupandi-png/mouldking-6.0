@@ -265,7 +265,7 @@ def main():
         ctr = lambda: e8("(()=>{const c=document.querySelector('.psb g:nth-of-type(2)'),t=c.querySelectorAll('text');return [c.querySelector('circle:nth-of-type(3)').getAttribute('stroke'),t[0].textContent,t[0].getAttribute('fill'),t[1].textContent,t[1].getAttribute('fill'),c.querySelectorAll('path,line').length]})()")
         icon_on = ctr()
         words = e8("document.querySelector('.bdw.psw').textContent")
-        check('start/stop: centre button is yellow with START/STOP wording while active, no power symbol, no hold wording', icon_on == ['#ffd84a', 'START', '#ffd84a', 'STOP', '#ffd84a', 0] and 'hold to' not in words.lower(), (icon_on, words))
+        check('start/stop: centre button is yellow with START/STOP wording while active, no power symbol, no hold wording', icon_on == ['#ffd84a', 'START', '#ffd84a', 'STOP', '#fff', 0] and 'hold to' not in words.lower() and 'ON' not in words and 'OFF' not in words, (icon_on, words))
         pg8.mouse.up(); pg8.wait_for_timeout(200)
         check('start/stop: holding on does not toggle again', e8("__t.S.connected") and e8("window.__vib.length") == 1)
         pg8.mouse.down(); pg8.wait_for_timeout(750); m2 = (cnt('#E24B4A'), cnt('#ffd84a')); pg8.wait_for_timeout(1000); pg8.mouse.up(); pg8.wait_for_timeout(200)
