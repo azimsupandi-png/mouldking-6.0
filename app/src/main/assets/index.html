@@ -1842,7 +1842,7 @@ html,body{overflow-anchor:none}
         var za=Math.round(+x.a);
         out.push({k:'z',w:w,a:(za>=0&&za<=240)?za:15});
       }else if(x.k==='ps'){
-        out.push({k:'ps',w:w,hd:pickOf(x.hd,[300,500,800,1200],800),md:pickOf(x.md,[0,1],0),o0:pickOf(x.o0,[0,1],1),o1:pickOf(x.o1,[0,1],1),o2:pickOf(x.o2,[0,1],1),o3:pickOf(x.o3,[0,1],1),o4:pickOf(x.o4,[0,1],1),o5:pickOf(x.o5,[0,1],1)});
+        out.push({k:'ps',w:w,hd:pickOf(x.hd,[300,500,800,1200],500),md:pickOf(x.md,[0,1],0),o0:pickOf(x.o0,[0,1],1),o1:pickOf(x.o1,[0,1],1),o2:pickOf(x.o2,[0,1],1),o3:pickOf(x.o3,[0,1],1),o4:pickOf(x.o4,[0,1],1),o5:pickOf(x.o5,[0,1],1)});
       }else if(x.k==='e'){
         out.push({k:'e',w:1});
       }
@@ -2335,7 +2335,7 @@ html,body{overflow-anchor:none}
       {k:'mid',l:'Centre off position',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.mid?1:0},s:function(it,v){if(v) it.mid=1; else delete it.mid}},
       {k:'ra',l:'Reverse output A',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.ra?1:0},s:function(it,v){if(v) it.ra=1; else delete it.ra}},
       {k:'rb',l:'Reverse output B',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.rb?1:0},s:function(it,v){if(v) it.rb=1; else delete it.rb}}]},
-    ps:{t:'Start / stop button settings',f:[{k:'hd',l:'Hold time before it switches',ch:[300,500,800,1200],lab:['0.3 s','0.5 s','0.8 s','1.2 s'],only:true,def:800},{k:'md',l:'What it controls',ch:[0,1],lab:['Hub link','Output only'],only:true,def:0}].concat('ABCDEF'.split('').map(function(c,j){return {k:'o'+j,l:'Output only: channel '+c,ch:[1,0],lab:['Stopped','Left running'],only:true,def:1,dep:{k:'md',v:1}}}))},
+    ps:{t:'Start / stop button settings',f:[{k:'hd',l:'Hold time before it switches',ch:[300,500,800,1200],lab:['0.3 s','0.5 s','0.8 s','1.2 s'],only:true,def:500},{k:'md',l:'What it controls',ch:[0,1],lab:['Hub link','Output only'],only:true,def:0}].concat('ABCDEF'.split('').map(function(c,j){return {k:'o'+j,l:'Output only: channel '+c,ch:[1,0],lab:['Stopped','Left running'],only:true,def:1,dep:{k:'md',v:1}}}))},
     a:{t:'Auto-stop settings',f:[{k:'s',l:'Stop after',u:'s',min:1,max:300,st:1,ch:[5,10,20,30,60]}]},
     z:{t:'Timer settings',f:[{k:'a',l:'Alert after (0 = off)',u:'min',min:0,max:240,st:1,ch:[0,5,10,15,20,30]}]}
   };
@@ -4746,7 +4746,7 @@ html,body{overflow-anchor:none}
         pb.addEventListener('pointerdown',function(e){
           e.preventDefault();try{pb.setPointerCapture(e.pointerId)}catch(_){}
           if(bdEditing) return;
-          noteInput();pv.dn=true;pv.fired=false;pv.sw=false;pv.hs=performance.now();pb.classList.add('dn');
+          noteInput();pv.dn=true;pb.classList.add('dn');
           clearTimeout(pv.tm);
           pv.tm=setTimeout(function(){
             if(!pv.dn) return;
@@ -4754,8 +4754,8 @@ html,body{overflow-anchor:none}
             if(store.prefs.haptic!==false&&!NB&&navigator.vibrate){try{navigator.vibrate(45)}catch(_){}}
             feedback('ok');
             if(store.prefs.haptic!==false&&NB&&NB.haptic){try{NB.haptic('estop')}catch(_){}}
-            pv.fired=true;pv.sw=true;if(it.md) toggleOut(it); else link.click();paintBoard();
-          },it.hd||800);
+            pv.fired=true;if(it.md) toggleOut(it); else link.click();paintBoard();
+          },it.hd||500);
         });
         ['pointerup','pointercancel','lostpointercapture'].forEach(function(ev){pb.addEventListener(ev,function(){pv.dn=false;clearTimeout(pv.tm);pb.classList.remove('dn')})});
         pb.addEventListener('contextmenu',function(e){e.preventDefault()});
@@ -4900,20 +4900,13 @@ html,body{overflow-anchor:none}
   }
   function paintVw(v){
     var now=performance.now(), n=v.ring.length, on=v.it.md?!S.outOff:!!S.connected, T=on?'#ffd84a':'#E24B4A', flt=psFault();
-    var hd=v.it.hd||800, dt=Math.min(100,now-(v.pt||now));v.pt=now;
-    // while it is held, the ring fills with the colour it is about to switch to; letting go early drains it back
-    if(v.dn&&!v.sw&&!flt) v.pr=Math.min(1,(now-v.hs)/hd); else v.pr=Math.max(0,(v.pr||0)-dt/(hd/4));
-    if(v.tgt!==T){
-      var full=v.fired;v.fired=false;v.tgt=T;v.t=now;
-      if(full){for(var q=0;q<n;q++) v.col[q]=T;v.ai=n;v.pr=0}else v.ai=0;
-    }
-    var fillN=flt?0:Math.round(v.pr*n), OV=T==='#ffd84a'?'#E24B4A':'#ffd84a';
+    if(v.tgt!==T){v.tgt=T;v.ai=0;v.t=now}
     // one more LED changes every ~22 ms, clockwise from the top
     var steps=Math.max(1,Math.floor((now-v.t)/22));
     if(v.ai<n){var upto=Math.min(n,v.ai+steps);for(;v.ai<upto;v.ai++) v.col[v.ai]=T;v.t=now}
     var blink=flt&&(Math.floor(now/450)%2===0);
     for(var i=0;i<n;i++){
-      var c=flt?(blink?'#ffd84a':OFFC):(i<fillN?OV:(v.col[i]||OFFC));
+      var c=flt?(blink?'#ffd84a':OFFC):(v.col[i]||OFFC);
       if(v.ring[i]._c!==c){v.ring[i]._c=c;v.ring[i].setAttribute('stroke',c);v.glow[i].setAttribute('stroke',c==='rgba(150,160,175,.32)'?'transparent':c)}
     }
     var word=S.estop?'E-STOP':flt?'FAULT':'', wc=flt?'#ffd84a':on?'#ffd84a':'#E24B4A';
@@ -5353,7 +5346,7 @@ html,body{overflow-anchor:none}
       C.board.push({k:'dp',c:n[0],d:n[1],w:ww,m:m==='tank'?'tank':'car',p:70});
     }
     else if(bdK==='z') C.board.push({k:'z',w:ww,a:15});
-    else if(bdK==='ps') C.board.push({k:'ps',w:ww,hd:800,md:0,o0:1,o1:1,o2:1,o3:1,o4:1,o5:1});
+    else if(bdK==='ps') C.board.push({k:'ps',w:ww,hd:500,md:0,o0:1,o1:1,o2:1,o3:1,o4:1,o5:1});
     else if(bdK==='rs') C.board.push({k:'rs',w:ww,p:100,ns:6,s:0});
     else if(bdK==='t'){
       var tsy=$('#bdTgStyle').value;
