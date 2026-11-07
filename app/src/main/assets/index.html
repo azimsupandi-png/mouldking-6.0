@@ -4725,11 +4725,11 @@ html,body{overflow-anchor:none}
         sv('circle',{cx:60,cy:58,r:39,fill:'#0d1015',stroke:'#6b7280','stroke-width':2},pcap);
         sv('circle',{cx:60,cy:58,r:35,fill:'url(#'+pgid+')',stroke:'#0d1015','stroke-width':2},pcap);
         sv('ellipse',{cx:52,cy:42,rx:19,ry:8,fill:'#fff',opacity:.12},pcap);
-        var pic=sv('g',{stroke:'#e8e8ea','stroke-width':3,'stroke-linecap':'round',fill:'none'},pcap);
-        sv('path',{d:'M'+(60+13*Math.sin(-50*Math.PI/180)).toFixed(1)+' '+(58-13*Math.cos(-50*Math.PI/180)).toFixed(1)+'A13 13 0 1 0 '+(60+13*Math.sin(50*Math.PI/180)).toFixed(1)+' '+(58-13*Math.cos(50*Math.PI/180)).toFixed(1)},pic);
-        sv('line',{x1:60,y1:43,x2:60,y2:57},pic);
+        var pic=sv('circle',{cx:60,cy:58,r:31,fill:'none','stroke-width':2.5,stroke:'#E24B4A'},pcap);
+        var pt1=sv('text',{x:60,y:58,'text-anchor':'middle','font-size':14,'font-weight':900,fill:'#e8e8ea'},pcap);pt1.textContent='START';
+        var pt2=sv('text',{x:60,y:71,'text-anchor':'middle','font-size':10,'font-weight':900,fill:'#E24B4A'},pcap);pt2.textContent='STOP';
         var pst=sv('text',{x:60,y:121,'text-anchor':'middle','font-size':12,'font-weight':900,fill:'#E24B4A'},psv);
-        var pv={k:'ps',it:it,b:pb,ring:pring,glow:pglw,glowg:pglow,cap:pcap,ic:pic,st:pst,col:[],tgt:'',ai:0,t:0,dn:false,tm:0};
+        var pv={k:'ps',it:it,b:pb,ring:pring,glow:pglw,glowg:pglow,cap:pcap,ic:pic,t1:pt1,t2:pt2,st:pst,col:[],tgt:'',ai:0,t:0,dn:false,tm:0};
         pb.addEventListener('pointerdown',function(e){
           e.preventDefault();try{pb.setPointerCapture(e.pointerId)}catch(_){}
           if(bdEditing) return;
@@ -4899,7 +4899,11 @@ html,body{overflow-anchor:none}
     var word=S.estop?'E-STOP':flt?'FAULT':on?'ON':'OFF', wc=flt?'#ffd84a':on?'#ffd84a':'#E24B4A';
     if(v.st.textContent!==word){v.st.textContent=word}
     v.st.setAttribute('fill',wc);
-    v.ic.setAttribute('stroke',on&&!flt?'#1D9E75':'#e8e8ea');
+    // centre button: red ring + white/red wording when stopped, all yellow when started
+    v.ic.setAttribute('stroke',on?'#ffd84a':'#E24B4A');
+    v.t1.setAttribute('fill',on?'#ffd84a':'#e8e8ea');
+    v.t2.setAttribute('fill',on?'#ffd84a':'#E24B4A');
+    v.t2.setAttribute('opacity',on?.75:1);
     v.glowg.setAttribute('opacity',on&&!flt?.95:.55);
     v.b.classList.toggle('flt',flt);
   }
