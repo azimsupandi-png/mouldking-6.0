@@ -295,6 +295,12 @@ def main():
         check('start/stop: sanitizer keeps a valid hold time and resets odd ones', cl[0]['hd'] == 500 and cl[1]['hd'] == 800, cl)
         clip8 = e8("(()=>{const w=document.querySelector('.bdw.psw');const s=w.querySelector('.pssvg').getBoundingClientRect(),r=w.getBoundingClientRect();return s.bottom>r.bottom+1||s.right>r.right+1||s.left<r.left-1})()")
         check('start/stop: nothing clipped inside the card', not clip8, clip8)
+        cen8 = e8("(()=>{const w=document.querySelector('.bdw.psw'),r=w.getBoundingClientRect(),p=[...w.querySelectorAll('.pssvg > path')].map(x=>x.getBoundingClientRect());const l=Math.min(...p.map(a=>a.left)),rr=Math.max(...p.map(a=>a.right)),tp=Math.min(...p.map(a=>a.top)),bt=Math.max(...p.map(a=>a.bottom));return [Math.round((l+rr)/2-(r.left+r.right)/2),Math.round((tp+bt)/2-(r.top+r.bottom)/2)]})()")
+        check('start/stop: the ring is centred in the card (no empty strip below it)', abs(cen8[0]) <= 3 and abs(cen8[1]) <= 4, cen8)
+        e8("__t.S.estop=true;0"); pg8.wait_for_timeout(300)
+        fw8 = e8("(()=>{const w=document.querySelector('.bdw.psw'),t=[...w.querySelectorAll('.pssvg text')].filter(x=>getComputedStyle(x).display!=='none').map(x=>x.textContent);return t})()")
+        e8("__t.S.estop=false;0")
+        check('start/stop: E-STOP wording replaces START/STOP inside the button', fw8 == ['E-STOP'], fw8)
         check('no script errors (start/stop button)', not errs8, errs8)
         # ---- Start / stop button, 'Output only' mode: hub link stays, channel outputs are held at 0 ----
         pg9, errs9 = W.boot(b, {'width': 1000, 'height': 447}, True, [{'k': 'ps', 'w': 1, 'g': [0, 0, 9, 12], 'md': 1, 'o1': 0}, {'k': 's', 'c': 0, 'w': 1, 'g': [9, 0, 12, 4]}])

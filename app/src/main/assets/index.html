@@ -4728,7 +4728,7 @@ html,body{overflow-anchor:none}
         el.classList.add('psw');
         bdHead(el,'',it,false);
         var pb=document.createElement('button');pb.type='button';pb.className='psb';pb.setAttribute('aria-label',it.md?'Hub output on/off (hold)':'Hub link on/off (hold)');
-        var psv=sv('svg',{viewBox:'0 0 120 138',class:'pssvg'},pb);
+        var psv=sv('svg',{viewBox:'0 0 120 116',class:'pssvg'},pb);
         var pdf=sv('defs',{},psv),pgr=sv('radialGradient',{id:'psg'+(MSEQ++),cx:'.35',cy:'.3',r:'.9'},pdf);
         var pgid=pgr.getAttribute('id');
         sv('stop',{offset:'0','stop-color':'#5a6376'},pgr);sv('stop',{offset:'.6','stop-color':'#2a303b'},pgr);sv('stop',{offset:'1','stop-color':'#14181f'},pgr);
@@ -4741,7 +4741,7 @@ html,body{overflow-anchor:none}
         var pic=sv('circle',{cx:60,cy:58,r:31,fill:'none','stroke-width':2.5,stroke:'#E24B4A'},pcap);
         var pt1=sv('text',{x:60,y:58,'text-anchor':'middle','font-size':14,'font-weight':900,fill:'#e8e8ea'},pcap);pt1.textContent='START';
         var pt2=sv('text',{x:60,y:71,'text-anchor':'middle','font-size':10,'font-weight':900,fill:'#E24B4A'},pcap);pt2.textContent='STOP';
-        var pst=sv('text',{x:60,y:121,'text-anchor':'middle','font-size':12,'font-weight':900,fill:'#E24B4A'},psv);
+        var pst=sv('text',{x:60,y:62,'text-anchor':'middle','font-size':11,'font-weight':900,fill:'#E24B4A'},psv);
         var pv={k:'ps',it:it,b:pb,ring:pring,glow:pglw,glowg:pglow,cap:pcap,ic:pic,t1:pt1,t2:pt2,st:pst,col:[],tgt:'',ai:0,t:0,dn:false,tm:0};
         pb.addEventListener('pointerdown',function(e){
           e.preventDefault();try{pb.setPointerCapture(e.pointerId)}catch(_){}
@@ -4912,6 +4912,8 @@ html,body{overflow-anchor:none}
     var word=S.estop?'E-STOP':flt?'FAULT':'', wc=flt?'#ffd84a':on?'#ffd84a':'#E24B4A';
     if(v.st.textContent!==word){v.st.textContent=word}
     v.st.setAttribute('fill',wc);
+    // E-STOP / FAULT replace START/STOP inside the button; the ring stays centred in the card
+    v.t1.style.display=v.t2.style.display=word?'none':'';
     // centre button: red ring + white/red wording when stopped, all yellow when started
     v.ic.setAttribute('stroke',on?'#ffd84a':'#E24B4A');
     // stopped: big white START, small red STOP; started: small yellow START, big white STOP
