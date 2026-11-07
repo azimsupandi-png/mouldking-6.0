@@ -953,6 +953,7 @@ html,body{overflow-anchor:none}
 .bdw-h{position:relative}
 .bdw-h .bdw-lbl{position:absolute;left:0;right:0;top:-2px;z-index:9;height:36px;min-height:36px;padding:0 12px;font-size:14px;border-radius:18px;box-sizing:border-box}
 :root.dash .dw .bdw-h .bdw-lbl{left:-4px;right:-4px;top:-2px}
+.wsf[hidden]{display:none}
 .bdw .psb{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;flex:1 1 auto;min-height:0;padding:0;border:0;background:none;color:inherit;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer}
 .bdw .pssvg{display:block;width:100%;height:100%;max-height:100%;min-height:0}
 .bdw .psb .psc{transition:transform .08s}
@@ -2334,7 +2335,7 @@ html,body{overflow-anchor:none}
       {k:'mid',l:'Centre off position',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.mid?1:0},s:function(it,v){if(v) it.mid=1; else delete it.mid}},
       {k:'ra',l:'Reverse output A',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.ra?1:0},s:function(it,v){if(v) it.ra=1; else delete it.ra}},
       {k:'rb',l:'Reverse output B',ch:[0,1],lab:['Off','On'],only:true,def:0,g:function(it){return it.rb?1:0},s:function(it,v){if(v) it.rb=1; else delete it.rb}}]},
-    ps:{t:'Start / stop button settings',f:[{k:'hd',l:'Hold time before it switches',ch:[300,500,800,1200],lab:['0.3 s','0.5 s','0.8 s','1.2 s'],only:true,def:500},{k:'md',l:'What it controls',ch:[0,1],lab:['Hub link','Output only'],only:true,def:0}].concat('ABCDEF'.split('').map(function(c,j){return {k:'o'+j,l:'Output only: channel '+c,ch:[1,0],lab:['Stopped','Left running'],only:true,def:1}}))},
+    ps:{t:'Start / stop button settings',f:[{k:'hd',l:'Hold time before it switches',ch:[300,500,800,1200],lab:['0.3 s','0.5 s','0.8 s','1.2 s'],only:true,def:500},{k:'md',l:'What it controls',ch:[0,1],lab:['Hub link','Output only'],only:true,def:0}].concat('ABCDEF'.split('').map(function(c,j){return {k:'o'+j,l:'Output only: channel '+c,ch:[1,0],lab:['Stopped','Left running'],only:true,def:1,dep:{k:'md',v:1}}}))},
     a:{t:'Auto-stop settings',f:[{k:'s',l:'Stop after',u:'s',min:1,max:300,st:1,ch:[5,10,20,30,60]}]},
     z:{t:'Timer settings',f:[{k:'a',l:'Alert after (0 = off)',u:'min',min:0,max:240,st:1,ch:[0,5,10,15,20,30]}]}
   };
@@ -2345,7 +2346,9 @@ html,body{overflow-anchor:none}
     var bx=document.createElement('div');bx.className='gbox';ov.appendChild(bx);
     function mk(tag,txt,cls){var e=document.createElement(tag);if(txt) e.textContent=txt;if(cls) e.className=cls;return e}
     bx.appendChild(mk('h3',sp.t));
-    var vals={}, ins={};
+    var vals={}, ins={}, boxes={};
+    // a field with dep:{k,v} is only shown while another field has that value
+    function refreshDep(){sp.f.forEach(function(f){if(f.dep&&boxes[f.k]) boxes[f.k].hidden=vals[f.dep.k]!==f.dep.v})}
     function dec(f){return f.st&&f.st<1?1:0}
     function clampF(f,v){v=+v;if(!isFinite(v)) return null;if(f.only) return v;v=Math.max(f.min,Math.min(f.max,v));return dec(f)?Math.round(v*10)/10:Math.round(v)}
     sp.f.forEach(function(f){
@@ -2360,7 +2363,7 @@ html,body{overflow-anchor:none}
       var un=mk('em',f.u);
       function set(v,fromInp){
         var c=clampF(f,v);if(c===null) return;
-        vals[f.k]=c;if(!fromInp) inp.value=String(c);
+        vals[f.k]=c;if(!fromInp) inp.value=String(c);refreshDep();
         [].forEach.call(chips.children,function(b){b.setAttribute('aria-pressed',String(+b.getAttribute('data-v')===c))});
       }
       mn.addEventListener('click',function(){set(vals[f.k]-f.st)});
@@ -2371,8 +2374,9 @@ html,body{overflow-anchor:none}
       var chips=mk('div','','wsc');
       f.ch.forEach(function(v){var b=mk('button',f.lab?f.lab[f.ch.indexOf(v)]:(v===0?'Off':String(v)+(f.u==='%'?'%':'')),'btn');b.type='button';b.setAttribute('data-v',String(v));b.addEventListener('click',function(){set(v)});chips.appendChild(b)});
       box.appendChild(rw);box.appendChild(chips);bx.appendChild(box);
-      ins[f.k]=inp;set(vals[f.k]);
+      ins[f.k]=inp;boxes[f.k]=box;set(vals[f.k]);
     });
+    refreshDep();
     var act=mk('div','','gact');
     var sv=mk('button','Save','btn'),cn=mk('button','Cancel','btn');sv.type=cn.type='button';sv.setAttribute('aria-pressed','true');
     sv.addEventListener('click',function(){
