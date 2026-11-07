@@ -4713,13 +4713,13 @@ html,body{overflow-anchor:none}
         dww.appendChild(dbx);el.appendChild(dww);w.dpd={bs:dbs,r:function(){return dpr},clr:dpClear};
       }else if(it.k==='ps'){
         el.classList.add('psw');
-        bdHead(el,'Start / stop',it,false);
-        var pb=document.createElement('button');pb.type='button';pb.className='psb';pb.setAttribute('aria-label','Hub link: hold to start or stop');
+        bdHead(el,'',it,false);
+        var pb=document.createElement('button');pb.type='button';pb.className='psb';pb.setAttribute('aria-label','Hub link on/off (hold)');
         var psv=sv('svg',{viewBox:'0 0 120 138',class:'pssvg'},pb);
         var pdf=sv('defs',{},psv),pgr=sv('radialGradient',{id:'psg'+(MSEQ++),cx:'.35',cy:'.3',r:'.9'},pdf);
         var pgid=pgr.getAttribute('id');
         sv('stop',{offset:'0','stop-color':'#5a6376'},pgr);sv('stop',{offset:'.6','stop-color':'#2a303b'},pgr);sv('stop',{offset:'1','stop-color':'#14181f'},pgr);
-        var pglow=sv('g',{style:'filter:blur(3px)',opacity:.55},psv);
+        var pglow=sv('g',{style:'filter:blur(4px)',opacity:.55},psv);
         var pglw=ledRing(pglow,60,58,46.5,40,90,360,7), pring=ledRing(psv,60,58,46.5,40,90,360,7);
         var pcap=sv('g',{},psv);
         sv('circle',{cx:60,cy:58,r:39,fill:'#0d1015',stroke:'#6b7280','stroke-width':2},pcap);
@@ -4729,8 +4729,7 @@ html,body{overflow-anchor:none}
         sv('path',{d:'M'+(60+13*Math.sin(-50*Math.PI/180)).toFixed(1)+' '+(58-13*Math.cos(-50*Math.PI/180)).toFixed(1)+'A13 13 0 1 0 '+(60+13*Math.sin(50*Math.PI/180)).toFixed(1)+' '+(58-13*Math.cos(50*Math.PI/180)).toFixed(1)},pic);
         sv('line',{x1:60,y1:43,x2:60,y2:57},pic);
         var pst=sv('text',{x:60,y:121,'text-anchor':'middle','font-size':12,'font-weight':900,fill:'#E24B4A'},psv);
-        var phn=sv('text',{x:60,y:134,'text-anchor':'middle','font-size':8,'font-weight':700,fill:'#8a93a0'},psv);
-        var pv={k:'ps',it:it,b:pb,ring:pring,glow:pglw,cap:pcap,ic:pic,st:pst,hn:phn,col:[],tgt:'',ai:0,t:0,dn:false,tm:0};
+        var pv={k:'ps',it:it,b:pb,ring:pring,glow:pglw,glowg:pglow,cap:pcap,ic:pic,st:pst,col:[],tgt:'',ai:0,t:0,dn:false,tm:0};
         pb.addEventListener('pointerdown',function(e){
           e.preventDefault();try{pb.setPointerCapture(e.pointerId)}catch(_){}
           if(bdEditing) return;
@@ -4881,13 +4880,13 @@ html,body{overflow-anchor:none}
     for(var i=0;i<n;i++) a.push(sv('path',{d:mArc(cx,cy,r,a0-i*span/n-0.8,a0-(i+1)*span/n+0.8),fill:'none','stroke-width':sw,stroke:OFFC},par));
     return a;
   }
-  // Start / stop button: red ring = hub link off, green = on, yellow flashing = E-stop or hub fault
+  // Start / stop button: red ring = hub link off, glowing yellow = on (green power symbol), yellow flashing = E-stop or hub fault
   function psFault(){
     var lb=$('#lostBanner');
     return !!S.estop||(!!hubMsg&&hubMsg!=='Pairing…')||!!(lb&&!lb.hidden);
   }
   function paintVw(v){
-    var now=performance.now(), n=v.ring.length, on=!!S.connected, T=on?'#1D9E75':'#E24B4A', flt=psFault();
+    var now=performance.now(), n=v.ring.length, on=!!S.connected, T=on?'#ffd84a':'#E24B4A', flt=psFault();
     if(v.tgt!==T){v.tgt=T;v.ai=0;v.t=now}
     // one more LED changes every ~22 ms, clockwise from the top
     var steps=Math.max(1,Math.floor((now-v.t)/22));
@@ -4897,11 +4896,11 @@ html,body{overflow-anchor:none}
       var c=flt?(blink?'#ffd84a':OFFC):(v.col[i]||OFFC);
       if(v.ring[i]._c!==c){v.ring[i]._c=c;v.ring[i].setAttribute('stroke',c);v.glow[i].setAttribute('stroke',c==='rgba(150,160,175,.32)'?'transparent':c)}
     }
-    var word=S.estop?'E-STOP':flt?'FAULT':on?'ON':'OFF', wc=flt?'#ffd84a':on?'#1D9E75':'#E24B4A';
+    var word=S.estop?'E-STOP':flt?'FAULT':on?'ON':'OFF', wc=flt?'#ffd84a':on?'#ffd84a':'#E24B4A';
     if(v.st.textContent!==word){v.st.textContent=word}
     v.st.setAttribute('fill',wc);
-    var hint=flt?(S.estop?'E-Stop is on':'Hub fault'):'hold to '+(on?'stop':'start');
-    if(v.hn.textContent!==hint) v.hn.textContent=hint;
+    v.ic.setAttribute('stroke',on&&!flt?'#1D9E75':'#e8e8ea');
+    v.glowg.setAttribute('opacity',on&&!flt?.95:.55);
     v.b.classList.toggle('flt',flt);
   }
   function paintBoard(){
